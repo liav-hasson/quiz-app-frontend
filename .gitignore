@@ -9,3 +9,7 @@ dist/
 # Terraform caches if present
 .terraform/
 *.tfstate
+
+# React / node build artifacts
+react-app/node_modules/
+react-app/dist/
