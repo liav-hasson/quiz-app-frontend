@@ -62,6 +62,9 @@ pipeline {
 
         // Docker image name without registry/user prefix (application)
         DOCKER_IMAGE_NAME     = "quiz-app-front"
+
+        // CI resources directory
+        CI_DIR                = "ci"
     }
 
     stages {
@@ -98,7 +101,7 @@ pipeline {
                 echo '--------- Installing dependencies and building frontend ---------'
                 sh """
                     set -e
-                    cd ${APP_DIR}
+                    cd ${env.APP_DIR}
                     if [ -f package-lock.json ]; then
                         npm ci
                     else
@@ -111,7 +114,7 @@ pipeline {
                 echo '--------- Running dependency vulnerability scan ---------'
                 sh """
                     set -e
-                    cd ${APP_DIR}
+                    cd ${env.APP_DIR}
                     npm audit --production
                 """
                 echo 'Dependency vulnerability scan passed!'
@@ -132,11 +135,11 @@ pipeline {
                     # Run Hadolint security scan on Dockerfile
                     # Check for security issues, best practices, and compliance
                     echo "Scanning Dockerfile with Hadolint..."
-                    hadolint --format json quiz-app/Dockerfile > hadolint-report.json || HADOLINT_EXIT_CODE=$?
+                    hadolint --format json ${CI_DIR}/app-dockerfile/Dockerfile > hadolint-report.json || HADOLINT_EXIT_CODE=$?
                     
                     # Display results in human-readable format
                     echo "Hadolint scan results:"
-                    hadolint quiz-app/Dockerfile || true
+                    hadolint ${CI_DIR}/app-dockerfile/Dockerfile || true
                     
                     # Check if critical/error level issues found
                     if [ "${HADOLINT_EXIT_CODE:-0}" -ne 0 ]; then
@@ -168,11 +171,11 @@ pipeline {
                         echo "Connecting to BuildKit DaemonSet..."
                         export BUILDKIT_HOST=tcp://buildkitd.jenkins.svc.cluster.local:1234
 
-                        echo "Building quiz-app-frontend image with buildctl..."
+                        echo "Building ${DOCKERHUB_CREDENTIALS_USR}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG} with buildctl..."
                         buildctl --addr ${BUILDKIT_HOST} build \
                             --frontend dockerfile.v0 \
-                            --local context=react-app \
-                            --local dockerfile=react-app \
+                            --local context=${APP_DIR} \
+                            --local dockerfile=${CI_DIR}/app-dockerfile \
                             --output type=image,name=${DOCKERHUB_CREDENTIALS_USR}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG},push=true
 
                         echo "Image ${DOCKERHUB_CREDENTIALS_USR}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG} built and pushed"
