@@ -1,6 +1,6 @@
 # Custom Jenkins inbound agent for quiz-app frontend pipeline
 # Base on the official Jenkins inbound agent with JDK 11 (compatible with Jenkins controller)
-FROM jenkins/inbound-agent:4.13.3-1-jdk11
+FROM jenkins/inbound-agent:jdk17
 
 USER root
 
