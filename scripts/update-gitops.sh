@@ -10,19 +10,21 @@ DOCKER_USERNAME="$1"
 DOCKER_IMAGE_NAME="$2"
 IMAGE_TAG="$3"
 BUILD_NUMBER="$4"
-GITHUB_REPO_URL="$5"
+GITOPS_REPO_URL="${5:-https://github.com/liav-hasson/quiz-app-gitops.git}"
 GIT_USER_NAME="$6"
 GIT_USER_EMAIL="$7"
+GITHUB_USERNAME="$8"
+GITHUB_PASSWORD="$9"
 
 # Validation
-if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_IMAGE_NAME" ] || [ -z "$IMAGE_TAG" ] || [ -z "$GITHUB_REPO_URL" ] || [ -z "$GIT_USER_NAME" ] || [ -z "$GIT_USER_EMAIL" ]; then
-    echo "Usage: $0 <docker_username> <docker_image_name> <image_tag> <build_number> <github_repo_url> <git_user_name> <git_user_email>"
+if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_IMAGE_NAME" ] || [ -z "$IMAGE_TAG" ] || [ -z "$GITOPS_REPO_URL" ] || [ -z "$GIT_USER_NAME" ] || [ -z "$GIT_USER_EMAIL" ]; then
+    echo "Usage: $0 <docker_username> <docker_image_name> <image_tag> <build_number> <gitops_repo_url> <git_user_name> <git_user_email> [github_username] [github_password]"
     echo "ERROR: Missing required parameters:"
     echo "   DOCKER_USERNAME: '$DOCKER_USERNAME'"
     echo "   DOCKER_IMAGE_NAME: '$DOCKER_IMAGE_NAME'"
     echo "   IMAGE_TAG: '$IMAGE_TAG'"  
     echo "   BUILD_NUMBER: '$BUILD_NUMBER'"
-    echo "   GITHUB_REPO_URL: '$GITHUB_REPO_URL'"
+    echo "   GITOPS_REPO_URL: '$GITOPS_REPO_URL'"
     echo "   GIT_USER_NAME: '$GIT_USER_NAME'"
     echo "   GIT_USER_EMAIL: '$GIT_USER_EMAIL'"
     exit 1
@@ -35,18 +37,26 @@ echo "Image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
 TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
 
-# Clone GitHub repo (shallow + sparse for efficiency)
-echo "--------- Cloning repository ---------"
-echo "   Repository: $GITHUB_REPO_URL"
+# Clone GitOps repo with authentication
+echo "--------- Cloning GitOps repository ---------"
+echo "   Repository: $GITOPS_REPO_URL"
 echo "   Git user: $GIT_USER_NAME <$GIT_USER_EMAIL>"
-git clone --depth=1 --filter=blob:none --sparse "$GITHUB_REPO_URL" .
-git sparse-checkout set gitops/quiz-frontend
+
+# Build authenticated URL if credentials provided
+if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_PASSWORD" ]; then
+    REPO_PATH=$(echo "$GITOPS_REPO_URL" | sed 's|https://||')
+    AUTHENTICATED_URL="https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@${REPO_PATH}"
+    git clone --depth=1 "$AUTHENTICATED_URL" .
+else
+    git clone --depth=1 "$GITOPS_REPO_URL" .
+fi
+
 git config user.name "$GIT_USER_NAME"
 git config user.email "$GIT_USER_EMAIL"
 
 # Update Helm chart values
 echo "--------- Updating Helm chart ---------"
-cd gitops/quiz-frontend
+cd quiz-frontend
 
 # Update image repository and tag in values.yaml
 sed -i "s|repository: .*|repository: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}|g" values.yaml
@@ -65,12 +75,21 @@ git add values.yaml Chart.yaml
 git commit -m "Deploy ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
 
 - Updated from Jenkins build #${BUILD_NUMBER:-unknown}
-- Image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-- Updated values.yaml image tag
-- Updated Chart.yaml appVersion" || {
-    echo "No changes to commit (image tag might already be up to date)"
-    rm -rf "$TEMP_DIR"
-    exit 0
+echo "Pushing changes to GitHub..."
+# Go back to repo root for git operations
+cd "$TEMP_DIR"
+
+# Use the authenticated remote URL for push
+if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_PASSWORD" ]; then
+    REPO_PATH=$(echo "$GITOPS_REPO_URL" | sed 's|https://||')
+    AUTHENTICATED_URL="https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@${REPO_PATH}"
+    git remote set-url origin "$AUTHENTICATED_URL"
+fi
+
+git push origin main
+
+# Tag the release version for next build's version calculation
+echo "--------- Tagging release version ---------"
 }
 
 echo "Pushing changes to GitHub..."

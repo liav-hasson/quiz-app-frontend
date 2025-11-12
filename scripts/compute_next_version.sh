@@ -2,16 +2,14 @@
 set -euo pipefail
 
 # compute_next_version.sh
-# Compute the next semantic version tag based on commit-message prefixes or explicit bump
+# Compute the next semantic version tag based on Docker Hub latest tag or fallback to date
 # Usage:
-#   compute_next_version.sh <repo-dir> <mode>
+#   compute_next_version.sh <repo-dir> <mode> [docker_user] [docker_image]
 # Modes:
-#   auto   - scan commit messages since the last semver tag for prefixes (major:/minor:/patch:)
+#   auto   - query Docker Hub for latest tag, bump patch
 #   major  - bump major
 #   minor  - bump minor
 #   patch  - bump patch (default)
-# Environment:
-#   If COMMIT_MESSAGES is set, the script will use that value (newline-separated) instead of running git.
 # Output:
 #   Prints the new tag (e.g. v1.2.3) to stdout. Also prints diagnostic info to stderr.
 
@@ -20,10 +18,20 @@ MODE="${2:-patch}"
 
 cd "$REPO_DIR"
 
-# Helper: get latest semver tag (vMAJOR.MINOR.PATCH)
+# Helper: get latest semver tag from Docker Hub
 get_latest_tag() {
-  git fetch --tags --quiet || true
-  git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --abbrev=0 2>/dev/null || true
+  DOCKER_USER="${DOCKERHUB_CREDENTIALS_USR:-}"
+  DOCKER_IMAGE="${DOCKER_IMAGE_NAME:-}"
+  
+  if [[ -n "$DOCKER_USER" ]] && [[ -n "$DOCKER_IMAGE" ]]; then
+    curl -s "https://hub.docker.com/v2/repositories/${DOCKER_USER}/${DOCKER_IMAGE}/tags?page_size=100" \
+      | grep -o '"name":"v[0-9]\+\.[0-9]\+\.[0-9]\+"' \
+      | cut -d'"' -f4 \
+      | sort -V \
+      | tail -n1 || echo "v0.0.0"
+  else
+    echo "v0.0.0"
+  fi
 }
 
 # Parse tag into MAJOR MINOR PATCH
