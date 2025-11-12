@@ -75,6 +75,14 @@ git add values.yaml Chart.yaml
 git commit -m "Deploy ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
 
 - Updated from Jenkins build #${BUILD_NUMBER:-unknown}
+- Image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
+- Updated values.yaml image tag
+- Updated Chart.yaml appVersion" || {
+    echo "No changes to commit (image tag might already be up to date)"
+    rm -rf "$TEMP_DIR"
+    exit 0
+}
+
 echo "Pushing changes to GitHub..."
 # Go back to repo root for git operations
 cd "$TEMP_DIR"
@@ -90,7 +98,6 @@ git push origin main
 
 # Tag the release version for next build's version calculation
 echo "--------- Tagging release version ---------"
-}
 
 echo "Pushing changes to GitHub..."
 git push origin main
