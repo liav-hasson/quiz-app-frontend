@@ -4,6 +4,9 @@ FROM jenkins/inbound-agent:4.13.3-1-jdk11
 
 USER root
 
+# Set shell options for security
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Install required packages and tools
 # - bash, curl, git: basic tooling for scripts and GitOps updates
 # - Node.js 18 runtime: required for building the React frontend
@@ -37,6 +40,8 @@ RUN apt-get update && \
 # Ensure npm package cache directory exists with write permissions
 RUN mkdir -p /home/jenkins/.npm && chown -R jenkins:jenkins /home/jenkins/.npm
 
-USER jenkins
+USER 1000
+WORKDIR /home/jenkins
 
-# Default command inherited from inbound-agent
+# Start Jenkins agent (inherited from base image)
+ENTRYPOINT ["/usr/local/bin/jenkins-agent"]
