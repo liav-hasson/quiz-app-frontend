@@ -21,8 +21,13 @@ FROM nginx:alpine
 # Copy built files to nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Note: nginx.conf is mounted as a volume in docker-compose.yml
+# Copy nginx configuration with backend proxy
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+# Set default backend URL (can be overridden by environment variable)
+ENV BACKEND_URL=backend:5000
 
 EXPOSE 80
 
+# nginx will automatically substitute ${BACKEND_URL} in template files
 CMD ["nginx", "-g", "daemon off;"]
