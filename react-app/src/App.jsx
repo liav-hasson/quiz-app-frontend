@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import './App.css'
 
 export default function App() {
   const [page, setPage] = useState('setup')
@@ -141,25 +140,29 @@ export default function App() {
 
   if (page === 'results' && feedback) {
     return (
-      <div className="container">
-        <div className="box">
-          <h2>Results</h2>
-          <div className="results-section">
-            <div className="question-content">
-              <strong>Question:</strong>
-              <p>{question.question}</p>
+      <div className="min-h-screen bg-black flex items-center justify-center p-5">
+        <div className="bg-lime-cream shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 w-full max-w-2xl aspect-square flex flex-col transition-all duration-300 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] hover:scale-[1.02]">
+          <h2 className="text-3xl font-bold text-center text-graphite mb-6">Results</h2>
+          <div className="space-y-6 flex-1 overflow-y-auto">
+            <div className="bg-white p-4">
+              <strong className="text-graphite text-sm font-semibold uppercase tracking-wide">Question:</strong>
+              <p className="text-graphite mt-2 leading-relaxed">{question.question}</p>
             </div>
-            <div className="answer-content">
-              <strong>Your Answer:</strong>
-              <p>{answer}</p>
+            <div className="bg-white p-4">
+              <strong className="text-graphite text-sm font-semibold uppercase tracking-wide">Your Answer:</strong>
+              <p className="text-graphite mt-2 leading-relaxed">{answer}</p>
             </div>
-            <div className="feedback-content">
-              <strong>Feedback:</strong>
-              <p>{feedback}</p>
+            <div className="bg-white p-4">
+              <strong className="text-graphite text-sm font-semibold uppercase tracking-wide">Feedback:</strong>
+              <p className="text-graphite mt-2 leading-relaxed">{feedback}</p>
             </div>
           </div>
-          <div className="button-group">
-            <button type="button" onClick={handleNewQuestion} className="btn-primary">
+          <div className="mt-8 flex gap-3">
+            <button 
+              type="button" 
+              onClick={handleNewQuestion} 
+              className="flex-1 bg-yellow hover:bg-graphite hover:text-white text-graphite font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
               New Question
             </button>
           </div>
@@ -170,26 +173,36 @@ export default function App() {
 
   if (page === 'question' && question) {
     return (
-      <div className="container">
-        <div className="box">
-          <h2>Question</h2>
-          <div className="question-content">
-            <p>{question.question}</p>
+      <div className="min-h-screen bg-black flex items-center justify-center p-5">
+        <div className="bg-lime-cream shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 w-full max-w-2xl aspect-square flex flex-col transition-all duration-300 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] hover:scale-[1.02]">
+          <h2 className="text-3xl font-bold text-center text-graphite mb-6">Question</h2>
+          <div className="bg-white p-5 mb-6">
+            <p className="text-graphite text-lg leading-relaxed">{question.question}</p>
           </div>
-          <div className="form-group">
-            <label>Your Answer:</label>
+          <div className="mb-6 flex-1 flex flex-col">
+            <label className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">Your Answer:</label>
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              rows={4}
               placeholder="Type your answer here..."
+              className="flex-1 w-full px-4 py-3 bg-white border-2 border-graphite text-graphite placeholder-graphite/50 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all resize-none"
             />
           </div>
-          <div className="button-group">
-            <button type="button" onClick={handleBackToSetup} className="btn-secondary" disabled={loading}>
+          <div className="flex gap-3">
+            <button 
+              type="button" 
+              onClick={handleBackToSetup} 
+              className="flex-1 bg-graphite hover:bg-black text-white font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
+              disabled={loading}
+            >
               Back
             </button>
-            <button type="button" onClick={handleSubmitAnswer} className="btn-primary" disabled={loading || !answer.trim()}>
+            <button 
+              type="button" 
+              onClick={handleSubmitAnswer} 
+              className="flex-1 bg-yellow hover:bg-graphite hover:text-white text-graphite font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
+              disabled={loading || !answer.trim()}
+            >
               {loading ? 'Evaluating...' : 'Submit Answer'}
             </button>
           </div>
@@ -199,59 +212,79 @@ export default function App() {
   }
 
   return (
-    <div className="container">
-      <div className="box">
-        <h1>DevOps Quiz</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="category">Category:</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+    <div className="min-h-screen bg-black flex items-center justify-center p-5">
+      <div className="bg-lime-cream shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 w-full max-w-2xl aspect-square flex flex-col transition-all duration-50 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] hover:scale-[1.005]">
+        <h1 className="text-4xl font-bold text-center text-graphite mb-8">DevOps Quiz</h1>
+        <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
+          <div className="flex-1 space-y-6">
+            <div>
+              <label htmlFor="category" className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">
+                Category:
+              </label>
+              <select
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                disabled={loading}
+                className="w-full px-4 py-3 bg-white border-2 border-graphite text-graphite focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Select a category</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="subject" className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">
+                Subject:
+              </label>
+              <select
+                id="subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                disabled={!category || loading}
+                className="w-full px-4 py-3 bg-white border-2 border-graphite text-graphite focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Select a subject</option>
+                {subjects.map(subj => (
+                  <option key={subj} value={subj}>{subj}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="difficulty" className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">
+                Difficulty:
+              </label>
+              <select
+                id="difficulty"
+                value={difficulty}
+                onChange={(e) => setDifficulty(Number(e.target.value))}
+                disabled={loading}
+                className="w-full px-4 py-3 bg-white border-2 border-graphite text-graphite focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value={1}>Easy</option>
+                <option value={2}>Medium</option>
+                <option value={3}>Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button 
+              type="button" 
+              onClick={handleClear} 
+              className="flex-1 bg-graphite hover:bg-black text-white font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
               disabled={loading}
             >
-              <option value="">Select a category</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="subject">Subject:</label>
-            <select
-              id="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              disabled={!category || loading}
-            >
-              <option value="">Select a subject</option>
-              {subjects.map(subj => (
-                <option key={subj} value={subj}>{subj}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="difficulty">Difficulty:</label>
-            <select
-              id="difficulty"
-              value={difficulty}
-              onChange={(e) => setDifficulty(Number(e.target.value))}
-              disabled={loading}
-            >
-              <option value={1}>Easy</option>
-              <option value={2}>Medium</option>
-              <option value={3}>Hard</option>
-            </select>
-          </div>
-
-          <div className="button-group">
-            <button type="button" onClick={handleClear} className="btn-secondary" disabled={loading}>
               Clear
             </button>
-            <button type="submit" className="btn-primary" disabled={!category || !subject || loading}>
+            <button 
+              type="submit" 
+              className="flex-1 bg-yellow hover:bg-graphite hover:text-white text-graphite font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
+              disabled={!category || !subject || loading}
+            >
               {loading ? 'Loading...' : 'Submit'}
             </button>
           </div>
