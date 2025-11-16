@@ -62,7 +62,7 @@ const SelectContent = React.forwardRef(({ className, children, position = "poppe
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn("p-1", position === "popper" &&
-          "h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)")}>
+          "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]")}>
         {children}
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />
@@ -83,7 +83,7 @@ const SelectItem = React.forwardRef(({ className, children, ...props }, ref) => 
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-8 pr-2 text-sm outline-none bg-transparent hover:bg-cyan/10 focus:bg-purple/20 transition-colors data-disabled:pointer-events-none data-disabled:opacity-50",
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-8 pr-2 text-sm outline-none bg-transparent hover:bg-cyan/10 focus:bg-purple/20 transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}>

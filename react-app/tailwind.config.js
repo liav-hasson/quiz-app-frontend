@@ -24,7 +24,6 @@ export default {
         'indigo': '#4F46E5',
         'slate': '#1E293B',
         'slate-light': '#334155',
-        'accent': '#06B6D4',
         
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
