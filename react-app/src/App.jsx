@@ -1,4 +1,16 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Toaster, toast } from 'react-hot-toast'
+import Header from './components/Header'
+import AnimatedBackground from './components/AnimatedBackground'
+import AnimatedBorder from './components/AnimatedBorder'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 
 export default function App() {
   const [page, setPage] = useState('setup')
@@ -21,7 +33,10 @@ export default function App() {
     fetch('/api/categories')
       .then(res => res.json())
       .then(data => setCategories(data.categories))
-      .catch(err => console.error('Failed to fetch categories:', err))
+      .catch(err => {
+        console.error('Failed to fetch categories:', err)
+        toast.error('Failed to load categories')
+      })
   }, [])
 
   // Fetch subjects when category changes
@@ -37,7 +52,10 @@ export default function App() {
         setSubjects(data.subjects)
         setSubject('')
       })
-      .catch(err => console.error('Failed to fetch subjects:', err))
+      .catch(err => {
+        console.error('Failed to fetch subjects:', err)
+        toast.error('Failed to load subjects')
+      })
   }, [category])
 
   const handleClear = () => {
@@ -61,7 +79,7 @@ export default function App() {
       if (!res.ok) {
         const errorText = await res.text()
         console.error('API Error:', res.status, errorText)
-        alert(`Error: ${res.status} - Failed to generate question. Backend may not be configured.`)
+        toast.error('Failed to generate question. Backend may not be configured.')
         return
       }
       
@@ -71,12 +89,13 @@ export default function App() {
       if (data.question) {
         setQuestion(data)
         setPage('question')
+        toast.success('Question generated!')
       } else if (data.error) {
-        alert(`Error: ${data.error}`)
+        toast.error(data.error)
       }
     } catch (err) {
       console.error('Failed to generate question:', err)
-      alert('Failed to connect to backend. Please check the server.')
+      toast.error('Failed to connect to backend. Please check the server.')
     } finally {
       setLoading(false)
     }
@@ -91,7 +110,7 @@ export default function App() {
 
   const handleSubmitAnswer = async () => {
     if (!answer.trim()) {
-      alert('Please enter an answer')
+      toast.error('Please enter an answer')
       return
     }
 
@@ -110,7 +129,7 @@ export default function App() {
       if (!res.ok) {
         const errorText = await res.text()
         console.error('API Error:', res.status, errorText)
-        alert(`Error: ${res.status} - Failed to evaluate answer`)
+        toast.error('Failed to evaluate answer')
         return
       }
 
@@ -120,12 +139,13 @@ export default function App() {
       if (data.feedback) {
         setFeedback(data.feedback)
         setPage('results')
+        toast.success('Answer evaluated!')
       } else if (data.error) {
-        alert(`Error: ${data.error}`)
+        toast.error(data.error)
       }
     } catch (err) {
       console.error('Failed to evaluate answer:', err)
-      alert('Failed to connect to backend')
+      toast.error('Failed to connect to backend')
     } finally {
       setLoading(false)
     }
@@ -140,156 +160,349 @@ export default function App() {
 
   if (page === 'results' && feedback) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-5">
-        <div className="bg-lime-cream shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 w-full max-w-2xl aspect-square flex flex-col transition-all duration-300 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] hover:scale-[1.02]">
-          <h2 className="text-3xl font-bold text-center text-graphite mb-6">Results</h2>
-          <div className="space-y-6 flex-1 overflow-y-auto">
-            <div className="bg-white p-4">
-              <strong className="text-graphite text-sm font-semibold uppercase tracking-wide">Question:</strong>
-              <p className="text-graphite mt-2 leading-relaxed">{question.question}</p>
-            </div>
-            <div className="bg-white p-4">
-              <strong className="text-graphite text-sm font-semibold uppercase tracking-wide">Your Answer:</strong>
-              <p className="text-graphite mt-2 leading-relaxed">{answer}</p>
-            </div>
-            <div className="bg-white p-4">
-              <strong className="text-graphite text-sm font-semibold uppercase tracking-wide">Feedback:</strong>
-              <p className="text-graphite mt-2 leading-relaxed">{feedback}</p>
-            </div>
-          </div>
-          <div className="mt-8 flex gap-3">
-            <button 
-              type="button" 
-              onClick={handleNewQuestion} 
-              className="flex-1 bg-yellow hover:bg-graphite hover:text-white text-graphite font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              New Question
-            </button>
-          </div>
+      <>
+        <AnimatedBackground />
+        <Header />
+        <Toaster position="top-right" toastOptions={{
+          style: {
+            background: '#1E293B',
+            color: '#E8EAF6',
+            border: '1px solid rgba(0, 217, 255, 0.3)',
+          },
+        }} />
+        <div className="min-h-screen flex items-center justify-center p-5 pt-24">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="w-full max-w-3xl"
+          >
+            <AnimatedBorder delay={1}>
+              <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20 hover:shadow-purple/30 transition-all duration-300">
+                <CardHeader>
+                <CardTitle className="text-3xl font-bold text-center text-silver flex items-center justify-center gap-3">
+                  <motion.span
+                    initial={{ rotate: -180, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    📊
+                  </motion.span>
+                  Results
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <Label className="text-cyan text-sm font-semibold uppercase tracking-wide">Question</Label>
+                  <Card className="bg-slate-light/50 backdrop-blur-sm border-cyan/20 mt-2">
+                    <CardContent className="pt-4">
+                      <p className="text-silver leading-relaxed">{question.question}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <Separator className="bg-purple/30" />
+
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Label className="text-cyan text-sm font-semibold uppercase tracking-wide">Your Answer</Label>
+                  <Card className="bg-slate-light/50 backdrop-blur-sm border-cyan/20 mt-2">
+                    <CardContent className="pt-4">
+                      <p className="text-silver leading-relaxed">{answer}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <Separator className="bg-purple/30" />
+
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Label className="text-purple-light text-sm font-semibold uppercase tracking-wide">Feedback</Label>
+                  <Card className="bg-linear-to-br from-purple/10 to-cyan/10 backdrop-blur-sm border-purple/40 mt-2 border-2 shadow-lg shadow-purple/10">
+                    <CardContent className="pt-4">
+                      <p className="text-silver leading-relaxed whitespace-pre-wrap">{feedback}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </CardContent>
+              <CardFooter className="flex gap-3">
+                <Button 
+                  onClick={handleNewQuestion}
+                  className="flex-1 bg-linear-to-r from-cyan to-purple hover:from-cyan-dark hover:to-purple-dark text-white font-semibold shadow-lg shadow-purple/30 hover:shadow-purple/50 transition-all"
+                  size="lg"
+                >
+                  New Question
+                </Button>
+              </CardFooter>
+            </Card>
+            </AnimatedBorder>
+          </motion.div>
         </div>
-      </div>
+      </>
     )
   }
 
   if (page === 'question' && question) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-5">
-        <div className="bg-lime-cream shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 w-full max-w-2xl aspect-square flex flex-col transition-all duration-300 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] hover:scale-[1.02]">
-          <h2 className="text-3xl font-bold text-center text-graphite mb-6">Question</h2>
-          <div className="bg-white p-5 mb-6">
-            <p className="text-graphite text-lg leading-relaxed">{question.question}</p>
-          </div>
-          <div className="mb-6 flex-1 flex flex-col">
-            <label className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">Your Answer:</label>
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Type your answer here..."
-              className="flex-1 w-full px-4 py-3 bg-white border-2 border-graphite text-graphite placeholder-graphite/50 focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all resize-none"
-            />
-          </div>
-          <div className="flex gap-3">
-            <button 
-              type="button" 
-              onClick={handleBackToSetup} 
-              className="flex-1 bg-graphite hover:bg-black text-white font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
-              disabled={loading}
-            >
-              Back
-            </button>
-            <button 
-              type="button" 
-              onClick={handleSubmitAnswer} 
-              className="flex-1 bg-yellow hover:bg-graphite hover:text-white text-graphite font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
-              disabled={loading || !answer.trim()}
-            >
-              {loading ? 'Evaluating...' : 'Submit Answer'}
-            </button>
-          </div>
+      <>
+        <AnimatedBackground />
+        <Header />
+        <Toaster position="top-right" toastOptions={{
+          style: {
+            background: '#1E293B',
+            color: '#E8EAF6',
+            border: '1px solid rgba(0, 217, 255, 0.3)',
+          },
+        }} />
+        <div className="min-h-screen flex items-center justify-center p-5 pt-24">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="w-full max-w-3xl"
+          >
+            <AnimatedBorder delay={0.5}>
+              <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20 hover:shadow-purple/30 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-3xl font-bold text-center text-silver flex items-center justify-center gap-3">
+                  <motion.span
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
+                  >
+                    🤔
+                  </motion.span>
+                  Question
+                  <Badge variant="secondary" className="ml-2 bg-purple/20 text-purple-light border-purple/40">
+                    {difficulty === 1 ? 'Easy' : difficulty === 2 ? 'Medium' : 'Hard'}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="relative"
+                >
+                  {/* Animated border wrapper */}
+                  <motion.div
+                    className="absolute -inset-px bg-linear-to-r from-cyan via-purple to-cyan rounded-lg opacity-0"
+                    animate={{
+                      opacity: [0, 0.5, 0],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                  <Card className="relative bg-linear-to-br from-cyan/10 to-purple/10 backdrop-blur-sm border-cyan/40 border-2 shadow-lg shadow-cyan/10">
+                    <CardContent className="pt-6">
+                      <p className="text-silver text-lg leading-relaxed">{question.question}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="answer" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                    Your Answer
+                  </Label>
+                  <Textarea
+                    id="answer"
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    placeholder="Type your answer here..."
+                    className="min-h-[200px] bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver placeholder:text-silver/40 focus:ring-2 focus:ring-cyan focus:border-cyan resize-none"
+                  />
+                </motion.div>
+              </CardContent>
+              <CardFooter className="flex gap-3">
+                <Button 
+                  onClick={handleBackToSetup}
+                  variant="outline"
+                  className="flex-1 bg-slate-light/50 hover:bg-slate-light text-silver border-purple/30 hover:border-purple/50 font-semibold shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
+                  size="lg"
+                  disabled={loading}
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleSubmitAnswer}
+                  className="flex-1 bg-linear-to-r from-cyan to-purple hover:from-cyan-dark hover:to-purple-dark text-white font-semibold shadow-lg shadow-purple/30 hover:shadow-purple/50 transition-all"
+                  size="lg"
+                  disabled={loading || !answer.trim()}
+                >
+                  {loading ? 'Evaluating...' : 'Submit Answer'}
+                </Button>
+              </CardFooter>
+            </Card>
+            </AnimatedBorder>
+          </motion.div>
         </div>
-      </div>
+      </>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-5">
-      <div className="bg-lime-cream shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-12 w-full max-w-2xl aspect-square flex flex-col transition-all duration-50 hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)] hover:scale-[1.005]">
-        <h1 className="text-4xl font-bold text-center text-graphite mb-8">DevOps Quiz</h1>
-        <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
-          <div className="flex-1 space-y-6">
-            <div>
-              <label htmlFor="category" className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">
-                Category:
-              </label>
-              <select
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                disabled={loading}
-                className="w-full px-4 py-3 bg-white border-2 border-graphite text-graphite focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">Select a category</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
+    <>
+      <AnimatedBackground />
+      <Header />
+      <Toaster position="top-right" toastOptions={{
+        style: {
+          background: '#1E293B',
+          color: '#E8EAF6',
+          border: '1px solid rgba(0, 217, 255, 0.3)',
+        },
+      }} />
+      <div className="min-h-screen flex items-center justify-center p-5 pt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-3xl"
+        >
+          <AnimatedBorder>
+            <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20 hover:shadow-purple/30 transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="text-4xl font-bold text-center">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-linear-to-r from-cyan via-purple-light to-purple bg-clip-text text-transparent"
+                    style={{
+                      background: 'linear-gradient(135deg, #00D9FF 0%, #A78BFA 50%, #7C3AED 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    DevOps Quiz
+                  </motion.div>
+                </CardTitle>
+              </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="category" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                    Category
+                  </Label>
+                  <Select value={category} onValueChange={setCategory} disabled={loading}>
+                    <SelectTrigger 
+                      id="category"
+                      className="w-full bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver focus:ring-2 focus:ring-cyan focus:border-cyan"
+                    >
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </motion.div>
 
-            <div>
-              <label htmlFor="subject" className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">
-                Subject:
-              </label>
-              <select
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                disabled={!category || loading}
-                className="w-full px-4 py-3 bg-white border-2 border-graphite text-graphite focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">Select a subject</option>
-                {subjects.map(subj => (
-                  <option key={subj} value={subj}>{subj}</option>
-                ))}
-              </select>
-            </div>
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="subject" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                    Subject
+                  </Label>
+                  <Select value={subject} onValueChange={setSubject} disabled={!category || loading}>
+                    <SelectTrigger 
+                      id="subject"
+                      className="w-full bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver focus:ring-2 focus:ring-cyan focus:border-cyan disabled:opacity-50"
+                    >
+                      <SelectValue placeholder="Select a subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjects.map(subj => (
+                        <SelectItem key={subj} value={subj}>{subj}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </motion.div>
 
-            <div>
-              <label htmlFor="difficulty" className="block text-graphite text-sm font-semibold uppercase tracking-wide mb-2">
-                Difficulty:
-              </label>
-              <select
-                id="difficulty"
-                value={difficulty}
-                onChange={(e) => setDifficulty(Number(e.target.value))}
-                disabled={loading}
-                className="w-full px-4 py-3 bg-white border-2 border-graphite text-graphite focus:outline-none focus:ring-2 focus:ring-yellow focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value={1}>Easy</option>
-                <option value={2}>Medium</option>
-                <option value={3}>Hard</option>
-              </select>
-            </div>
-          </div>
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="difficulty" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                    Difficulty
+                  </Label>
+                  <Select value={difficulty.toString()} onValueChange={(val) => setDifficulty(Number(val))} disabled={loading}>
+                    <SelectTrigger 
+                      id="difficulty"
+                      className="w-full bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver focus:ring-2 focus:ring-cyan focus:border-cyan"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Easy</SelectItem>
+                      <SelectItem value="2">Medium</SelectItem>
+                      <SelectItem value="3">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
 
-          <div className="flex gap-3 pt-2">
-            <button 
-              type="button" 
-              onClick={handleClear} 
-              className="flex-1 bg-graphite hover:bg-black text-white font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
-              disabled={loading}
-            >
-              Clear
-            </button>
-            <button 
-              type="submit" 
-              className="flex-1 bg-yellow hover:bg-graphite hover:text-white text-graphite font-semibold py-3 px-6 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" 
-              disabled={!category || !subject || loading}
-            >
-              {loading ? 'Loading...' : 'Submit'}
-            </button>
-          </div>
-        </form>
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex gap-3 pt-4"
+                >
+                  <Button 
+                    type="button" 
+                    onClick={handleClear}
+                    variant="outline"
+                    className="flex-1 bg-slate-light/50 hover:bg-slate-light text-silver border-purple/30 hover:border-purple/50 font-semibold shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
+                    size="lg"
+                    disabled={loading}
+                  >
+                    Clear
+                  </Button>
+                  <Button 
+                    type="submit"
+                    className="flex-1 bg-linear-to-r from-cyan to-purple hover:from-cyan-dark hover:to-purple-dark text-white font-semibold shadow-lg shadow-purple/30 hover:shadow-purple/50 transition-all"
+                    size="lg"
+                    disabled={!category || !subject || loading}
+                  >
+                    {loading ? 'Loading...' : 'Generate Question'}
+                  </Button>
+                </motion.div>
+              </form>
+            </CardContent>
+          </Card>
+          </AnimatedBorder>
+        </motion.div>
       </div>
-    </div>
+    </>
   )
 }
