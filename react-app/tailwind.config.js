@@ -8,9 +8,24 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Old colors
         'lime-cream': '#E8F5C8',
         'yellow': '#FFC857',
         'graphite': '#2D2D2A',
+        
+        // New Modern Palette
+        'silver': '#E8EAF6',
+        'silver-light': '#F5F7FA',
+        'cyan': '#00D9FF',
+        'cyan-dark': '#00B8D9',
+        'purple': '#7C3AED',
+        'purple-dark': '#5B21B6',
+        'purple-light': '#A78BFA',
+        'indigo': '#4F46E5',
+        'slate': '#1E293B',
+        'slate-light': '#334155',
+        'accent': '#06B6D4',
+        
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -49,6 +64,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      animation: {
+        'gradient-shift': 'gradient-shift 15s ease infinite',
+        'float': 'float 20s ease-in-out infinite',
       },
     },
   },
