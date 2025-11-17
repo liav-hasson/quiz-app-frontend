@@ -64,7 +64,11 @@
   height: 800px;
   translate: 33.333% 33.333%;
   border-radius: 9999px;
+<<<<<<< HEAD
   background: radial-gradient(circle, var(--accent-secondary-medium) 0%, rgba(30, 227, 207, 0.06) 50%, transparent 75%);
+=======
+  background: radial-gradient(circle, var(--accent-secondary-medium) 0%, var(--accent-secondary-light) 50%, transparent 75%);
+>>>>>>> 24d7d98 (theme changes)
   filter: blur(90px);
 }
 
@@ -89,23 +93,38 @@
   border-radius: 9999px;
 }
 
+<<<<<<< HEAD
 /* Particle accent secondary */
+=======
+/* Particle accent secondary - turquoise bright */
+>>>>>>> 24d7d98 (theme changes)
 .floating-particle--accent-secondary {
   background-color: var(--accent-secondary-medium);
   box-shadow: 0 0 10px var(--accent-secondary-strong);
 }
 
+<<<<<<< HEAD
 /* Particle accent primary */
+=======
+/* Particle accent primary - vivid royal */
+>>>>>>> 24d7d98 (theme changes)
 .floating-particle--accent-primary {
   background-color: var(--accent-primary-medium);
   box-shadow: 0 0 10px var(--accent-primary-strong);
 }
 
+<<<<<<< HEAD
 /* Particle accent quaternary */
 .floating-particle--accent-quaternary {
   background-color: var(--accent-quaternary-light);
   box-shadow: 0 0 10px var(--accent-quaternary-medium);
   box-shadow: 0 0 10px rgba(181, 23, 158, 0.5);
+=======
+/* Particle accent quaternary - neon pink */
+.floating-particle--accent-quaternary {
+  background-color: var(--accent-quaternary-light);
+  box-shadow: 0 0 10px var(--accent-quaternary-medium);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* Noise texture overlay */
@@ -121,7 +140,11 @@
 .vignette-overlay {
   position: absolute;
   inset: 0;
+<<<<<<< HEAD
   background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 23, 42, 0.4) 100%);
+=======
+  background: radial-gradient(ellipse at center, transparent 0%, var(--bg-dark) 100%);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* Top accent line */
@@ -131,7 +154,11 @@
   left: 0;
   right: 0;
   height: 1px;
+<<<<<<< HEAD
   background: linear-gradient(to right, transparent, rgba(30, 227, 207, 1), transparent);
+=======
+  background: linear-gradient(to right, transparent, var(--accent-secondary), transparent);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================
@@ -148,7 +175,11 @@
   border-radius: 0.5rem;
   opacity: 0;
   pointer-events: none;
+<<<<<<< HEAD
   background: linear-gradient(90deg, transparent, rgba(30, 227, 207, 0.5), rgba(114, 9, 183, 0.5), transparent);
+=======
+  background: linear-gradient(90deg, transparent, var(--accent-secondary-medium), var(--accent-tertiary-medium), transparent);
+>>>>>>> 24d7d98 (theme changes)
   background-size: 200% 100%;
 }
 
@@ -157,27 +188,49 @@
    ============================================================================ */
 
 .glass-card {
+<<<<<<< HEAD
   background-color: rgba(26, 31, 58, 0.95);
   backdrop-filter: blur(1.5rem);
   border: 1px solid rgba(114, 9, 183, 0.3);
   box-shadow: 0 25px 50px -12px rgba(247, 37, 133, 0.2);
+=======
+  background-color: var(--bg-card);
+  backdrop-filter: blur(1.5rem);
+  border: 1px solid var(--accent-tertiary-light);
+  box-shadow: 0 25px 50px -12px var(--accent-quaternary-light);
+>>>>>>> 24d7d98 (theme changes)
   transition: all 300ms ease;
 }
 
 .glass-card:hover {
+<<<<<<< HEAD
   box-shadow: 0 25px 50px -12px rgba(247, 37, 133, 0.3);
 }
 
 .glass-card-light {
   background-color: rgba(52, 58, 85, 0.5);
+=======
+  box-shadow: 0 25px 50px -12px var(--accent-quaternary-medium);
+}
+
+.glass-card-light {
+  background-color: var(--bg-card-light);
+>>>>>>> 24d7d98 (theme changes)
   backdrop-filter: blur(0.5rem);
 }
 
 .glass-card-accent {
+<<<<<<< HEAD
   background: linear-gradient(to bottom right, rgba(114, 9, 183, 0.1), rgba(30, 227, 207, 0.1));
   backdrop-filter: blur(0.5rem);
   border: 2px solid rgba(114, 9, 183, 0.4);
   box-shadow: 0 20px 25px -5px rgba(114, 9, 183, 0.1);
+=======
+  background: linear-gradient(to bottom right, var(--accent-tertiary-light), var(--accent-secondary-light));
+  backdrop-filter: blur(0.5rem);
+  border: 2px solid var(--accent-tertiary-medium);
+  box-shadow: 0 20px 25px -5px var(--accent-tertiary-light);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================
@@ -190,10 +243,17 @@
   left: 0;
   right: 0;
   z-index: 50;
+<<<<<<< HEAD
   background-color: rgba(26, 31, 58, 0.9);
   backdrop-filter: blur(1rem);
   border-bottom: 1px solid rgba(30, 227, 207, 0.2);
   box-shadow: 0 10px 15px -3px rgba(247, 37, 133, 0.05);
+=======
+  background-color: var(--bg-card-dark);
+  backdrop-filter: blur(1rem);
+  border-bottom: 1px solid var(--accent-secondary-light);
+  box-shadow: 0 10px 15px -3px var(--accent-quaternary-light);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 .header-border-accent {
@@ -202,7 +262,11 @@
   left: 0;
   right: 0;
   height: 2px;
+<<<<<<< HEAD
   background: linear-gradient(to right, transparent, rgba(30, 227, 207, 1), transparent);
+=======
+  background: linear-gradient(to right, transparent, var(--accent-secondary), transparent);
+>>>>>>> 24d7d98 (theme changes)
   opacity: 0.5;
   transform-origin: center;
 }
@@ -212,8 +276,13 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
+<<<<<<< HEAD
   background-color: rgba(247, 37, 133, 0.1);
   border: 1px solid rgba(247, 37, 133, 0.3);
+=======
+  background-color: var(--accent-quaternary-light);
+  border: 1px solid var(--accent-quaternary-medium);
+>>>>>>> 24d7d98 (theme changes)
   border-radius: 0.5rem;
   backdrop-filter: blur(0.5rem);
   transition: all 200ms ease;
@@ -221,7 +290,11 @@
 
 .header-info-badge:hover {
   transform: scale(1.02);
+<<<<<<< HEAD
   border-color: rgba(247, 37, 133, 0.5);
+=======
+  border-color: var(--accent-quaternary-strong);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 .header-status-badge {
@@ -229,8 +302,13 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
+<<<<<<< HEAD
   background-color: rgba(30, 227, 207, 0.1);
   border: 1px solid rgba(30, 227, 207, 0.3);
+=======
+  background-color: var(--accent-secondary-light);
+  border: 1px solid var(--accent-secondary-medium);
+>>>>>>> 24d7d98 (theme changes)
   border-radius: 0.5rem;
   backdrop-filter: blur(0.5rem);
   transition: all 200ms ease;
@@ -238,7 +316,11 @@
 
 .header-status-badge:hover {
   transform: scale(1.05);
+<<<<<<< HEAD
   border-color: rgba(30, 227, 207, 0.5);
+=======
+  border-color: var(--accent-secondary-strong);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================
@@ -246,14 +328,50 @@
    ============================================================================ */
 
 .gradient-text-primary {
+<<<<<<< HEAD
   background: linear-gradient(135deg, #f72585 0%, #1ee3cf 100%);
+=======
+  background: var(--gradient-primary);
+>>>>>>> 24d7d98 (theme changes)
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-cool-warm {
+<<<<<<< HEAD
   background: linear-gradient(135deg, #1ee3cf 0%, #f72585 100%);
+=======
+  background: var(--gradient-cool-warm);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-primary-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-neon-purple-text {
+  background: var(--gradient-neon-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-cool-warm-text {
+  background: var(--gradient-cool-warm);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-login-title {
+  background: var(--gradient-login-title);
+>>>>>>> 24d7d98 (theme changes)
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -264,7 +382,11 @@
    ============================================================================ */
 
 .separator-muted {
+<<<<<<< HEAD
   background-color: rgba(114, 9, 183, 0.3);
+=======
+  background-color: var(--accent-tertiary-light);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================
@@ -272,7 +394,11 @@
    ============================================================================ */
 
 .label-accent-turquoise {
+<<<<<<< HEAD
   color: #1ee3cf;
+=======
+  color: var(--accent-secondary);
+>>>>>>> 24d7d98 (theme changes)
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -280,7 +406,11 @@
 }
 
 .label-accent-purple {
+<<<<<<< HEAD
   color: #a78bfa;
+=======
+  color: var(--accent-primary);
+>>>>>>> 24d7d98 (theme changes)
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -288,11 +418,19 @@
 }
 
 .text-secondary-light {
+<<<<<<< HEAD
   color: #92f2e8;
 }
 
 .text-primary-light {
   color: #e8eaf6;
+=======
+  color: var(--accent-secondary);
+}
+
+.text-primary-light {
+  color: var(--text-primary);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================
@@ -300,31 +438,54 @@
    ============================================================================ */
 
 .btn-gradient-primary {
+<<<<<<< HEAD
   background: linear-gradient(to right, #f72585, #560bad);
   color: white;
   font-weight: 600;
   box-shadow: 0 10px 15px -3px rgba(247, 37, 133, 0.3);
+=======
+  background: linear-gradient(to right, var(--color-neon-pink), var(--color-ultrasonic));
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px var(--accent-quaternary-light);
+>>>>>>> 24d7d98 (theme changes)
   transition: all 200ms ease;
 }
 
 .btn-gradient-primary:hover {
+<<<<<<< HEAD
   box-shadow: 0 10px 15px -3px rgba(247, 37, 133, 0.5);
+=======
+  box-shadow: 0 10px 15px -3px var(--accent-quaternary-medium);
+>>>>>>> 24d7d98 (theme changes)
   transform: translateY(-2px);
 }
 
 .btn-outline-glass {
+<<<<<<< HEAD
   background-color: rgba(26, 31, 58, 0.5);
   backdrop-filter: blur(0.5rem);
   border: 1px solid rgba(114, 9, 183, 0.3);
   color: #92f2e8;
+=======
+  background-color: var(--bg-card-light);
+  backdrop-filter: blur(0.5rem);
+  border: 1px solid var(--accent-tertiary-light);
+  color: var(--accent-secondary);
+>>>>>>> 24d7d98 (theme changes)
   font-weight: 600;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 200ms ease;
 }
 
 .btn-outline-glass:hover {
+<<<<<<< HEAD
   background-color: rgba(26, 31, 58, 0.8);
   border-color: rgba(114, 9, 183, 0.5);
+=======
+  background-color: var(--bg-card-medium);
+  border-color: var(--accent-tertiary-medium);
+>>>>>>> 24d7d98 (theme changes)
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }
 
@@ -340,21 +501,35 @@
 .input-glass {
   background-color: rgba(52, 58, 85, 0.5);
   backdrop-filter: blur(0.5rem);
+<<<<<<< HEAD
   border: 2px solid rgba(114, 9, 183, 0.3);
   color: #e8eaf6;
+=======
+  border: 2px solid var(--accent-tertiary-light);
+  color: var(--text-primary);
+>>>>>>> 24d7d98 (theme changes)
   min-height: 200px;
   resize: none;
   transition: all 200ms ease;
 }
 
 .input-glass::placeholder {
+<<<<<<< HEAD
   color: rgba(232, 234, 246, 0.4);
+=======
+  color: rgba(146, 242, 232, 0.4);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 .input-glass:focus {
   outline: none;
+<<<<<<< HEAD
   border-color: #1ee3cf;
   box-shadow: 0 0 0 3px rgba(30, 227, 207, 0.1);
+=======
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px var(--accent-secondary-light);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================
@@ -362,9 +537,15 @@
    ============================================================================ */
 
 .badge-secondary {
+<<<<<<< HEAD
   background-color: rgba(114, 9, 183, 0.2);
   color: #a78bfa;
   border: 1px solid rgba(114, 9, 183, 0.4);
+=======
+  background-color: var(--accent-tertiary-light);
+  color: var(--accent-secondary);
+  border: 1px solid var(--accent-tertiary-medium);
+>>>>>>> 24d7d98 (theme changes)
 }
 
 /* ============================================================================

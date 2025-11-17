@@ -73,11 +73,12 @@ export default function Login() {
         <AnimatedBorder>
           <Card className="bg-dark-card/95 backdrop-blur-xl border-indigo-bloom/30 shadow-2xl shadow-indigo-bloom/20">
             <CardHeader>
-              <CardTitle className="text-3xl font-bold text-center">
+              <CardTitle className="text-3xl font-bold text-center\">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
+<<<<<<< HEAD
                   className="bg-linear-to-r from-turquoise-bright via-indigo-bloom to-ultrasonic bg-clip-text text-transparent"
                   style={{
                     background: gradients.primary,
@@ -85,6 +86,9 @@ export default function Login() {
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
                   }}
+=======
+                  className="gradient-login-title"
+>>>>>>> 24d7d98 (theme changes)
                 >
                   Quiz Labs
                 </motion.div>

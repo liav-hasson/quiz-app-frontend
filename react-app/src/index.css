@@ -30,33 +30,77 @@
      These map to the palette colors above
      ======================================================================== */
   
+<<<<<<< HEAD
   /* Primary accent - used for highlights, buttons, important elements */
   /* Branding: align primary with the logo (vividRoyal) */
+=======
+  /* Primary accent - vibrant royal purple (logo color) */
+>>>>>>> 24d7d98 (theme changes)
   --accent-primary: #3a0ca3; /* vividRoyal */
   --accent-primary-light: rgba(58, 12, 163, 0.18);
   --accent-primary-medium: rgba(58, 12, 163, 0.38);
   --accent-primary-strong: rgba(58, 12, 163, 0.75);
   
+<<<<<<< HEAD
   /* Secondary accent - used for supporting elements, borders */
+=======
+  /* Secondary accent - bright soft cyan */
+>>>>>>> 24d7d98 (theme changes)
   --accent-secondary: #92f2e8; /* softCyan */
   --accent-secondary-light: rgba(146, 242, 232, 0.12);
   --accent-secondary-medium: rgba(146, 242, 232, 0.28);
   --accent-secondary-strong: rgba(146, 242, 232, 0.55);
   
+<<<<<<< HEAD
   /* Tertiary accent - used for cards, shadows */
+=======
+  /* Tertiary accent - indigo bloom purple */
+>>>>>>> 24d7d98 (theme changes)
   --accent-tertiary: #7209b7;
   --accent-tertiary-light: rgba(114, 9, 183, 0.15);
   --accent-tertiary-medium: rgba(114, 9, 183, 0.3);
   --accent-tertiary-strong: rgba(114, 9, 183, 0.5);
   
+<<<<<<< HEAD
   /* Quaternary accent - used for supporting purple tones */
   --accent-quaternary: #b5179e;
   --accent-quaternary-light: rgba(181, 23, 158, 0.25);
   --accent-quaternary-medium: rgba(181, 23, 158, 0.5);
+=======
+  /* Quaternary accent - neon pink for highlights and CTAs */
+  --accent-quaternary: #f72585; /* neonPink */
+  --accent-quaternary-light: rgba(247, 37, 133, 0.18);
+  --accent-quaternary-medium: rgba(247, 37, 133, 0.4);
+  --accent-quaternary-strong: rgba(247, 37, 133, 0.7);
+  
+  /* Quinary accent - turquoise for supporting elements */
+  --accent-quinary: #1ee3cf; /* turquoiseBright */
+  --accent-quinary-light: rgba(30, 227, 207, 0.12);
+  --accent-quinary-medium: rgba(30, 227, 207, 0.3);
+  --accent-quinary-strong: rgba(30, 227, 207, 0.6);
+  
+  /* Senary accent - verdigris for additional depth */
+  --accent-senary: #159f91; /* verdigris */
+  --accent-senary-light: rgba(21, 159, 145, 0.15);
+  --accent-senary-medium: rgba(21, 159, 145, 0.35);
+  --accent-senary-strong: rgba(21, 159, 145, 0.6);
+  
+  /* Septenary accent - raspberry plum for accents */
+  --accent-septenary: #b5179e; /* raspberryPlum */
+  --accent-septenary-light: rgba(181, 23, 158, 0.15);
+  --accent-septenary-medium: rgba(181, 23, 158, 0.4);
+  --accent-septenary-strong: rgba(181, 23, 158, 0.65);
+>>>>>>> 24d7d98 (theme changes)
   
   /* Background & Text */
   --bg-dark: #0a0e27;
   --bg-card: #1a1f3a;
+<<<<<<< HEAD
+=======
+  --bg-card-light: rgba(26, 31, 58, 0.5);
+  --bg-card-medium: rgba(26, 31, 58, 0.8);
+  --bg-card-dark: rgba(26, 31, 58, 0.9);
+>>>>>>> 24d7d98 (theme changes)
   --text-primary: #92f2e8;
   --text-secondary: #1ee3cf;
   
@@ -82,6 +126,14 @@
   --input: 280 30% 25%;
   --ring: 280 80% 50%;
   --radius: 0.5rem;
+  
+  /* ========================================================================
+     GRADIENT CSS VARIABLES
+     ======================================================================== */
+  --gradient-primary: linear-gradient(135deg, #f72585 0%, #1ee3cf 100%);
+  --gradient-neon-purple: linear-gradient(135deg, #f72585 0%, #7209b7 100%);
+  --gradient-cool-warm: linear-gradient(135deg, #1ee3cf 0%, #f72585 100%);
+  --gradient-login-title: linear-gradient(90deg, #1ee3cf, #7209b7, #560bad);
 }
 
 @theme dark {
@@ -136,4 +188,533 @@
 
 .floating-orb {
   animation: float 20s ease-in-out infinite;
+}
+
+/* Header Styles */
+.header-gradient {
+  background: linear-gradient(90deg, 
+    var(--color-true-azure), 
+    var(--color-neon-pink));
+  border-color: var(--color-turquoise-bright);
+}
+
+/* ============================================================================
+   ANIMATED BACKGROUND STYLES
+   Uses semantic CSS variables for easy color management
+   Change colors in index.css and all animations update automatically
+   ============================================================================ */
+
+/* Main background container */
+.animated-bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+}
+
+/* Mesh gradient foundation layer - uses accent colors */
+.mesh-gradient-foundation {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+}
+
+.mesh-gradient-foundation::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(at 0% 0%, var(--accent-primary-light) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, var(--accent-secondary-light) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, var(--accent-tertiary-light) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, var(--accent-quaternary-light) 0px, transparent 50%);
+}
+
+/* Mouse follower orb */
+.mouse-follower-orb {
+  position: absolute;
+  pointer-events: none;
+  width: 600px;
+  height: 600px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at center, var(--accent-secondary-light) 0%, var(--accent-primary-light) 30%, transparent 65%);
+  filter: blur(60px);
+}
+
+/* Floating orb - top left (primary accent) */
+.floating-orb-accent-primary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 700px;
+  height: 700px;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--accent-primary-medium) 0%, var(--accent-primary-light) 50%, transparent 75%);
+  filter: blur(80px);
+}
+
+/* Floating orb - bottom right (secondary accent) */
+.floating-orb-accent-secondary {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 800px;
+  height: 800px;
+  translate: 33.333% 33.333%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--accent-secondary-medium) 0%, var(--accent-secondary-light) 50%, transparent 75%);
+  filter: blur(90px);
+}
+
+/* Center rotating accent - uses tertiary accent */
+.center-rotating-accent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: radial-gradient(ellipse 80% 120%, var(--accent-tertiary-light) 0%, var(--accent-quaternary-light) 40%, transparent 70%);
+  filter: blur(70px);
+}
+
+/* Floating particles */
+.floating-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+}
+
+/* Particle accent secondary - turquoise bright */
+.floating-particle--accent-secondary {
+  background-color: var(--accent-secondary-medium);
+  box-shadow: 0 0 10px var(--accent-secondary-strong);
+}
+
+/* Particle accent primary - vivid royal */
+.floating-particle--accent-primary {
+  background-color: var(--accent-primary-medium);
+  box-shadow: 0 0 10px var(--accent-primary-strong);
+}
+
+/* Particle accent quaternary - neon pink */
+.floating-particle--accent-quaternary {
+  background-color: var(--accent-quaternary-light);
+  box-shadow: 0 0 10px var(--accent-quaternary-medium);
+}
+
+/* Noise texture overlay */
+.noise-texture-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Vignette effect */
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, var(--bg-dark) 100%);
+}
+
+/* Top accent line */
+.top-accent-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--accent-secondary), transparent);
+}
+
+/* ============================================================================
+   ANIMATED BORDER STYLES
+   ============================================================================ */
+
+.animated-border-wrapper {
+  position: relative;
+}
+
+.animated-border-gradient {
+  position: absolute;
+  inset: -1px;
+  border-radius: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--accent-secondary-medium), var(--accent-tertiary-medium), transparent);
+  background-size: 200% 100%;
+}
+
+/* ============================================================================
+   CARD & CONTAINER STYLES
+   ============================================================================ */
+
+.glass-card {
+  background-color: var(--bg-card);
+  backdrop-filter: blur(1.5rem);
+  border: 1px solid var(--accent-tertiary-light);
+  box-shadow: 0 25px 50px -12px var(--accent-quaternary-light);
+  transition: all 300ms ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 25px 50px -12px var(--accent-quaternary-medium);
+}
+
+.glass-card-light {
+  background-color: var(--bg-card-light);
+  backdrop-filter: blur(0.5rem);
+}
+
+.glass-card-accent {
+  background: linear-gradient(to bottom right, var(--accent-tertiary-light), var(--accent-secondary-light));
+  backdrop-filter: blur(0.5rem);
+  border: 2px solid var(--accent-tertiary-medium);
+  box-shadow: 0 20px 25px -5px var(--accent-tertiary-light);
+}
+
+/* ============================================================================
+   HEADER STYLES
+   ============================================================================ */
+
+.header-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: var(--bg-card-dark);
+  backdrop-filter: blur(1rem);
+  border-bottom: 1px solid var(--accent-secondary-light);
+  box-shadow: 0 10px 15px -3px var(--accent-quaternary-light);
+}
+
+.header-border-accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--accent-secondary), transparent);
+  opacity: 0.5;
+  transform-origin: center;
+}
+
+.header-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--accent-quaternary-light);
+  border: 1px solid var(--accent-quaternary-medium);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(0.5rem);
+  transition: all 200ms ease;
+}
+
+.header-info-badge:hover {
+  transform: scale(1.02);
+  border-color: var(--accent-quaternary-strong);
+}
+
+.header-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--accent-secondary-light);
+  border: 1px solid var(--accent-secondary-medium);
+  border-radius: 0.5rem;
+  backdrop-filter: blur(0.5rem);
+  transition: all 200ms ease;
+}
+
+.header-status-badge:hover {
+  transform: scale(1.05);
+  border-color: var(--accent-secondary-strong);
+}
+
+/* ============================================================================
+   GRADIENT TEXT STYLES
+   ============================================================================ */
+
+.gradient-text-primary {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-cool-warm {
+  background: var(--gradient-cool-warm);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-primary-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-neon-purple-text {
+  background: var(--gradient-neon-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-cool-warm-text {
+  background: var(--gradient-cool-warm);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-login-title {
+  background: var(--gradient-login-title);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================================
+   SEPARATOR STYLES
+   ============================================================================ */
+
+.separator-muted {
+  background-color: var(--accent-tertiary-light);
+}
+
+/* ============================================================================
+   LABEL & TEXT STYLES
+   ============================================================================ */
+
+.label-accent-turquoise {
+  color: var(--accent-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.label-accent-purple {
+  color: var(--accent-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.text-secondary-light {
+  color: var(--accent-secondary);
+}
+
+.text-primary-light {
+  color: var(--text-primary);
+}
+
+/* ============================================================================
+   BUTTON STYLES
+   ============================================================================ */
+
+.btn-gradient-primary {
+  background: linear-gradient(to right, var(--color-neon-pink), var(--color-ultrasonic));
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 10px 15px -3px var(--accent-quaternary-light);
+  transition: all 200ms ease;
+}
+
+.btn-gradient-primary:hover {
+  box-shadow: 0 10px 15px -3px var(--accent-quaternary-medium);
+  transform: translateY(-2px);
+}
+
+.btn-outline-glass {
+  background-color: var(--bg-card-light);
+  backdrop-filter: blur(0.5rem);
+  border: 1px solid var(--accent-tertiary-light);
+  color: var(--accent-secondary);
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 200ms ease;
+}
+
+.btn-outline-glass:hover {
+  background-color: var(--bg-card-medium);
+  border-color: var(--accent-tertiary-medium);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-glass:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   INPUT & TEXTAREA STYLES
+   ============================================================================ */
+
+.input-glass {
+  background-color: rgba(52, 58, 85, 0.5);
+  backdrop-filter: blur(0.5rem);
+  border: 2px solid var(--accent-tertiary-light);
+  color: var(--text-primary);
+  min-height: 200px;
+  resize: none;
+  transition: all 200ms ease;
+}
+
+.input-glass::placeholder {
+  color: rgba(146, 242, 232, 0.4);
+}
+
+.input-glass:focus {
+  outline: none;
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px var(--accent-secondary-light);
+}
+
+/* ============================================================================
+   BADGE STYLES
+   ============================================================================ */
+
+.badge-secondary {
+  background-color: var(--accent-tertiary-light);
+  color: var(--accent-secondary);
+  border: 1px solid var(--accent-tertiary-medium);
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.3;
+    scale: 1;
+  }
+  50% {
+    opacity: 1;
+    scale: 2;
+  }
+}
+
+@keyframes rotate-360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.3;
+  }
+}
+
+@keyframes border-animate {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes opacity-pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes scale-pulse {
+  0%, 100% {
+    scale: 0.8;
+  }
+  50% {
+    scale: 1;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    scale: 1;
+    opacity: 0.3;
+  }
+  50% {
+    scale: 1.15;
+    opacity: 0.6;
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.blur-heavy {
+  filter: blur(60px);
+}
+
+.blur-very-heavy {
+  filter: blur(80px);
+}
+
+.blur-extreme {
+  filter: blur(90px);
+}
+
+.mix-blend-overlay-light {
+  mix-blend-mode: overlay;
+  opacity: 0.03;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.absolute-inset {
+  position: absolute;
+  inset: 0;
+}
+
+.rounded-full {
+  border-radius: 9999px;
 }

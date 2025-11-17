@@ -7,6 +7,7 @@ export default {
   ],
   theme: {
     extend: {
+<<<<<<< HEAD
       colors: {
         // Neon Vibrant Palette
         'neon-pink': '#f72585',
@@ -58,6 +59,8 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+=======
+>>>>>>> 24d7d98 (theme changes)
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

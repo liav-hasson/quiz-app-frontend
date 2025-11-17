@@ -4,7 +4,10 @@ import { Toaster, toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { toasterProps } from '@/lib/toastConfig'
+<<<<<<< HEAD
 import { gradients } from '@/lib/colors'
+=======
+>>>>>>> 24d7d98 (theme changes)
 import Header from '@/components/Header'
 import AnimatedBorder from '@/components/AnimatedBorder'
 import { Button } from '@/components/ui/button'
@@ -382,6 +385,7 @@ export default function Quiz() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
+<<<<<<< HEAD
                     className="bg-linear-to-r from-turquoise-bright via-indigo-bloom to-ultrasonic bg-clip-text text-transparent"
                     style={{
                       background: gradients.primary,
@@ -389,6 +393,9 @@ export default function Quiz() {
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
                     }}
+=======
+                    className="gradient-primary-text"
+>>>>>>> 24d7d98 (theme changes)
                   >
                     DevOps Quiz
                   </motion.div>
