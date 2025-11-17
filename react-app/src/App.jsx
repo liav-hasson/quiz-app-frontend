@@ -17,6 +17,7 @@ export default function App() {
   const [categories, setCategories] = useState([])
   const [subjects, setSubjects] = useState([])
   const [loading, setLoading] = useState(false)
+  // Test comment for dev pipeline
   
   // Form state
   const [category, setCategory] = useState('')
