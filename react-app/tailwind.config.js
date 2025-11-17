@@ -8,22 +8,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Old colors
-        'lime-cream': '#E8F5C8',
-        'yellow': '#FFC857',
-        'graphite': '#2D2D2A',
+        // Neon Vibrant Palette
+        'neon-pink': '#f72585',
+        'raspberry-plum': '#b5179e',
+        'indigo-bloom': '#7209b7',
+        'ultrasonic': '#560bad',
+        'true-azure': '#480ca8',
+        'vivid-royal': '#3a0ca3',
+        'verdigris': '#159f91',
+        'turquoise': '#1bccba',
+        'turquoise-bright': '#1ee3cf',
+        'soft-cyan': '#92f2e8',
         
-        // New Modern Palette
-        'silver': '#E8EAF6',
-        'silver-light': '#F5F7FA',
-        'cyan': '#00D9FF',
-        'cyan-dark': '#00B8D9',
-        'purple': '#7C3AED',
-        'purple-dark': '#5B21B6',
-        'purple-light': '#A78BFA',
-        'indigo': '#4F46E5',
-        'slate': '#1E293B',
-        'slate-light': '#334155',
+        // Dark backgrounds
+        'dark-bg': '#0a0e27',
+        'dark-card': '#1a1f3a',
         
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

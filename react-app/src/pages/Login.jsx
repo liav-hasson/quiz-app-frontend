@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import AnimatedBorder from '@/components/AnimatedBorder'
+import { gradients } from '@/lib/colors'
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth()
@@ -70,16 +71,16 @@ export default function Login() {
         className="w-full max-w-md"
       >
         <AnimatedBorder>
-          <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20">
+          <Card className="bg-dark-card/95 backdrop-blur-xl border-indigo-bloom/30 shadow-2xl shadow-indigo-bloom/20">
             <CardHeader>
               <CardTitle className="text-3xl font-bold text-center">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
-                  className="bg-linear-to-r from-cyan via-purple-light to-purple bg-clip-text text-transparent"
+                  className="bg-linear-to-r from-turquoise-bright via-indigo-bloom to-ultrasonic bg-clip-text text-transparent"
                   style={{
-                    background: 'linear-gradient(135deg, #00D9FF 0%, #A78BFA 50%, #7C3AED 100%)',
+                    background: gradients.primary,
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
@@ -90,14 +91,14 @@ export default function Login() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <p className="text-center text-silver/80">
+              <p className="text-center text-soft-cyan/80">
                 Sign in with your Google account to start taking quizzes
               </p>
               <div className="flex justify-center">
                 <div id="google-signin-button"></div>
               </div>
               {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
-                <p className="text-sm text-center text-purple-light">
+                <p className="text-sm text-center text-indigo-bloom">
                   ⚠️ Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.
                 </p>
               )}

@@ -1,25 +1,64 @@
 @import "tailwindcss";
+@import "./styles/animations.css";
 
 @theme {
-  /* Old colors - keeping for reference */
-  --color-white: #FCFCFC;
-  --color-lime-cream: #D2F898;
-  --color-yellow: #F6F930;
-  --color-graphite: #2F2F2F;
-  --color-black: #000000;
+  /* ========================================================================
+     NEON COLOR PALETTE - Single Source of Truth for All Colors
+     Change these values once, all CSS and Tailwind update automatically
+     ======================================================================== */
   
-  /* New Modern Color Palette - Silver Cyan Purple */
-  --color-silver: #E8EAF6;
-  --color-silver-light: #F5F7FA;
-  --color-cyan: #00D9FF;
-  --color-cyan-dark: #00B8D9;
-  --color-purple: #7C3AED;
-  --color-purple-dark: #5B21B6;
-  --color-purple-light: #A78BFA;
-  --color-indigo: #4F46E5;
-  --color-slate: #1E293B;
-  --color-slate-light: #334155;
-  --color-accent: #06B6D4;
+  /* Primary Accent Colors */
+  --color-neon-pink: #f72585;
+  --color-raspberry-plum: #b5179e;
+  --color-indigo-bloom: #7209b7;
+  --color-ultrasonic: #560bad;
+  
+  /* Secondary Colors */
+  --color-true-azure: #480ca8;
+  --color-vivid-royal: #3a0ca3;
+  --color-verdigris: #159f91;
+  --color-turquoise: #1bccba;
+  --color-turquoise-bright: #1ee3cf;
+  --color-soft-cyan: #92f2e8;
+  
+  /* Dark Backgrounds */
+  --color-dark-bg: #0a0e27;
+  --color-dark-card: #1a1f3a;
+  
+  /* ========================================================================
+     SEMANTIC CSS VARIABLES - For easy color changes throughout the design
+     These map to the palette colors above
+     ======================================================================== */
+  
+  /* Primary accent - used for highlights, buttons, important elements */
+  /* Branding: align primary with the logo (vividRoyal) */
+  --accent-primary: #3a0ca3; /* vividRoyal */
+  --accent-primary-light: rgba(58, 12, 163, 0.18);
+  --accent-primary-medium: rgba(58, 12, 163, 0.38);
+  --accent-primary-strong: rgba(58, 12, 163, 0.75);
+  
+  /* Secondary accent - used for supporting elements, borders */
+  --accent-secondary: #92f2e8; /* softCyan */
+  --accent-secondary-light: rgba(146, 242, 232, 0.12);
+  --accent-secondary-medium: rgba(146, 242, 232, 0.28);
+  --accent-secondary-strong: rgba(146, 242, 232, 0.55);
+  
+  /* Tertiary accent - used for cards, shadows */
+  --accent-tertiary: #7209b7;
+  --accent-tertiary-light: rgba(114, 9, 183, 0.15);
+  --accent-tertiary-medium: rgba(114, 9, 183, 0.3);
+  --accent-tertiary-strong: rgba(114, 9, 183, 0.5);
+  
+  /* Quaternary accent - used for supporting purple tones */
+  --accent-quaternary: #b5179e;
+  --accent-quaternary-light: rgba(181, 23, 158, 0.25);
+  --accent-quaternary-medium: rgba(181, 23, 158, 0.5);
+  
+  /* Background & Text */
+  --bg-dark: #0a0e27;
+  --bg-card: #1a1f3a;
+  --text-primary: #92f2e8;
+  --text-secondary: #1ee3cf;
   
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
@@ -27,42 +66,44 @@
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  /* Primary maps to vividRoyal (approx HSL: 258 86% 34%) */
+  --primary: 258 86% 34%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 258 60% 42%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 280 20% 20%;
+  --muted-foreground: 280 10% 70%;
+  /* Accent maps to softCyan (approx HSL: 174 78% 60%) */
+  --accent: 174 78% 60%;
+  --accent-foreground: 280 30% 8%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 189 100% 50%;
+  --border: 280 30% 25%;
+  --input: 280 30% 25%;
+  --ring: 280 80% 50%;
   --radius: 0.5rem;
 }
 
 @theme dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --background: 280 30% 8%;
+  --foreground: 158 80% 85%;
+  --card: 280 30% 12%;
+  --card-foreground: 158 80% 85%;
+  --popover: 280 30% 12%;
+  --popover-foreground: 158 80% 85%;
+  --primary: 258 86% 55%;
+  --primary-foreground: 280 30% 8%;
+  --secondary: 258 60% 48%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 280 20% 25%;
+  --muted-foreground: 280 10% 65%;
+  --accent: 174 78% 55%;
+  --accent-foreground: 280 30% 8%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
+  --border: 280 40% 30%;
+  --input: 280 40% 30%;
+  --ring: 280 80% 55%;
 }
 
 /* Animated Background */
@@ -88,7 +129,7 @@
 }
 
 .animated-gradient {
-  background: linear-gradient(-45deg, #0F172A, #1E293B, #4F46E5, #7C3AED, #00B8D9, #1E293B);
+  background: linear-gradient(-45deg, #0a0e27, #1a1f3a, #7209b7, #560bad, #159f91, #1a1f3a);
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
 }

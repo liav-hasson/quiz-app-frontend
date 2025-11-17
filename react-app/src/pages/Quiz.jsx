@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { Toaster, toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { toasterProps } from '@/lib/toastConfig'
+import { gradients } from '@/lib/colors'
 import Header from '@/components/Header'
 import AnimatedBorder from '@/components/AnimatedBorder'
 import { Button } from '@/components/ui/button'
@@ -177,13 +179,7 @@ export default function Quiz() {
     return (
       <>
         <Header user={user} onLogout={handleLogout} />
-        <Toaster position="top-right" toastOptions={{
-          style: {
-            background: '#1E293B',
-            color: '#E8EAF6',
-            border: '1px solid rgba(0, 217, 255, 0.3)',
-          },
-        }} />
+        <Toaster {...toasterProps} />
         <div className="min-h-screen flex items-center justify-center p-5 pt-24">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -193,9 +189,9 @@ export default function Quiz() {
             className="w-full max-w-3xl"
           >
             <AnimatedBorder delay={1}>
-              <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20 hover:shadow-purple/30 transition-all duration-300">
+              <Card className="bg-dark-card/95 backdrop-blur-xl border-indigo-bloom/30 shadow-2xl shadow-indigo-bloom/20 hover:shadow-indigo-bloom/30 transition-all duration-300">
                 <CardHeader>
-                <CardTitle className="text-3xl font-bold text-center text-silver flex items-center justify-center gap-3">
+                <CardTitle className="text-3xl font-bold text-center text-soft-cyan flex items-center justify-center gap-3">
                   <motion.span
                     initial={{ rotate: -180, opacity: 0 }}
                     animate={{ rotate: 0, opacity: 1 }}
@@ -212,40 +208,40 @@ export default function Quiz() {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Label className="text-cyan text-sm font-semibold uppercase tracking-wide">Question</Label>
-                  <Card className="bg-slate-light/50 backdrop-blur-sm border-cyan/20 mt-2">
+                  <Label className="text-turquoise-bright text-sm font-semibold uppercase tracking-wide">Question</Label>
+                  <Card className="bg-dark-card/70 backdrop-blur-sm border-turquoise-bright/20 mt-2">
                     <CardContent className="pt-4">
-                      <p className="text-silver leading-relaxed">{question.question}</p>
+                      <p className="text-soft-cyan leading-relaxed">{question.question}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
 
-                <Separator className="bg-purple/30" />
+                <Separator className="bg-indigo-bloom/30" />
 
                 <motion.div
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Label className="text-cyan text-sm font-semibold uppercase tracking-wide">Your Answer</Label>
-                  <Card className="bg-slate-light/50 backdrop-blur-sm border-cyan/20 mt-2">
+                  <Label className="text-turquoise-bright text-sm font-semibold uppercase tracking-wide">Your Answer</Label>
+                  <Card className="bg-dark-card/70 backdrop-blur-sm border-turquoise-bright/20 mt-2">
                     <CardContent className="pt-4">
-                      <p className="text-silver leading-relaxed">{answer}</p>
+                      <p className="text-soft-cyan leading-relaxed">{answer}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
 
-                <Separator className="bg-purple/30" />
+                <Separator className="bg-indigo-bloom/30" />
 
                 <motion.div
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Label className="text-purple-light text-sm font-semibold uppercase tracking-wide">Feedback</Label>
-                  <Card className="bg-linear-to-br from-purple/10 to-cyan/10 backdrop-blur-sm border-purple/40 mt-2 border-2 shadow-lg shadow-purple/10">
+                  <Label className="text-indigo-bloom text-sm font-semibold uppercase tracking-wide">Feedback</Label>
+                  <Card className="bg-linear-to-br from-indigo-bloom/10 to-turquoise-bright/10 backdrop-blur-sm border-indigo-bloom/40 mt-2 border-2 shadow-lg shadow-indigo-bloom/10">
                     <CardContent className="pt-4">
-                      <p className="text-silver leading-relaxed whitespace-pre-wrap">{feedback}</p>
+                      <p className="text-soft-cyan leading-relaxed whitespace-pre-wrap">{feedback}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -253,7 +249,7 @@ export default function Quiz() {
               <CardFooter className="flex gap-3">
                 <Button 
                   onClick={handleNewQuestion}
-                  className="flex-1 bg-linear-to-r from-cyan to-purple hover:from-cyan-dark hover:to-purple-dark text-white font-semibold shadow-lg shadow-purple/30 hover:shadow-purple/50 transition-all"
+                  className="flex-1 bg-linear-to-r from-turquoise-bright to-indigo-bloom hover:from-turquoise hover:to-ultrasonic text-white font-semibold shadow-lg shadow-indigo-bloom/30 hover:shadow-indigo-bloom/50 transition-all"
                   size="lg"
                 >
                   New Question
@@ -271,13 +267,7 @@ export default function Quiz() {
     return (
       <>
         <Header user={user} onLogout={handleLogout} />
-        <Toaster position="top-right" toastOptions={{
-          style: {
-            background: '#1E293B',
-            color: '#E8EAF6',
-            border: '1px solid rgba(0, 217, 255, 0.3)',
-          },
-        }} />
+        <Toaster {...toasterProps} />
         <div className="min-h-screen flex items-center justify-center p-5 pt-24">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -287,9 +277,9 @@ export default function Quiz() {
             className="w-full max-w-3xl"
           >
             <AnimatedBorder delay={0.5}>
-              <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20 hover:shadow-purple/30 transition-all duration-300">
+              <Card className="bg-dark-card/95 backdrop-blur-xl border-indigo-bloom/30 shadow-2xl shadow-indigo-bloom/20 hover:shadow-indigo-bloom/30 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-3xl font-bold text-center text-silver flex items-center justify-center gap-3">
+                  <CardTitle className="text-3xl font-bold text-center text-soft-cyan flex items-center justify-center gap-3">
                   <motion.span
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
@@ -297,7 +287,7 @@ export default function Quiz() {
                     🤔
                   </motion.span>
                   Question
-                  <Badge variant="secondary" className="ml-2 bg-purple/20 text-purple-light border-purple/40">
+                  <Badge variant="secondary" className="ml-2 bg-indigo-bloom/20 text-indigo-bloom border-indigo-bloom/40">
                     {difficulty === 1 ? 'Easy' : difficulty === 2 ? 'Medium' : 'Hard'}
                   </Badge>
                 </CardTitle>
@@ -311,7 +301,7 @@ export default function Quiz() {
                 >
                   {/* Animated border wrapper */}
                   <motion.div
-                    className="absolute -inset-px bg-linear-to-r from-cyan via-purple to-cyan rounded-lg opacity-0"
+                    className="absolute -inset-px bg-linear-to-r from-turquoise-bright via-indigo-bloom to-turquoise-bright rounded-lg opacity-0"
                     animate={{
                       opacity: [0, 0.5, 0],
                     }}
@@ -321,9 +311,9 @@ export default function Quiz() {
                       ease: "easeInOut",
                     }}
                   />
-                  <Card className="relative bg-linear-to-br from-cyan/10 to-purple/10 backdrop-blur-sm border-cyan/40 border-2 shadow-lg shadow-cyan/10">
+                  <Card className="relative bg-linear-to-br from-turquoise-bright/10 to-indigo-bloom/10 backdrop-blur-sm border-turquoise-bright/40 border-2 shadow-lg shadow-turquoise-bright/10">
                     <CardContent className="pt-6">
-                      <p className="text-silver text-lg leading-relaxed">{question.question}</p>
+                      <p className="text-soft-cyan text-lg leading-relaxed">{question.question}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -334,7 +324,7 @@ export default function Quiz() {
                   transition={{ delay: 0.2 }}
                   className="space-y-2"
                 >
-                  <Label htmlFor="answer" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                  <Label htmlFor="answer" className="text-turquoise-bright text-sm font-semibold uppercase tracking-wide">
                     Your Answer
                   </Label>
                   <Textarea
@@ -342,7 +332,7 @@ export default function Quiz() {
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
                     placeholder="Type your answer here..."
-                    className="min-h-[200px] bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver placeholder:text-silver/40 focus:ring-2 focus:ring-cyan focus:border-cyan resize-none"
+                    className="min-h-[200px] bg-dark-card/70 backdrop-blur-sm border-2 border-indigo-bloom/30 text-soft-cyan placeholder:text-soft-cyan/40 focus:ring-2 focus:ring-turquoise-bright focus:border-turquoise-bright resize-none"
                   />
                 </motion.div>
               </CardContent>
@@ -350,7 +340,7 @@ export default function Quiz() {
                 <Button 
                   onClick={handleBackToSetup}
                   variant="outline"
-                  className="flex-1 bg-slate-light/50 hover:bg-slate-light text-silver border-purple/30 hover:border-purple/50 font-semibold shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
+                  className="flex-1 bg-dark-card/70 hover:bg-dark-card text-soft-cyan border-indigo-bloom/30 hover:border-indigo-bloom/50 font-semibold shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
                   size="lg"
                   disabled={loading}
                 >
@@ -358,7 +348,7 @@ export default function Quiz() {
                 </Button>
                 <Button 
                   onClick={handleSubmitAnswer}
-                  className="flex-1 bg-linear-to-r from-cyan to-purple hover:from-cyan-dark hover:to-purple-dark text-white font-semibold shadow-lg shadow-purple/30 hover:shadow-purple/50 transition-all"
+                  className="flex-1 bg-linear-to-r from-turquoise-bright to-indigo-bloom hover:from-turquoise hover:to-ultrasonic text-white font-semibold shadow-lg shadow-indigo-bloom/30 hover:shadow-indigo-bloom/50 transition-all"
                   size="lg"
                   disabled={loading || !answer.trim()}
                 >
@@ -376,13 +366,7 @@ export default function Quiz() {
   return (
     <>
       <Header user={user} onLogout={handleLogout} />
-      <Toaster position="top-right" toastOptions={{
-        style: {
-          background: '#1E293B',
-          color: '#E8EAF6',
-          border: '1px solid rgba(0, 217, 255, 0.3)',
-        },
-      }} />
+      <Toaster {...toasterProps} />
       <div className="min-h-screen flex items-center justify-center p-5 pt-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -391,16 +375,16 @@ export default function Quiz() {
           className="w-full max-w-3xl"
         >
           <AnimatedBorder>
-            <Card className="bg-slate/95 backdrop-blur-xl border-purple/30 shadow-2xl shadow-purple/20 hover:shadow-purple/30 transition-all duration-300">
+            <Card className="bg-dark-card/95 backdrop-blur-xl border-indigo-bloom/30 shadow-2xl shadow-indigo-bloom/20 hover:shadow-indigo-bloom/30 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="text-4xl font-bold text-center">
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="bg-linear-to-r from-cyan via-purple-light to-purple bg-clip-text text-transparent"
+                    className="bg-linear-to-r from-turquoise-bright via-indigo-bloom to-ultrasonic bg-clip-text text-transparent"
                     style={{
-                      background: 'linear-gradient(135deg, #00D9FF 0%, #A78BFA 50%, #7C3AED 100%)',
+                      background: gradients.primary,
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
@@ -418,13 +402,13 @@ export default function Quiz() {
                   transition={{ delay: 0.1 }}
                   className="space-y-2"
                 >
-                  <Label htmlFor="category" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                  <Label htmlFor="category" className="text-turquoise-bright text-sm font-semibold uppercase tracking-wide">
                     Category
                   </Label>
                   <Select value={category} onValueChange={setCategory} disabled={loading}>
                     <SelectTrigger 
                       id="category"
-                      className="w-full bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver focus:ring-2 focus:ring-cyan focus:border-cyan"
+                      className="w-full bg-dark-card/70 backdrop-blur-sm border-2 border-indigo-bloom/30 text-soft-cyan focus:ring-2 focus:ring-turquoise-bright focus:border-turquoise-bright"
                     >
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
@@ -442,13 +426,13 @@ export default function Quiz() {
                   transition={{ delay: 0.2 }}
                   className="space-y-2"
                 >
-                  <Label htmlFor="subject" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                  <Label htmlFor="subject" className="text-turquoise-bright text-sm font-semibold uppercase tracking-wide">
                     Subject
                   </Label>
                   <Select value={subject} onValueChange={setSubject} disabled={!category || loading}>
                     <SelectTrigger 
                       id="subject"
-                      className="w-full bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver focus:ring-2 focus:ring-cyan focus:border-cyan disabled:opacity-50"
+                      className="w-full bg-dark-card/70 backdrop-blur-sm border-2 border-indigo-bloom/30 text-soft-cyan focus:ring-2 focus:ring-turquoise-bright focus:border-turquoise-bright disabled:opacity-50"
                     >
                       <SelectValue placeholder="Select a subject" />
                     </SelectTrigger>
@@ -466,13 +450,13 @@ export default function Quiz() {
                   transition={{ delay: 0.3 }}
                   className="space-y-2"
                 >
-                  <Label htmlFor="difficulty" className="text-cyan text-sm font-semibold uppercase tracking-wide">
+                  <Label htmlFor="difficulty" className="text-turquoise-bright text-sm font-semibold uppercase tracking-wide">
                     Difficulty
                   </Label>
                   <Select value={difficulty.toString()} onValueChange={(val) => setDifficulty(Number(val))} disabled={loading}>
                     <SelectTrigger 
                       id="difficulty"
-                      className="w-full bg-slate-light/50 backdrop-blur-sm border-2 border-purple/30 text-silver focus:ring-2 focus:ring-cyan focus:border-cyan"
+                      className="w-full bg-dark-card/70 backdrop-blur-sm border-2 border-indigo-bloom/30 text-soft-cyan focus:ring-2 focus:ring-turquoise-bright focus:border-turquoise-bright"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -494,7 +478,7 @@ export default function Quiz() {
                     type="button" 
                     onClick={handleClear}
                     variant="outline"
-                    className="flex-1 bg-slate-light/50 hover:bg-slate-light text-silver border-purple/30 hover:border-purple/50 font-semibold shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
+                    className="flex-1 bg-dark-card/70 hover:bg-dark-card text-soft-cyan border-indigo-bloom/30 hover:border-indigo-bloom/50 font-semibold shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
                     size="lg"
                     disabled={loading}
                   >
@@ -502,7 +486,7 @@ export default function Quiz() {
                   </Button>
                   <Button 
                     type="submit"
-                    className="flex-1 bg-linear-to-r from-cyan to-purple hover:from-cyan-dark hover:to-purple-dark text-white font-semibold shadow-lg shadow-purple/30 hover:shadow-purple/50 transition-all"
+                    className="flex-1 bg-linear-to-r from-turquoise-bright to-indigo-bloom hover:from-turquoise hover:to-ultrasonic text-white font-semibold shadow-lg shadow-indigo-bloom/30 hover:shadow-indigo-bloom/50 transition-all"
                     size="lg"
                     disabled={!category || !subject || loading}
                   >
