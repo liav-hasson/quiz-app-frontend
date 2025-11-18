@@ -12,7 +12,7 @@ pipeline {
                 spec:
                   containers:
                     - name: jnlp
-                      image: liavvv/jenkins-agent-front:1.2
+                      image: liavvv/jenkins-agent-front:1.3
                       imagePullPolicy: Always
                       volumeMounts:
                         - name: workspace-volume
@@ -81,39 +81,18 @@ pipeline {
                     echo '--------- Preparing image version ---------'
                     checkout scm
 
-                    // Determine deployment environment based on branch
-                    def branchName = env.BRANCH_NAME ?: env.GIT_BRANCH ?: ''
-                    echo "Detected branch: ${branchName}"
-                    
-                    // Only deploy to prod if on main branch (handle origin/main and main)
-                    if (branchName == 'main' || branchName == 'origin/main') {
-                        env.DEPLOY_ENV = 'prod'
-                        echo "Branch: ${branchName} → Deploying to PRODUCTION"
-                    } else {
-                        env.DEPLOY_ENV = 'dev'
-                        echo "Branch: ${branchName ?: 'unknown'} → Deploying to DEVELOPMENT"
-                    }
+                    env.DEPLOY_ENV = 'prod'
 
                     def semver = sh(returnStdout: true, script: './scripts/compute_next_version.sh . auto').trim()
                     if (semver) {
                         echo "Computed semantic version: ${semver}"
-                        // Append -dev suffix for non-main branches
-                        if (env.DEPLOY_ENV == 'dev') {
-                            env.IMAGE_TAG = "${semver}-dev"
-                            echo "Dev environment: appending -dev suffix → ${env.IMAGE_TAG}"
-                        } else {
-                            env.IMAGE_TAG = semver
-                        }
+                        env.IMAGE_TAG = semver
                     } else {
                         echo "No semantic version computed; falling back to date-based tag: ${env.BUILD_TAG}"
                         env.IMAGE_TAG = env.BUILD_TAG
-                        if (env.DEPLOY_ENV == 'dev') {
-                            env.IMAGE_TAG = "${env.IMAGE_TAG}-dev"
-                        }
                     }
                     
                     echo "Final image tag: ${env.IMAGE_TAG}"
-                    echo "Deploy environment: ${env.DEPLOY_ENV}"
                 }
             }
             post {
@@ -196,19 +175,33 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh '''
+                    echo '--------- Fetching Google Client ID from SSM Parameter Store ---------'
+                    
+                    // Fetch Google Client ID from SSM Parameter Store
+                    def googleClientId = sh(returnStdout: true, script: '''
+                        aws ssm get-parameter \
+                            --name "/devops-quiz/frontend/google-client-id" \
+                            --region eu-north-1 \
+                            --query "Parameter.Value" \
+                            --output text
+                    ''').trim()
+                    
+                    echo "Google Client ID fetched successfully"
+                    
+                    sh """
                         echo "Connecting to BuildKit DaemonSet..."
                         export BUILDKIT_HOST=tcp://buildkitd.jenkins.svc.cluster.local:1234
 
                         echo "Building ${DOCKERHUB_CREDENTIALS_USR}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG} with buildctl..."
-                        buildctl --addr ${BUILDKIT_HOST} build \
-                            --frontend dockerfile.v0 \
-                            --local context=${APP_DIR} \
-                            --local dockerfile=${CI_DIR}/app-dockerfile \
+                        buildctl --addr \${BUILDKIT_HOST} build \\
+                            --frontend dockerfile.v0 \\
+                            --local context=${APP_DIR} \\
+                            --local dockerfile=${CI_DIR}/app-dockerfile \\
+                            --opt build-arg:VITE_GOOGLE_CLIENT_ID=${googleClientId} \\
                             --output type=image,name=${DOCKERHUB_CREDENTIALS_USR}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG},push=true
 
                         echo "Image ${DOCKERHUB_CREDENTIALS_USR}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG} built and pushed"
-                    '''
+                    """
                 }
             }
             post {

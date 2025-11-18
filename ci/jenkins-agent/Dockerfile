@@ -13,6 +13,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # - docker-cli, buildctl: BuildKit client to build/push Docker images
 # - hadolint: Dockerfile linter used in the pipeline
 # - jq: handy JSON processor (used by npm audit output)
+# - unzip: required for AWS CLI installation
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         bash \
@@ -22,10 +23,16 @@ RUN apt-get update && \
         gnupg \
         docker.io \
         build-essential \
-        jq && \
+        jq \
+        unzip && \
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
     npm install -g npm@10.2.3 && \
+    # Install AWS CLI v2
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
+    unzip -q /tmp/awscliv2.zip -d /tmp && \
+    /tmp/aws/install && \
+    rm -rf /tmp/awscliv2.zip /tmp/aws && \
     # Install buildctl (BuildKit CLI)
     curl -L -o /tmp/buildkit.tgz https://github.com/moby/buildkit/releases/download/v0.12.5/buildkit-v0.12.5.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf /tmp/buildkit.tgz && \
