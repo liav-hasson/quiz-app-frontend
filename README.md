@@ -1,19 +1,19 @@
 # Quiz App - Frontend Repository
 
-A modern, responsive React frontend for the DevOps learning platform. Built with **Vite**, **Tailwind CSS**, **Framer Motion**, and **Radix UI**.
+A modern, responsive React frontend for the DevOps learning platform. Built with Vite, Tailwind CSS, Framer Motion, and Radix UI.
 
 ---
 
-## 🚀 Related Repositories
+## Related Repositories
 
-- **[Backend](https://github.com/liav-hasson/quiz-app-backend.git)** - Flask API
-- **[GitOps](https://github.com/liav-hasson/quiz-app-gitops.git)** - ArgoCD deployment
-- **[IaC](https://github.com/liav-hasson/quiz-app-iac.git)** - Terraform infrastructure
-- **[Mini](https://github.com/liav-hasson/quiz-app-mini.git)** - Self-hosted version
+- Backend: https://github.com/liav-hasson/quiz-app-backend.git
+- GitOps: https://github.com/liav-hasson/quiz-app-gitops.git
+- IaC: https://github.com/liav-hasson/quiz-app-iac.git
+- Mini: https://github.com/liav-hasson/quiz-app-mini.git
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 cd react-app
@@ -25,7 +25,7 @@ npm run preview  # Preview production build
 
 ---
 
-## 📋 Project Structure
+## Project Structure
 
 ```
 react-app/
@@ -41,9 +41,9 @@ react-app/
 │   ├── pages/
 │   │   ├── Login.jsx          ← Google OAuth login
 │   │   └── Quiz.jsx           ← Main quiz interface
-│   ├── context/
-│   │   ├── AuthContext.jsx    ← User authentication state
-│   │   └── ThemeContext.jsx   ← Dark/light mode toggle
+│   ├── store/
+│   │   ├── index.js           ← Redux store configuration
+│   │   └── slices/            ← Redux Toolkit slices (auth, quiz, theme)
 │   └── lib/
 │       ├── colors.js          ← Deprecated (reference only)
 │       ├── toastConfig.js     ← Toast notifications setup
@@ -59,13 +59,13 @@ react-app/
 
 ---
 
-## 🎨 Design System
+## Design System
 
 ### Single Source of Truth: `src/index.css`
 
-All colors, styles, and animations are defined **in one file** for consistency and easy maintenance.
+All colors, styles, and animations are defined in one file for consistency and maintenance.
 
-**Edit the palette once, everything updates automatically:**
+Edit the palette once; changes propagate across the app.
 
 ```css
 @theme {
@@ -76,116 +76,103 @@ All colors, styles, and animations are defined **in one file** for consistency a
   /* ... */
   
   /* Semantic variables - for usage context */
-  --accent-primary: #3a0ca3;        /* Vivid Royal - logo color */
-  --accent-secondary: #92f2e8;      /* Soft Cyan - text & accents */
-  --accent-tertiary: #7209b7;       /* Indigo Bloom - supporting */
-  --accent-quaternary: #f72585;     /* Neon Pink - highlights */
-  /* ... plus 3 more for depth */
+  --accent-primary: #3a0ca3;
+  --accent-secondary: #92f2e8;
+  --accent-tertiary: #7209b7;
+  --accent-quaternary: #f72585;
 }
 ```
 
-**Available color variants:**
+Available color variants:
 - Light, Medium, Strong opacity versions of each accent color
 - Gradients: `var(--gradient-primary)`, `var(--gradient-neon-purple)`, etc.
 - Background colors: `--bg-dark`, `--bg-card` with opacity variants
 
-**Usage in JSX:**
+Usage in JSX:
+
 ```jsx
 // Tailwind classes automatically reference the palette
 <div className="bg-neon-pink text-soft-cyan border-turquoise-bright/30">
-  
+
 // CSS variables in styled components
 <motion.div style={{ background: 'var(--gradient-primary)' }}>
 ```
 
 ---
 
-## 🔑 Key Features
+## Key Features
 
 ### Authentication
-- **Google OAuth 2.0** integration via `AuthContext.jsx`
-- User session persistence
+- Google OAuth 2.0 integration using Redux (`authSlice.js`)
+- User session persistence (state persisted to `localStorage` by the app)
 - Protected routes (quiz only accessible when logged in)
 
 ### Quiz Interface
-- **Dynamic category/subject selection** with dropdown menus
-- **Difficulty levels** (Easy, Medium, Hard)
-- **Real-time question generation** via backend API
-- **Answer submission** with feedback scoring
+- Dynamic category/subject selection with dropdown menus
+- Difficulty levels (Easy, Medium, Hard)
+- Real-time question generation via backend API
+- Answer submission with feedback
 
 ### UI/UX
-- **Framer Motion animations** for smooth transitions
-- **Animated background** with floating gradient orbs
-- **Glass-morphism cards** with backdrop blur effects
-- **Dark theme with neon accents** for visual appeal
-- **Responsive design** (mobile, tablet, desktop)
-- **Toast notifications** for user feedback
+- Framer Motion for animations and transitions
+- Animated background component
+- Glass-morphism cards with backdrop blur
+- Dark theme with neon accents
+- Responsive design
+- Toast notifications for user feedback
 
 ### Accessibility
-- Radix UI components (semantic, WCAG compliant)
+- Radix UI components (semantic, accessible)
 - Keyboard navigation support
 - Theme toggle (dark/light mode)
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 | Package | Purpose |
 |---------|---------|
-| **React** | UI library |
-| **React Router** | Client-side routing |
-| **Framer Motion** | Animations & transitions |
-| **Tailwind CSS** | Utility-first styling |
-| **Radix UI** | Accessible UI components |
-| **React Hot Toast** | Toast notifications |
-| **Vite** | Build tool & dev server |
+| React | UI library |
+| React Router | Client-side routing |
+| Framer Motion | Animations & transitions |
+| Tailwind CSS | Utility-first styling |
+| Radix UI | Accessible UI components |
+| React Hot Toast | Notifications |
+| Vite | Build tool & dev server |
 
 ---
 
-## 🔄 Build & Deployment
+## Build & Deployment
 
 ### Development
 ```bash
 npm run dev
 ```
-Starts Vite dev server with HMR (Hot Module Replacement).
 
 ### Production Build
 ```bash
 npm run build
 ```
-Generates optimized static files in `dist/` folder.
 
 ### Docker Deployment
-The `nginx.conf` is configured for production:
-- Serves the React SPA from `dist/`
-- Handles routing (404s redirect to `index.html`)
-- Gzip compression enabled
-- Can be deployed via Docker (see `ci/app-dockerfile/Dockerfile`)
+The `nginx.conf` is configured for production to serve the SPA, handle routing, and enable gzip compression. See the Dockerfile in `ci/app-dockerfile` for the multi-stage build.
 
 ---
 
-## 🎯 API Integration
+## API Integration
 
-The frontend communicates with the **Flask backend** via HTTP requests:
+The frontend communicates with the Flask backend via HTTP requests.
 
-```javascript
-// Example: Generate a question
-fetch('/api/question/generate', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ category, subject, difficulty })
-})
-```
+Required backend endpoints:
+- `GET /api/categories`
+- `GET /api/subjects?category=X`
+- `POST /api/question/generate`
 
-**Required backend endpoints:**
-- `GET /api/categories` — Fetch available categories
-- `GET /api/subjects?category=X` — Fetch subjects for a category
-- `POST /api/question/generate` — Generate a quiz question
+The frontend API wrapper is implemented in `react-app/src/api/quizAPI.js`.
 
 ---
 
-## 🌐 Environment Variables
+## Environment Variables
 
 Create a `.env` file in `react-app/`:
 

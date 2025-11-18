@@ -37,19 +37,18 @@ export default function Header({ user, onLogout }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative"
+            className="relative header-logo"
           >
             <img
-              src="/logo.svg"
+              src="/assets/Quizlabs-Full.svg"
               alt="Quiz Labs Logo"
-              className="h-12 w-auto drop-shadow-lg contrast-125 brightness-125"
             />
 
             {/* Subtle pulsing aura effect */}
             <motion.div
               className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
               style={{
-                background: `radial-gradient(circle, var(--accent-secondary-medium) 0%, var(--accent-primary-light) 50%, transparent 100%)`,
+                background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
               }}
               animate={{
                 scale: [1, 1.15, 1],
@@ -91,17 +90,6 @@ export default function Header({ user, onLogout }) {
                     </span>
                   </motion.div>
 
-                  {/* Theme toggle button */}
-                  <Button
-                    onClick={handleToggleTheme}
-                    variant="outline"
-                    size="sm"
-                    className="header-theme-btn"
-                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                  >
-                    {isDark ? '☀️' : '🌙'}
-                  </Button>
-
                   {/* Logout button */}
                   <Button
                     onClick={onLogout}
@@ -110,6 +98,17 @@ export default function Header({ user, onLogout }) {
                     className="header-logout-btn"
                   >
                     Logout
+                  </Button>
+
+                  {/* Theme toggle button - rightmost */}
+                  <Button
+                    onClick={handleToggleTheme}
+                    variant="outline"
+                    size="sm"
+                    className="header-theme-btn"
+                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                  >
+                    {isDark ? '☀️' : '🌙'}
                   </Button>
                 </>
               )}
