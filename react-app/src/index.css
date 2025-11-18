@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./styles/animations.css";
 
 @theme {
   /* ========================================================================
@@ -30,43 +29,24 @@
      These map to the palette colors above
      ======================================================================== */
   
-<<<<<<< HEAD
-  /* Primary accent - used for highlights, buttons, important elements */
-  /* Branding: align primary with the logo (vividRoyal) */
-=======
   /* Primary accent - vibrant royal purple (logo color) */
->>>>>>> 24d7d98 (theme changes)
   --accent-primary: #3a0ca3; /* vividRoyal */
   --accent-primary-light: rgba(58, 12, 163, 0.18);
   --accent-primary-medium: rgba(58, 12, 163, 0.38);
   --accent-primary-strong: rgba(58, 12, 163, 0.75);
   
-<<<<<<< HEAD
-  /* Secondary accent - used for supporting elements, borders */
-=======
   /* Secondary accent - bright soft cyan */
->>>>>>> 24d7d98 (theme changes)
   --accent-secondary: #92f2e8; /* softCyan */
   --accent-secondary-light: rgba(146, 242, 232, 0.12);
   --accent-secondary-medium: rgba(146, 242, 232, 0.28);
   --accent-secondary-strong: rgba(146, 242, 232, 0.55);
   
-<<<<<<< HEAD
-  /* Tertiary accent - used for cards, shadows */
-=======
   /* Tertiary accent - indigo bloom purple */
->>>>>>> 24d7d98 (theme changes)
   --accent-tertiary: #7209b7;
   --accent-tertiary-light: rgba(114, 9, 183, 0.15);
   --accent-tertiary-medium: rgba(114, 9, 183, 0.3);
   --accent-tertiary-strong: rgba(114, 9, 183, 0.5);
   
-<<<<<<< HEAD
-  /* Quaternary accent - used for supporting purple tones */
-  --accent-quaternary: #b5179e;
-  --accent-quaternary-light: rgba(181, 23, 158, 0.25);
-  --accent-quaternary-medium: rgba(181, 23, 158, 0.5);
-=======
   /* Quaternary accent - neon pink for highlights and CTAs */
   --accent-quaternary: #f72585; /* neonPink */
   --accent-quaternary-light: rgba(247, 37, 133, 0.18);
@@ -90,17 +70,13 @@
   --accent-septenary-light: rgba(181, 23, 158, 0.15);
   --accent-septenary-medium: rgba(181, 23, 158, 0.4);
   --accent-septenary-strong: rgba(181, 23, 158, 0.65);
->>>>>>> 24d7d98 (theme changes)
   
   /* Background & Text */
   --bg-dark: #0a0e27;
   --bg-card: #1a1f3a;
-<<<<<<< HEAD
-=======
   --bg-card-light: rgba(26, 31, 58, 0.5);
   --bg-card-medium: rgba(26, 31, 58, 0.8);
   --bg-card-dark: rgba(26, 31, 58, 0.9);
->>>>>>> 24d7d98 (theme changes)
   --text-primary: #92f2e8;
   --text-secondary: #1ee3cf;
   

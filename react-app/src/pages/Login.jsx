@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import AnimatedBorder from '@/components/AnimatedBorder'
-import { gradients } from '@/lib/colors'
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth()
@@ -78,17 +77,7 @@ export default function Login() {
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
-<<<<<<< HEAD
-                  className="bg-linear-to-r from-turquoise-bright via-indigo-bloom to-ultrasonic bg-clip-text text-transparent"
-                  style={{
-                    background: gradients.primary,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-=======
                   className="gradient-login-title"
->>>>>>> 24d7d98 (theme changes)
                 >
                   Quiz Labs
                 </motion.div>
