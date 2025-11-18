@@ -80,6 +80,12 @@ decide_bump_from_commits() {
   fi
 }
 
+LATEST_TAG=$(get_latest_tag)
+if [[ -z "$LATEST_TAG" ]]; then
+  LATEST_TAG="v0.0.0"
+fi
+parse_tag "$LATEST_TAG"
+
 case "$MODE" in
   auto)
     # Use COMMIT_MESSAGES env if set, otherwise collect via git
