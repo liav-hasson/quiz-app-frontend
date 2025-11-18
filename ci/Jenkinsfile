@@ -34,7 +34,6 @@ pipeline {
     }
 
     environment {
-        PIPELINE_STATUS       = "SUCCESS"
         BUILD_TAG             = "${BUILD_TIMESTAMP}"
         
         // Generates DOCKERHUB_CREDENTIALS_USR, DOCKERHUB_CREDENTIALS_PSW
@@ -81,25 +80,36 @@ pipeline {
                     echo '--------- Preparing image version ---------'
                     checkout scm
 
-                    env.DEPLOY_ENV = 'prod'
+                    // Determine environment based on branch
+                    if (env.BRANCH_NAME == 'main') {
+                        env.DEPLOY_ENV = 'prod'
+                        echo "Building for PRODUCTION (main branch)"
+                    } else {
+                        env.DEPLOY_ENV = 'dev'
+                        echo "Building for DEVELOPMENT (${env.BRANCH_NAME} branch)"
+                    }
 
                     def semver = sh(returnStdout: true, script: './scripts/compute_next_version.sh . auto').trim()
                     if (semver) {
                         echo "Computed semantic version: ${semver}"
-                        env.IMAGE_TAG = semver
+                        // Add -dev suffix for non-main branches
+                        if (env.DEPLOY_ENV == 'dev') {
+                            env.IMAGE_TAG = "${semver}-dev"
+                            echo "Added -dev suffix for dev environment"
+                        } else {
+                            env.IMAGE_TAG = semver
+                        }
                     } else {
                         echo "No semantic version computed; falling back to date-based tag: ${env.BUILD_TAG}"
-                        env.IMAGE_TAG = env.BUILD_TAG
+                        if (env.DEPLOY_ENV == 'dev') {
+                            env.IMAGE_TAG = "${env.BUILD_TAG}-dev"
+                        } else {
+                            env.IMAGE_TAG = env.BUILD_TAG
+                        }
                     }
                     
                     echo "Final image tag: ${env.IMAGE_TAG}"
-                }
-            }
-            post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
+                    echo "Deploy environment: ${env.DEPLOY_ENV}"
                 }
             }
         }
@@ -127,13 +137,6 @@ pipeline {
                 """
                 echo 'Dependency vulnerability scan passed!'
             }
-            post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
-                }
-            }
         }
 
         stage('Dockerfile Security Scan') {
@@ -160,11 +163,6 @@ pipeline {
                 echo 'Dockerfile security scan passed!'
             }
             post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
-                }
                 always {
                     // Archive the Hadolint report for review
                     archiveArtifacts artifacts: 'hadolint-report.json', allowEmptyArchive: true
@@ -204,15 +202,7 @@ pipeline {
                     """
                 }
             }
-            post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
-                }
-            }
         }
-
 
         stage('Update GitOps Repository') {
             steps {
@@ -244,9 +234,6 @@ pipeline {
                     echo "ArgoCD will detect changes and deploy automatically"
                 }
                 failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
                     echo "❌ Failed to update GitOps repository"
                 }
             }
@@ -291,9 +278,6 @@ pipeline {
                     echo "✅ Application tagged with version ${env.IMAGE_TAG}"
                 }
                 failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
                     echo "❌ Failed to tag application release"
                 }
             }
