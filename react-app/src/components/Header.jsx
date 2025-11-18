@@ -1,14 +1,20 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { useTheme } from '@/context/ThemeContext'
+import { toggleTheme, selectIsDark } from '@/store/slices/themeSlice'
 
 export default function Header({ user, onLogout }) {
-  const { isDark, toggleTheme } = useTheme()
+  const dispatch = useDispatch()
+  const isDark = useSelector(selectIsDark)
+
+  const handleToggleTheme = () => {
+    dispatch(toggleTheme())
+  }
   return (
-    <header className="header-gradient fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b shadow-lg shadow-neon-pink/5">
+    <header className="header-base">
       {/* Animated border gradient */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-transparent via-turquoise-bright to-transparent opacity-50"
+        className="header-border-line"
         animate={{
           opacity: [0.3, 0.7, 0.3],
           scaleX: [0.8, 1, 0.8],
@@ -70,7 +76,7 @@ export default function Header({ user, onLogout }) {
                   {/* User info */}
                   <motion.div
                     initial={{ borderColor: 'var(--accent-primary-light)' }}
-                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-neon-pink/10 border border-neon-pink/30 rounded-lg backdrop-blur-sm"
+                    className="header-user-badge"
                     whileHover={{ scale: 1.02, borderColor: 'var(--accent-primary-strong)' }}
                   >
                     <img
@@ -80,17 +86,17 @@ export default function Header({ user, onLogout }) {
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />
-                    <span className="text-sm font-medium text-soft-cyan">
+                    <span className="header-user-name">
                       {user.name || user.email}
                     </span>
                   </motion.div>
 
-                  {/* Logout button */}
+                  {/* Theme toggle button */}
                   <Button
-                    onClick={toggleTheme}
+                    onClick={handleToggleTheme}
                     variant="outline"
                     size="sm"
-                    className="bg-dark-card/50 hover:bg-dark-card border-soft-cyan/30 hover:border-soft-cyan/50 text-soft-cyan"
+                    className="header-theme-btn"
                     title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                   >
                     {isDark ? '☀️' : '🌙'}
@@ -101,7 +107,7 @@ export default function Header({ user, onLogout }) {
                     onClick={onLogout}
                     variant="outline"
                     size="sm"
-                    className="bg-dark-card/50 hover:bg-dark-card border-neon-pink/30 hover:border-neon-pink/50 text-soft-cyan"
+                    className="header-logout-btn"
                   >
                     Logout
                   </Button>
@@ -113,7 +119,7 @@ export default function Header({ user, onLogout }) {
                   {/* Fun fact or tip */}
                   <motion.div
                     initial={{ borderColor: 'var(--accent-primary-light)' }}
-                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-neon-pink/10 border border-neon-pink/30 rounded-lg backdrop-blur-sm"
+                    className="header-guest-badge"
                     whileHover={{ scale: 1.02, borderColor: 'var(--accent-primary-strong)' }}
                   >
                     <motion.span
@@ -123,7 +129,7 @@ export default function Header({ user, onLogout }) {
                     >
                       💡
                     </motion.span>
-                    <span className="text-sm font-medium text-soft-cyan">
+                    <span className="header-badge-text">
                       Test Your DevOps Skills
                     </span>
                   </motion.div>
@@ -131,7 +137,7 @@ export default function Header({ user, onLogout }) {
                   {/* Status indicator */}
                   <motion.div
                     initial={{ borderColor: 'var(--accent-secondary-light)' }}
-                    className="hidden sm:flex items-center gap-2 px-3 py-2 bg-turquoise-bright/10 border border-turquoise-bright/30 rounded-lg backdrop-blur-sm"
+                    className="header-status-badge"
                     whileHover={{ scale: 1.05, borderColor: 'var(--accent-secondary-strong)' }}
                   >
                     <motion.span 
@@ -141,7 +147,7 @@ export default function Header({ user, onLogout }) {
                     >
                       ⚡
                     </motion.span>
-                    <span className="text-sm font-semibold text-soft-cyan">Ready</span>
+                    <span className="header-status-text">Ready</span>
                   </motion.div>
                 </>
               )}

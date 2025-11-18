@@ -1,28 +1,50 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { useAuth } from './context/AuthContext'
+import { selectIsAuthenticated } from './store/slices/authSlice'
+import { selectIsDark } from './store/slices/themeSlice'
 import AnimatedBackground from './components/AnimatedBackground'
 import Login from './pages/Login'
 import Quiz from './pages/Quiz'
-import { toasterProps } from './lib/toastConfig'
 
 // Protected route component
 function ProtectedRoute({ children }) {
-  const { user } = useAuth()
-  if (!user) {
+  const isAuthenticated = useSelector(selectIsAuthenticated)
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
   return children
 }
 
 export default function App() {
+  const isDark = useSelector(selectIsDark)
+
+  // Sync .dark class on <html> with Redux state
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isDark])
+
   return (
     <>
       {/* AnimatedBackground is always visible */}
       <AnimatedBackground />
       
       {/* Toaster for notifications */}
-      <Toaster {...toasterProps} />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--accent-quinary-light)',
+          },
+        }}
+      />
       
       {/* Routes are rendered on top of the background */}
       <div className="relative z-10">

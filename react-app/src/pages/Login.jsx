@@ -1,13 +1,15 @@
 import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useAuth } from '@/context/AuthContext'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import AnimatedBorder from '@/components/AnimatedBorder'
+import { loginSuccess, selectIsAuthenticated } from '@/store/slices/authSlice'
 
 export default function Login() {
-  const { login, isAuthenticated } = useAuth()
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const isAuthenticated = useSelector(selectIsAuthenticated)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -54,7 +56,7 @@ export default function Login() {
         token: credential,
       }
       
-      login(userData)
+      dispatch(loginSuccess(userData))
       navigate('/quiz')
     } catch (error) {
       console.error('Error processing Google Sign-In:', error)
@@ -70,9 +72,9 @@ export default function Login() {
         className="w-full max-w-md"
       >
         <AnimatedBorder>
-          <Card className="bg-dark-card/95 backdrop-blur-xl border-indigo-bloom/30 shadow-2xl shadow-indigo-bloom/20">
+          <Card className="login-card">
             <CardHeader>
-              <CardTitle className="text-3xl font-bold text-center\">
+              <CardTitle className="login-title">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -83,15 +85,15 @@ export default function Login() {
                 </motion.div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <p className="text-center text-soft-cyan/80">
+            <CardContent className="login-content">
+              <p className="login-desc">
                 Sign in with your Google account to start taking quizzes
               </p>
               <div className="flex justify-center">
                 <div id="google-signin-button"></div>
               </div>
               {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
-                <p className="text-sm text-center text-indigo-bloom">
+                <p className="login-warning">
                   ⚠️ Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.
                 </p>
               )}
