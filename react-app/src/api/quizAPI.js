@@ -27,6 +27,25 @@ async function fetchAPI(url, options = {}) {
 }
 
 /**
+ * Send user login information to backend
+ * @param {Object} userData - User data from Google OAuth
+ * @param {string} userData.id - User's unique ID
+ * @param {string} userData.email - User's email
+ * @param {string} userData.name - User's name
+ * @returns {Promise<Object>} Login response from backend
+ */
+export async function loginUser(userData) {
+  return await fetchAPI('/api/login', {
+    method: 'POST',
+    body: JSON.stringify({
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+    }),
+  })
+}
+
+/**
  * Get all available categories
  * @returns {Promise<string[]>} Array of category names
  */
@@ -52,25 +71,6 @@ export async function getSubjects(category) {
 export async function getCategoriesWithSubjects() {
   const response = await fetchAPI('/api/categories-with-subjects')
   return response.data || {}
-}
-
-/**
- * Get all available categories
- * @returns {Promise<string[]>} Array of category names
- */
-export async function getCategories() {
-  const data = await fetchAPI('/api/categories')
-  return data.categories || []
-}
-
-/**
- * Get subjects for a specific category
- * @param {string} category - The category to get subjects for
- * @returns {Promise<string[]>} Array of subject names
- */
-export async function getSubjects(category) {
-  const data = await fetchAPI(`/api/subjects?category=${encodeURIComponent(category)}`)
-  return data.subjects || []
 }
 
 /**
