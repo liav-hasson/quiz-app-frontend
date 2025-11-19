@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import AnimatedBorder from '@/components/AnimatedBorder'
 import { loginSuccess, selectIsAuthenticated } from '@/store/slices/authSlice'
+import { loginUser } from '@/api/quizAPI'
 
 export default function Login() {
   const dispatch = useDispatch()
@@ -43,7 +44,7 @@ export default function Login() {
     }
   }, [])
 
-  const handleCredentialResponse = (response) => {
+  const handleCredentialResponse = async (response) => {
     try {
       const credential = response.credential
       const payload = JSON.parse(atob(credential.split('.')[1]))
@@ -55,6 +56,9 @@ export default function Login() {
         picture: payload.picture,
         token: credential,
       }
+      
+      // Send user info to backend
+      await loginUser(userData)
       
       dispatch(loginSuccess(userData))
       navigate('/quiz')

@@ -11,7 +11,7 @@ import QuizResults from '@/components/quiz/QuizResults'
 import {
   selectCurrentPage,
   selectError,
-  fetchCategories,
+  fetchCategoriesWithSubjects,
   resetQuiz,
 } from '@/store/slices/quizSlice'
 import { selectUser, logout } from '@/store/slices/authSlice'
@@ -31,9 +31,9 @@ export default function Quiz() {
     }
   }, [user, navigate])
 
-  // Fetch categories on mount
+  // Fetch categories with subjects on mount (single API call, cached)
   useEffect(() => {
-    dispatch(fetchCategories())
+    dispatch(fetchCategoriesWithSubjects())
   }, [dispatch])
 
   // Show error toasts

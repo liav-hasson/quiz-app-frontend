@@ -7,6 +7,17 @@ import * as quizAPI from '../../api/quizAPI'
  */
 
 // Async thunks for API calls
+export const fetchCategoriesWithSubjects = createAsyncThunk(
+  'quiz/fetchCategoriesWithSubjects',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getCategoriesWithSubjects()
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 export const fetchCategories = createAsyncThunk(
   'quiz/fetchCategories',
   async (_, { rejectWithValue }) => {
@@ -57,6 +68,7 @@ const quizSlice = createSlice({
     // Setup form state
     categories: [],
     subjects: [],
+    categoriesWithSubjects: {}, // Cache for all categories with their subjects
     selectedCategory: '',
     selectedSubject: '',
     selectedDifficulty: 1,
@@ -76,7 +88,12 @@ const quizSlice = createSlice({
     setCategory: (state, action) => {
       state.selectedCategory = action.payload
       state.selectedSubject = '' // Reset subject when category changes
-      state.subjects = []
+      // Load subjects from cache if available
+      if (state.categoriesWithSubjects[action.payload]) {
+        state.subjects = state.categoriesWithSubjects[action.payload]
+      } else {
+        state.subjects = []
+      }
     },
     setSubject: (state, action) => {
       state.selectedSubject = action.payload
@@ -118,7 +135,27 @@ const quizSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch categories
+    // Fetch categories with subjects (combined, more efficient)
+    builder
+      .addCase(fetchCategoriesWithSubjects.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchCategoriesWithSubjects.fulfilled, (state, action) => {
+        state.loading = false
+        state.categoriesWithSubjects = action.payload
+        state.categories = Object.keys(action.payload)
+        // If a category is already selected, update subjects from cache
+        if (state.selectedCategory && action.payload[state.selectedCategory]) {
+          state.subjects = action.payload[state.selectedCategory]
+        }
+      })
+      .addCase(fetchCategoriesWithSubjects.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+    
+    // Fetch categories (fallback, less efficient)
     builder
       .addCase(fetchCategories.pending, (state) => {
         state.loading = true
@@ -133,7 +170,7 @@ const quizSlice = createSlice({
         state.error = action.payload
       })
     
-    // Fetch subjects
+    // Fetch subjects (fallback for individual category)
     builder
       .addCase(fetchSubjects.pending, (state) => {
         state.loading = true
@@ -147,7 +184,6 @@ const quizSlice = createSlice({
         state.loading = false
         state.error = action.payload
       })
-    
     // Generate question
     builder
       .addCase(generateQuestion.pending, (state) => {
@@ -197,6 +233,7 @@ export const {
 // Selectors - Easy access to quiz state
 export const selectCategories = (state) => state.quiz.categories
 export const selectSubjects = (state) => state.quiz.subjects
+export const selectCategoriesWithSubjects = (state) => state.quiz.categoriesWithSubjects
 export const selectSelectedCategory = (state) => state.quiz.selectedCategory
 export const selectSelectedSubject = (state) => state.quiz.selectedSubject
 export const selectSelectedDifficulty = (state) => state.quiz.selectedDifficulty

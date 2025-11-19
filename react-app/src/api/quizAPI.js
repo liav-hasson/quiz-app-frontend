@@ -46,6 +46,34 @@ export async function getSubjects(category) {
 }
 
 /**
+ * Get all categories with their subjects in a single call
+ * @returns {Promise<Object>} Object with categories as keys and subject arrays as values
+ */
+export async function getCategoriesWithSubjects() {
+  const response = await fetchAPI('/api/categories-with-subjects')
+  return response.data || {}
+}
+
+/**
+ * Get all available categories
+ * @returns {Promise<string[]>} Array of category names
+ */
+export async function getCategories() {
+  const data = await fetchAPI('/api/categories')
+  return data.categories || []
+}
+
+/**
+ * Get subjects for a specific category
+ * @param {string} category - The category to get subjects for
+ * @returns {Promise<string[]>} Array of subject names
+ */
+export async function getSubjects(category) {
+  const data = await fetchAPI(`/api/subjects?category=${encodeURIComponent(category)}`)
+  return data.subjects || []
+}
+
+/**
  * Generate a new question
  * @param {string} category - The category for the question
  * @param {string} subject - The subject for the question
