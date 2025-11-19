@@ -69,7 +69,7 @@ export async function getSubjects(category) {
  * @returns {Promise<Object>} Object with categories as keys and subject arrays as values
  */
 export async function getCategoriesWithSubjects() {
-  const response = await fetchAPI('/api/categories-with-subjects')
+  const response = await fetchAPI('/api/all-subjects')
   return response.data || {}
 }
 
