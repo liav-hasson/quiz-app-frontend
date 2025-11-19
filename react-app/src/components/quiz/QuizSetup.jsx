@@ -15,17 +15,18 @@ import {
   selectSelectedSubject,
   selectSelectedDifficulty,
   selectLoading,
+  selectCategoriesWithSubjects,
   setCategory,
   setSubject,
   setDifficulty,
   clearForm,
-  fetchSubjects,
   generateQuestion,
 } from '@/store/slices/quizSlice'
 
 /**
  * QuizSetup Component
  * Handles the initial quiz configuration (category, subject, difficulty)
+ * Now uses cached categories with subjects for better performance
  */
 export default function QuizSetup() {
   const dispatch = useDispatch()
@@ -36,13 +37,10 @@ export default function QuizSetup() {
   const selectedSubject = useSelector(selectSelectedSubject)
   const selectedDifficulty = useSelector(selectSelectedDifficulty)
   const loading = useSelector(selectLoading)
+  const categoriesWithSubjects = useSelector(selectCategoriesWithSubjects)
 
-  // Fetch subjects when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      dispatch(fetchSubjects(selectedCategory))
-    }
-  }, [selectedCategory, dispatch])
+  // Subjects are now loaded from cache when category is selected
+  // No need for separate API call
 
   const handleCategoryChange = (value) => {
     dispatch(setCategory(value))
