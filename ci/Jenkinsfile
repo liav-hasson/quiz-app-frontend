@@ -34,7 +34,6 @@ pipeline {
     }
 
     environment {
-        PIPELINE_STATUS       = "SUCCESS"
         BUILD_TAG             = "${BUILD_TIMESTAMP}"
         
         // Generates DOCKERHUB_CREDENTIALS_USR, DOCKERHUB_CREDENTIALS_PSW
@@ -68,10 +67,6 @@ pipeline {
 
         // CI resources directory
         CI_DIR                = "ci"
-        
-        // Environment detection (prod vs dev)
-        // Will be set dynamically in Prepare stage based on branch
-        DEPLOY_ENV            = ""
     }
 
     stages {
@@ -80,26 +75,38 @@ pipeline {
                 script {
                     echo '--------- Preparing image version ---------'
                     checkout scm
+                    
+                    // Fetch tags explicitly (Jenkins SCM checkout doesn't fetch tags by default)
+                    sh '''
+                        echo "Fetching git tags..."
+                        git fetch --tags
+                        echo "Available tags:"
+                        git tag -l | sort -V | tail -5
+                    '''
 
-                    env.DEPLOY_ENV = 'prod'
-
-                    def semver = sh(returnStdout: true, script: './scripts/compute_next_version.sh . auto').trim()
-                    if (semver) {
-                        echo "Computed semantic version: ${semver}"
-                        env.IMAGE_TAG = semver
+                    // Determine environment based on branch
+                    if (env.BRANCH_NAME == 'main') {
+                        env.DEPLOY_ENV = 'prod'
+                        echo "Building for PRODUCTION (main branch)"
                     } else {
-                        echo "No semantic version computed; falling back to date-based tag: ${env.BUILD_TAG}"
-                        env.IMAGE_TAG = env.BUILD_TAG
+                        env.DEPLOY_ENV = 'dev'
+                        echo "Building for DEVELOPMENT (${env.BRANCH_NAME} branch)"
+                    }
+
+                    // Compute semantic version (script will fail if no tag exists)
+                    def semver = sh(returnStdout: true, script: './scripts/compute_next_version.sh . auto').trim()
+                    echo "Computed semantic version: ${semver}"
+                    
+                    // Add -dev suffix for non-main branches
+                    if (env.DEPLOY_ENV == 'dev') {
+                        env.IMAGE_TAG = "${semver}-dev"
+                        echo "Added -dev suffix for dev environment"
+                    } else {
+                        env.IMAGE_TAG = semver
                     }
                     
                     echo "Final image tag: ${env.IMAGE_TAG}"
-                }
-            }
-            post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
+                    echo "Deploy environment: ${env.DEPLOY_ENV}"
                 }
             }
         }
@@ -127,13 +134,6 @@ pipeline {
                 """
                 echo 'Dependency vulnerability scan passed!'
             }
-            post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
-                }
-            }
         }
 
         stage('Dockerfile Security Scan') {
@@ -160,11 +160,6 @@ pipeline {
                 echo 'Dockerfile security scan passed!'
             }
             post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
-                }
                 always {
                     // Archive the Hadolint report for review
                     archiveArtifacts artifacts: 'hadolint-report.json', allowEmptyArchive: true
@@ -204,15 +199,7 @@ pipeline {
                     """
                 }
             }
-            post {
-                failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
-                }
-            }
         }
-
 
         stage('Update GitOps Repository') {
             steps {
@@ -244,9 +231,6 @@ pipeline {
                     echo "ArgoCD will detect changes and deploy automatically"
                 }
                 failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
                     echo "❌ Failed to update GitOps repository"
                 }
             }
@@ -291,9 +275,6 @@ pipeline {
                     echo "✅ Application tagged with version ${env.IMAGE_TAG}"
                 }
                 failure {
-                    script {
-                        env.PIPELINE_STATUS = "FAILURE"
-                    }
                     echo "❌ Failed to tag application release"
                 }
             }
@@ -303,19 +284,19 @@ pipeline {
     post {
         always {
             script {
-                def statusIcon = env.PIPELINE_STATUS == "SUCCESS" ? "✅" : "❌"
-                def color = env.PIPELINE_STATUS == "SUCCESS" ? "good" : "danger"
-                def slackMessage = env.PIPELINE_STATUS == "SUCCESS" ? 
+                def buildResult = currentBuild.result ?: 'SUCCESS'
+                def statusIcon = buildResult == "SUCCESS" ? "✅" : "❌"
+                def color = buildResult == "SUCCESS" ? "good" : "danger"
+                def slackMessage = buildResult == "SUCCESS" ? 
                     "✅ GitOps update completed! Sync ArgoCD to deploy!" : 
                     "❌ Pipeline failed - check logs for details"
                 def finalMessage = [
-                    "${statusIcon} GitOps Pipeline *${env.JOB_NAME}* #${env.BUILD_NUMBER} ${env.PIPELINE_STATUS}",
+                    "${statusIcon} GitOps Pipeline *${env.JOB_NAME}* #${env.BUILD_NUMBER} ${buildResult}",
                     "",
                     "*Environment:* ${env.DEPLOY_ENV?.toUpperCase() ?: 'UNKNOWN'}",
                     "*Branch:* ${env.BRANCH_NAME}",
                     "*Docker Image:* ${env.DOCKERHUB_CREDENTIALS_USR}/${env.DOCKER_IMAGE_NAME}:${env.IMAGE_TAG}",
                     "*GitOps Repo:* GitHub repository updated",
-                    "*Deployment:* ArgoCD will sync automatically", 
                     "${slackMessage}"
                 ].join('\n')
 
@@ -328,8 +309,9 @@ pipeline {
 
             // Report status back to GitHub using Commit Status API
             script {
-                def status = env.PIPELINE_STATUS == "SUCCESS" ? "success" : "failure"
-                def description = env.PIPELINE_STATUS == "SUCCESS" ? 
+                def buildResult = currentBuild.result ?: 'SUCCESS'
+                def status = buildResult == "SUCCESS" ? "success" : "failure"
+                def description = buildResult == "SUCCESS" ? 
                     "Jenkins build passed" : 
                     "Jenkins build failed"
                     
