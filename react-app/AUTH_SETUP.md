@@ -29,10 +29,10 @@ This React app now includes Google Sign-In authentication and uses React Router 
 ## Features
 
 ### Authentication
-- **Google Sign-In**: Users must sign in with Google to access the quiz
-- **Session Persistence**: User data is stored in `localStorage` under the key `quiz_user`
+- **Google Sign-In**: Users must sign in with Google to access the quiz (handled in `authSlice.js`)
+- **Session Persistence**: User data is stored in `localStorage` under the key `quiz_user` and mirrored into Redux state
 - **Protected Routes**: Quiz page is only accessible when authenticated
-- **Logout**: Users can sign out via the header button
+- **Logout**: Users can sign out via the header button (dispatches `logout()` from `authSlice`)
 
 ### Routing
 - `/login` - Google Sign-In page
@@ -48,8 +48,10 @@ This React app now includes Google Sign-In authentication and uses React Router 
 
 ```
 src/
-├── context/
-│   └── AuthContext.jsx        # Authentication state management
+├── store/
+│   ├── index.js               # Redux store configuration
+│   └── slices/
+│       └── authSlice.js       # Authentication state management
 ├── pages/
 │   ├── Login.jsx              # Google Sign-In page
 │   └── Quiz.jsx               # Main quiz interface
@@ -58,7 +60,7 @@ src/
 │   ├── AnimatedBackground.jsx # Background animation
 │   └── ui/                    # shadcn/ui components
 ├── App.jsx                    # Router configuration
-└── main.jsx                   # App entry with providers
+└── main.jsx                   # App entry with providers (wraps app with Redux Provider)
 ```
 
 ## User Flow
