@@ -35,7 +35,7 @@ async function fetchAPI(url, options = {}) {
  * @returns {Promise<Object>} Login response from backend
  */
 export async function loginUser(userData) {
-  return await fetchAPI('/api/login', {
+  return await fetchAPI('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({
       id: userData.id,
