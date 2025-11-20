@@ -26,23 +26,12 @@ const themeSlice = createSlice({
     toggleTheme: (state) => {
       state.isDark = !state.isDark
       localStorage.setItem('quiz_theme_dark', String(state.isDark))
-      
-      // Apply theme to HTML element
-      if (state.isDark) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
+      // DOM manipulation removed - handled by useEffect in App.jsx
     },
     setTheme: (state, action) => {
       state.isDark = action.payload
       localStorage.setItem('quiz_theme_dark', String(state.isDark))
-      
-      if (state.isDark) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
+      // DOM manipulation removed - handled by useEffect in App.jsx
     },
   },
 })

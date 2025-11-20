@@ -18,6 +18,20 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate])
 
+  // This function is used for the "mini-version"
+  // allows for auto-login for localhost development
+  useEffect(() => {
+    if (window.location.hostname === 'localhost' && !isAuthenticated) {
+      console.log('Auto-login enabled for localhost development')
+      const mockUser = {
+        id: 'local-dev-user',
+        email: 'dev@localhost',
+        name: 'Local Developer',
+      }
+      dispatch(loginSuccess(mockUser))
+    }
+  }, [dispatch, isAuthenticated])
+
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     

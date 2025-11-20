@@ -8,19 +8,42 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 /**
  * Generic fetch wrapper with error handling
+ * Automatically injects user email header for protected endpoints
  */
 async function fetchAPI(url, options = {}) {
+  // Auto-inject email header from localStorage for protected endpoints
+  const userStr = localStorage.getItem('quiz_user')
+  const user = userStr ? JSON.parse(userStr) : null
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(user?.email && { 'X-User-Email': user.email }),
+    ...options.headers,
+  }
+  
   const response = await fetch(`${API_BASE_URL}${url}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers,
   })
 
   if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`API Error: ${response.status} - ${errorText}`)
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    
+    // Handle user not found error - clear session and redirect to login
+    if (response.status === 404 && errorData.error?.includes('User not found')) {
+      localStorage.removeItem('quiz_user')
+      window.location.href = '/login'
+      throw new Error('Session expired. Please login again.')
+    }
+    
+    // Handle missing email error
+    if (response.status === 400 && errorData.error?.includes('Email is required')) {
+      localStorage.removeItem('quiz_user')
+      window.location.href = '/login'
+      throw new Error('Authentication required. Please login.')
+    }
+    
+    throw new Error(errorData.error || `API Error: ${response.status}`)
   }
 
   return response.json()
@@ -81,16 +104,10 @@ export async function getCategoriesWithSubjects() {
  * @returns {Promise<Object>} The generated question object
  */
 export async function generateQuestion(category, subject, difficulty) {
-  const data = await fetchAPI('/api/question/generate', {
+  return await fetchAPI('/api/question/generate', {
     method: 'POST',
     body: JSON.stringify({ category, subject, difficulty }),
   })
-
-  if (data.error) {
-    throw new Error(data.error)
-  }
-
-  return data
 }
 
 /**
@@ -105,10 +122,6 @@ export async function evaluateAnswer(question, answer, difficulty) {
     method: 'POST',
     body: JSON.stringify({ question, answer, difficulty }),
   })
-
-  if (data.error) {
-    throw new Error(data.error)
-  }
-
+  
   return data.feedback
 }
