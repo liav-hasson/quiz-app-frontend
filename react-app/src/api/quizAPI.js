@@ -50,20 +50,16 @@ async function fetchAPI(url, options = {}) {
 }
 
 /**
- * Send user login information to backend
+ * Send Google credential token to backend for secure verification and JWT issuance
  * @param {Object} userData - User data from Google OAuth
- * @param {string} userData.id - User's unique ID
- * @param {string} userData.email - User's email
- * @param {string} userData.name - User's name
- * @returns {Promise<Object>} Login response from backend
+ * @param {string} userData.token - Google ID token (credential)
+ * @returns {Promise<Object>} Login response with JWT token and user info
  */
 export async function loginUser(userData) {
-  return await fetchAPI('/api/auth/login', {
+  return await fetchAPI('/api/auth/google-login', {
     method: 'POST',
     body: JSON.stringify({
-      id: userData.id,
-      email: userData.email,
-      name: userData.name,
+      credential: userData.token,
     }),
   })
 }
