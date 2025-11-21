@@ -10,6 +10,7 @@ import {
   selectCurrentQuestion,
   selectUserAnswer,
   selectFeedback,
+  selectScore,
   resetQuiz,
 } from '@/store/slices/quizSlice'
 
@@ -23,6 +24,7 @@ export default function QuizResults() {
   const currentQuestion = useSelector(selectCurrentQuestion)
   const userAnswer = useSelector(selectUserAnswer)
   const feedback = useSelector(selectFeedback)
+  const score = useSelector(selectScore)
 
   const handleNewQuestion = () => {
     dispatch(resetQuiz())
@@ -36,15 +38,15 @@ export default function QuizResults() {
     <AnimatedBorder delay={1}>
       <Card className="quiz-results-card">
         <CardHeader>
-          <CardTitle className="quiz-results-title flex items-center justify-center gap-3">
-            <motion.span
-              initial={{ rotate: -180, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
+          <CardTitle className="quiz-results-title">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
+              className="text-center"
             >
-              📊
-            </motion.span>
-            Results
+              Your Score: <span className="font-bold text-5xl">{score || 'N/A'}</span>
+            </motion.div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">

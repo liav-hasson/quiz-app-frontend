@@ -111,7 +111,7 @@ export async function generateQuestion(category, subject, difficulty) {
  * @param {string} question - The question text
  * @param {string} answer - The user's answer
  * @param {number} difficulty - The difficulty level
- * @returns {Promise<string>} The feedback text
+ * @returns {Promise<{score: string, feedback: string}>} Score and feedback object
  */
 export async function evaluateAnswer(question, answer, difficulty) {
   const data = await fetchAPI('/api/answer/evaluate', {
@@ -119,5 +119,6 @@ export async function evaluateAnswer(question, answer, difficulty) {
     body: JSON.stringify({ question, answer, difficulty }),
   })
   
-  return data.feedback
+  // Return the whole response object with score and feedback
+  return data
 }

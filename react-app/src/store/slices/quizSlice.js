@@ -77,6 +77,7 @@ const quizSlice = createSlice({
     currentQuestion: null,
     userAnswer: '',
     feedback: null,
+    score: null,
     
     // UI state
     currentPage: 'setup', // 'setup' | 'question' | 'results'
@@ -111,6 +112,7 @@ const quizSlice = createSlice({
       state.currentQuestion = null
       state.userAnswer = ''
       state.feedback = null
+      state.score = null
       state.error = null
     },
     goToQuestion: (state) => {
@@ -130,6 +132,7 @@ const quizSlice = createSlice({
       state.currentQuestion = null
       state.userAnswer = ''
       state.feedback = null
+      state.score = null
       state.currentPage = 'setup'
       state.error = null
     },
@@ -208,7 +211,8 @@ const quizSlice = createSlice({
       })
       .addCase(submitAnswer.fulfilled, (state, action) => {
         state.loading = false
-        state.feedback = action.payload
+        state.feedback = action.payload.feedback
+        state.score = action.payload.score
         state.currentPage = 'results'
       })
       .addCase(submitAnswer.rejected, (state, action) => {
@@ -240,6 +244,7 @@ export const selectSelectedDifficulty = (state) => state.quiz.selectedDifficulty
 export const selectCurrentQuestion = (state) => state.quiz.currentQuestion
 export const selectUserAnswer = (state) => state.quiz.userAnswer
 export const selectFeedback = (state) => state.quiz.feedback
+export const selectScore = (state) => state.quiz.score
 export const selectCurrentPage = (state) => state.quiz.currentPage
 export const selectLoading = (state) => state.quiz.loading
 export const selectError = (state) => state.quiz.error
