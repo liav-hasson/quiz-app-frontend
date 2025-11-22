@@ -35,7 +35,6 @@
 
 .header-user-badge,
 .header-guest-badge {
-  display: none;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
@@ -45,8 +44,22 @@
   backdrop-filter: var(--backdrop-medium);
 }
 
+.header-user-badge {
+  display: inline-flex;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.header-user-badge:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--accent-primary-medium);
+}
+
+.header-guest-badge {
+  display: none;
+}
+
 @media (min-width: 768px) {
-  .header-user-badge,
   .header-guest-badge {
     display: flex;
   }
@@ -57,6 +70,12 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+  .header-user-name {
+    display: none;
+  }
 }
 
 .header-theme-btn,

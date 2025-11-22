@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { toast } from 'react-hot-toast'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import AnimatedBorder from '@/components/AnimatedBorder'
 import { loginSuccess, selectIsAuthenticated } from '@/store/slices/authSlice'
@@ -63,21 +64,23 @@ export default function Login() {
       const credential = response.credential
       const payload = JSON.parse(atob(credential.split('.')[1]))
       
+      // Send Google credential to backend for verification
+      const backendResponse = await loginUser({ token: credential })
+      
+      // Backend returns our app's JWT token + user info
       const userData = {
         id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-        token: credential,
+        email: backendResponse.email,
+        name: backendResponse.name,
+        picture: backendResponse.picture,
+        token: backendResponse.token,  // ✅ Our app's JWT token from backend
       }
-      
-      // Send user info to backend
-      await loginUser(userData)
       
       dispatch(loginSuccess(userData))
       navigate('/quiz')
     } catch (error) {
       console.error('Error processing Google Sign-In:', error)
+      toast.error('Failed to login. Please try again.')
     }
   }
 
