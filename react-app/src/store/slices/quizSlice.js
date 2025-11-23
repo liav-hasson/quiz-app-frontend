@@ -100,6 +100,18 @@ export const fetchUserHistory = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
+  },
+  {
+    // Prevent duplicate fetches when a request is already in-flight or
+    // when data is already loaded. Pass `{ force: true }` in params to
+    // bypass this guard and force a re-fetch.
+    condition: (params = {}, { getState }) => {
+      const state = getState()
+      const quiz = state.quiz || {}
+      if (quiz.historyLoading) return false
+      if (quiz.historyLoaded && !params.force) return false
+      return true
+    },
   }
 )
 
@@ -111,6 +123,15 @@ export const fetchUserBestCategory = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
+  },
+  {
+    condition: (_arg, { getState }) => {
+      const state = getState()
+      const quiz = state.quiz || {}
+      if (quiz.bestCategoryLoading) return false
+      if (quiz.bestCategoryLoaded) return false
+      return true
+    },
   }
 )
 
@@ -122,6 +143,15 @@ export const fetchUserPerformance = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
+  },
+  {
+    condition: (params = {}, { getState }) => {
+      const state = getState()
+      const quiz = state.quiz || {}
+      if (quiz.performanceLoading) return false
+      if (quiz.performanceLoaded && !params.force) return false
+      return true
+    },
   }
 )
 
@@ -151,6 +181,7 @@ const quizSlice = createSlice({
     bestCategory: null,
     bestCategoryLoading: false,
     bestCategoryError: null,
+    bestCategoryLoaded: false,
 
     // Performance data for charts
     performance: [],
@@ -318,16 +349,29 @@ const quizSlice = createSlice({
         .addCase(fetchUserBestCategory.pending, (state) => {
           state.bestCategoryLoading = true
           state.bestCategoryError = null
+          state.bestCategoryLoaded = false
         })
         .addCase(fetchUserBestCategory.fulfilled, (state, action) => {
           state.bestCategoryLoading = false
-          // Only accept string value; otherwise keep null
-          state.bestCategory = typeof action.payload === 'string' ? action.payload : null
+          // Accept string value or try to coerce common shapes. If the backend
+          // returns a nested object, attempt to extract a string value. If
+          // extraction fails keep null but mark as loaded so we don't keep
+          // refetching indefinitely.
+          if (typeof action.payload === 'string') {
+            state.bestCategory = action.payload
+          } else if (action.payload && typeof action.payload === 'object') {
+            const v = action.payload.bestCategory || action.payload.best_category || action.payload.category || null
+            state.bestCategory = typeof v === 'string' ? v : null
+          } else {
+            state.bestCategory = null
+          }
+          state.bestCategoryLoaded = true
         })
         .addCase(fetchUserBestCategory.rejected, (state, action) => {
           state.bestCategoryLoading = false
           state.bestCategoryError = action.payload
           state.bestCategory = null
+          state.bestCategoryLoaded = true
         })
 
       // Performance data
@@ -397,6 +441,7 @@ export const selectHistoryLoaded = (state) => state.quiz.historyLoaded
 export const selectBestCategory = (state) => state.quiz.bestCategory
 export const selectBestCategoryLoading = (state) => state.quiz.bestCategoryLoading
 export const selectBestCategoryError = (state) => state.quiz.bestCategoryError
+export const selectBestCategoryLoaded = (state) => state.quiz.bestCategoryLoaded
 
 export const selectPerformance = (state) => state.quiz.performance
 export const selectPerformanceLoading = (state) => state.quiz.performanceLoading
