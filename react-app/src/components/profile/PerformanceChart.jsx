@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+// Dynamically import `recharts` to avoid bundling it into the main chunk.
 import { fetchUserPerformance, selectPerformance, selectPerformanceLoading, selectPerformanceLoaded } from '@/store/slices/quizSlice'
 
 const parseScoreValue = (score) => {
@@ -30,6 +30,7 @@ export default function PerformanceChart() {
   const [performance, setPerformance] = useState(null)
   const [error, setError] = useState(null)
   const [hiddenCategories, setHiddenCategories] = useState({})
+  const [Recharts, setRecharts] = useState(null)
   const dispatch = useDispatch()
   const perfFromStore = useSelector(selectPerformance)
   const perfLoading = useSelector(selectPerformanceLoading)
@@ -50,8 +51,23 @@ export default function PerformanceChart() {
     }
   }, [perfFromStore])
 
+  // Dynamically load recharts only when this component mounts (Profile page)
+  useEffect(() => {
+    let mounted = true
+    import('recharts')
+      .then((mod) => {
+        if (mounted) setRecharts(mod)
+      })
+      .catch(() => {
+        if (mounted) setRecharts(null)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   const chartData = useMemo(() => {
-    if (!performance || performance.length === 0) return []
+    if (!performance || performance.length === 0) return { data: [], categories: [] }
     // Collect all categories present
     const categorySet = new Set()
     performance.forEach((p) => {
@@ -156,32 +172,37 @@ export default function PerformanceChart() {
           )}
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--accent-primary-light)" opacity={0.3} />
-            <XAxis dataKey="name" stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} angle={-45} textAnchor="end" height={60} />
-            <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
-            <Tooltip content={<CustomTooltip />} />
-            {/* overall line - always visible */}
-            <Line type="monotone" dataKey="overall" stroke="var(--accent-secondary)" strokeWidth={3} dot={{ r: 4 }} name="Overall" />
+        // If recharts hasn't loaded yet, show a small placeholder while it's fetched
+        !Recharts ? (
+          <div className="flex items-center justify-center h-64 text-muted-foreground">Loading chart library…</div>
+        ) : (
+          <Recharts.ResponsiveContainer width="100%" height={300}>
+            <Recharts.LineChart data={chartData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <Recharts.CartesianGrid strokeDasharray="3 3" stroke="var(--accent-primary-light)" opacity={0.3} />
+              <Recharts.XAxis dataKey="name" stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} angle={-45} textAnchor="end" height={60} />
+              <Recharts.YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
+              <Recharts.Tooltip content={<CustomTooltip />} />
+              {/* overall line - always visible */}
+              <Recharts.Line type="monotone" dataKey="overall" stroke="var(--accent-secondary)" strokeWidth={3} dot={{ r: 4 }} name="Overall" />
 
-            {/* per-category lines */}
-            {chartData.categories.map((c, i) => (
-              !hiddenCategories[c] ? (
-                <Line
-                  key={c}
-                  type="monotone"
-                  dataKey={c}
-                  stroke={palette[(i + 1) % palette.length]}
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  connectNulls={true}
-                  name={c}
-                />
-              ) : null
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+              {/* per-category lines */}
+              {chartData.categories.map((c, i) => (
+                !hiddenCategories[c] ? (
+                  <Recharts.Line
+                    key={c}
+                    type="monotone"
+                    dataKey={c}
+                    stroke={palette[(i + 1) % palette.length]}
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    connectNulls={true}
+                    name={c}
+                  />
+                ) : null
+              ))}
+            </Recharts.LineChart>
+          </Recharts.ResponsiveContainer>
+        )
       )}
     </div>
   )

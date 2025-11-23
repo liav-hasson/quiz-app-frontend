@@ -54,9 +54,8 @@ export default function Profile() {
   const historyLoaded = useSelector(selectHistoryLoaded)
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login')
-    }
+    // ProtectedRoute already guards pages; avoid redirect here to prevent
+    // accidental blank render during transient auth state (e.g. hydration).
   }, [user, navigate])
 
   useEffect(() => {
