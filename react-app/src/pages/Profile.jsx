@@ -18,7 +18,7 @@ import {
   resetQuiz,
   clearHistory,
 } from '@/store/slices/quizSlice'
-import { fetchUserBestCategory, selectBestCategory } from '@/store/slices/quizSlice'
+import { fetchUserBestCategory, selectBestCategory, selectBestCategoryLoading, selectBestCategoryLoaded } from '@/store/slices/quizSlice'
 import { selectUser, logout } from '@/store/slices/authSlice'
 
 const parseScoreValue = (score) => {
@@ -52,6 +52,8 @@ export default function Profile() {
   const historyLoading = useSelector(selectHistoryLoading)
   const historyError = useSelector(selectHistoryError)
   const historyLoaded = useSelector(selectHistoryLoaded)
+  const bestCategoryLoading = useSelector(selectBestCategoryLoading)
+  const bestCategoryLoaded = useSelector(selectBestCategoryLoaded)
 
   useEffect(() => {
     // ProtectedRoute already guards pages; avoid redirect here to prevent
@@ -59,10 +61,10 @@ export default function Profile() {
   }, [user, navigate])
 
   useEffect(() => {
-    if (user && !historyLoaded) {
+    if (user && !historyLoaded && !historyLoading) {
       dispatch(fetchUserHistory())
     }
-  }, [dispatch, user, historyLoaded])
+  }, [dispatch, user, historyLoaded, historyLoading])
 
   const stats = useMemo(() => {
     const numericScores = history
@@ -90,8 +92,8 @@ export default function Profile() {
   // Fetch bestCategory from backend (via Redux thunk)
   const bestCategory = useSelector(selectBestCategory)
   useEffect(() => {
-    if (user) dispatch(fetchUserBestCategory())
-  }, [dispatch, user])
+    if (user && !bestCategoryLoaded && !bestCategoryLoading) dispatch(fetchUserBestCategory())
+  }, [dispatch, user, bestCategoryLoaded, bestCategoryLoading])
 
   const displayBestCategory = typeof bestCategory === 'string' ? bestCategory : null
 
