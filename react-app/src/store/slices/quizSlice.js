@@ -265,7 +265,13 @@ const quizSlice = createSlice({
       })
       .addCase(fetchUserHistory.fulfilled, (state, action) => {
         state.historyLoading = false
-        state.history = action.payload || []
+        // Merge local unsaved entries with fetched history
+        const fetched = action.payload || []
+        // Find local entries not present in fetched (by id)
+        const fetchedIds = new Set(fetched.map(entry => entry.id))
+        const localUnsaved = state.history.filter(entry => !fetchedIds.has(entry.id))
+        // Prepend local unsaved entries to fetched history (or append, as desired)
+        state.history = [...localUnsaved, ...fetched].slice(0, 50)
         state.historyLoaded = true
       })
       .addCase(fetchUserHistory.rejected, (state, action) => {

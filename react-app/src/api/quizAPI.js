@@ -9,7 +9,7 @@ const DEFAULT_TIMEOUT = 30000 // 30 seconds
 
 /**
  * Generic fetch wrapper with error handling and timeout
- * Automatically injects user email header for protected endpoints
+ * Automatically injects Bearer token authentication header for protected endpoints
  * @param {string} url - API endpoint URL
  * @param {Object} options - Fetch options
  * @param {number} [options.timeout] - Request timeout in milliseconds
@@ -70,9 +70,7 @@ async function fetchAPI(url, options = {}) {
  * Send Google credential token to backend for secure verification and JWT issuance
  * @param {Object} userData - User data from Google OAuth
  * @param {string} userData.token - Google ID token (credential)
- * @param {string} userData.email - User email from Google
- * @param {string} userData.name - User name from Google
- * @param {string} userData.picture - User profile picture URL
+
  * @returns {Promise<{email: string, name: string, picture: string, token: string}>} Login response with JWT token and user info
  */
 export async function loginUser(userData) {

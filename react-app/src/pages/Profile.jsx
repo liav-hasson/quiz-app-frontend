@@ -220,7 +220,8 @@ export default function Profile() {
             )}
             <div className="profile-history-list">
               {history.map((entry, index) => (
-                <HistoryCard key={entry.id || `${entry.summary?.created_at}-${index}` } entry={entry} defaultOpen={index === 0} />
+                // Use entry.id if available, otherwise fall back to index (not ideal if list order can change)
+                <HistoryCard key={entry.id ?? index} entry={entry} defaultOpen={index === 0} />
               ))}
             </div>
           </section>

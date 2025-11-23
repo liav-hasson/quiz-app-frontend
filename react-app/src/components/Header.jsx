@@ -85,6 +85,7 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     className="header-user-badge"
                     whileHover={{ scale: 1.02, borderColor: 'var(--accent-primary-strong)' }}
                     onClick={handleProfileClick}
+                    aria-label={`View profile for ${user.name || user.email}`}
                   >
                     <img
                       src={user?.picture ?? '/default-avatar.png'}

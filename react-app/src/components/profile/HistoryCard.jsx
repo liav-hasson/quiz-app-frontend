@@ -53,6 +53,8 @@ export default function HistoryCard({ entry, defaultOpen = false }) {
         type="button"
         className="history-card-header"
         onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+        aria-label={`${isOpen ? 'Collapse' : 'Expand'} history details for ${summary.category || 'Unknown Topic'} - ${summary.subject || 'Unknown Subject'}`}
       >
         <div>
           <p className="history-card-title">
