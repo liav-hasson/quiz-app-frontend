@@ -21,27 +21,55 @@
   color: var(--color-white);
   box-shadow: var(--card-shadow-md);
 }
+.btn-primary:hover {
+  background: var(--gradient-cool-warm);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-xl);
+}
 .btn-outline {
   background: var(--bg-card-light);
   color: var(--text-primary);
   border: 1px solid var(--accent-tertiary-light);
 }
+.btn-outline:hover {
+  background: var(--bg-card);
+  border-color: var(--accent-tertiary);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-md);
+}
 .btn-secondary {
   background: var(--accent-secondary);
   color: var(--accent-secondary-foreground, var(--color-ink));
+}
+.btn-secondary:hover {
+  background: var(--accent-secondary-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-md);
 }
 .btn-destructive {
   background: var(--accent-quaternary);
   color: var(--color-white);
 }
+.btn-destructive:hover {
+  background: var(--accent-quaternary-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-md);
+}
 .btn-ghost {
   background: transparent;
   color: var(--text-primary);
+}
+.btn-ghost:hover {
+  background: var(--bg-card-light);
 }
 .btn-link {
   background: none;
   color: var(--accent-primary);
   text-decoration: underline;
+}
+.btn-link:hover {
+  color: var(--accent-secondary);
+  text-decoration: none;
 }
 .btn-size-default {
   height: 2.5rem;

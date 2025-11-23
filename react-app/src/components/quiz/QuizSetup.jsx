@@ -193,11 +193,12 @@ export default function QuizSetup() {
               </Button>
               <Button 
                 type="submit"
+                variant="outline"
                 className="quiz-setup-generate-btn"
                 size="lg"
                 disabled={!selectedCategory || !selectedSubject || loading}
               >
-                {loading ? 'Loading...' : 'Generate Question'}
+                <span>{loading ? 'Loading...' : 'Generate Question'}</span>
               </Button>
             </motion.div>
           </form>

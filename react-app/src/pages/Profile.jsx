@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import Header from '@/components/Header'
 import AnimatedBorder from '@/components/AnimatedBorder'
 import HistoryCard from '@/components/profile/HistoryCard'
+import PerformanceChart from '@/components/profile/PerformanceChart'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -138,9 +139,6 @@ export default function Profile() {
                     <Button variant="outline" onClick={handleBackToQuiz}>
                       Back to Quiz
                     </Button>
-                    <Button variant="ghost" onClick={handleLogout}>
-                      Logout
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -169,13 +167,13 @@ export default function Profile() {
               </Card>
               <Card className="profile-card">
                 <CardHeader>
-                  <CardTitle>Best Score</CardTitle>
+                  <CardTitle>Best Subject</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="profile-stat-value">
-                    {typeof stats.bestScore === 'number' ? `${stats.bestScore}/10` : '—'}
+                    {typeof stats.bestSubject === 'string' ? `${stats.bestSubject}` : '—'}
                   </p>
-                  <p className="profile-stat-label">Peak performance</p>
+                  <p className="profile-stat-label">Peak Subject</p>
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -190,6 +188,20 @@ export default function Profile() {
             </div>
           </motion.section>
 
+          <section className="profile-chart-section">
+            <Card className="profile-card">
+              <CardHeader>
+                <CardTitle>Performance Over Time</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="profile-chart-subtitle text-muted-foreground mb-4">
+                  Visualize your score trends and improvement areas.
+                </p>
+                <PerformanceChart history={history} />
+              </CardContent>
+            </Card>
+          </section>
+
           <section className="profile-history">
             <div className="profile-history-header">
               <div>
@@ -197,9 +209,6 @@ export default function Profile() {
                 <p>Expandable cards show your prompts, answers, and AI feedback.</p>
               </div>
               <div className="profile-history-actions">
-                <Button variant="outline" onClick={handleBackToQuiz}>
-                  Continue Quiz
-                </Button>
                 <Button variant="secondary" onClick={handleRefreshHistory} disabled={historyLoading}>
                   {historyLoading ? 'Refreshing…' : 'Refresh'}
                 </Button>

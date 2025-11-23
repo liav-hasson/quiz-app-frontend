@@ -7,14 +7,10 @@
   left: 0;
   right: 0;
   z-index: 50;
-  background: linear-gradient(
-    135deg,
-    var(--accent-senary) 0%,
-    var(--accent-tertiary) 50%,
-    var(--accent-septenary) 100%
-  );
+  background: var(--accent-primary);
+  opacity: 0.95;
   border-bottom: var(--card-border);
-  backdrop-filter: var(--backdrop-strong);
+  backdrop-filter: var(--backdrop-strong) brightness(1.2);
   box-shadow: var(--card-shadow-md);
 }
 
@@ -27,7 +23,7 @@
   background: linear-gradient(
     to right,
     transparent,
-    var(--accent-quinary),
+    var(--accent-secondary),
     transparent
   );
   opacity: 0.8;

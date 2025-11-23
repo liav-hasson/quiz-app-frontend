@@ -84,7 +84,7 @@ export default function AnimatedBackground() {
       />
 
       {/* Subtle floating particles */}
-      {[...Array(15)].map((_, i) => {
+      {[...Array(50)].map((_, i) => {
         const accentVariants = ['secondary', 'primary', 'quaternary']
         const accentVariant = accentVariants[i % 3]
         const accentClass = `floating-particle floating-particle--accent-${accentVariant}`

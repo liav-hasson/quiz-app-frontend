@@ -11,9 +11,9 @@ const loadThemeFromStorage = () => {
     if (stored !== null) {
       return stored === 'true'
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+    return true // Default to dark mode
   } catch {
-    return false
+    return true // Default to dark mode on error
   }
 }
 

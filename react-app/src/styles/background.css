@@ -17,7 +17,7 @@
 .mesh-gradient-foundation {
   position: absolute;
   inset: 0;
-  opacity: 0.4;
+  opacity: 1;
 }
 
 .mesh-gradient-foundation::after {
@@ -52,11 +52,12 @@
   border-radius: 9999px;
   background: radial-gradient(
     circle at center,
-    var(--accent-secondary-light) 0%,
-    var(--accent-primary-light) 30%,
+    var(--accent-secondary-strong) 0%,
+    var(--accent-primary-medium) 30%,
     transparent 65%
   );
   filter: blur(60px);
+  opacity: 1;
 }
 
 /* Floating orb - top left (primary accent) */
@@ -70,11 +71,12 @@
   border-radius: 9999px;
   background: radial-gradient(
     circle,
-    var(--accent-primary-medium) 0%,
-    var(--accent-primary-light) 50%,
+    var(--accent-primary-strong) 0%,
+    var(--accent-primary-medium) 50%,
     transparent 75%
   );
   filter: blur(80px);
+  opacity: 1;
 }
 
 /* Floating orb - bottom right (secondary accent) */
@@ -88,11 +90,12 @@
   border-radius: 9999px;
   background: radial-gradient(
     circle,
-    var(--accent-secondary-medium) 0%,
-    var(--accent-secondary-light) 50%,
+    var(--accent-secondary-strong) 0%,
+    var(--accent-secondary-medium) 50%,
     transparent 75%
   );
   filter: blur(90px);
+  opacity: 1;
 }
 
 /* Center rotating accent - uses tertiary accent */
@@ -106,37 +109,39 @@
   border-radius: 9999px;
   background: radial-gradient(
     ellipse 80% 120%,
-    var(--accent-tertiary-light) 0%,
-    var(--accent-quaternary-light) 40%,
+    var(--accent-tertiary-medium) 0%,
+    var(--accent-quaternary-medium) 40%,
     transparent 70%
   );
   filter: blur(70px);
+  opacity: 1;
 }
 
 /* Floating particles */
 .floating-particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
   border-radius: 9999px;
+  opacity: 0.8;
 }
 
 /* Particle accent secondary - turquoise bright */
 .floating-particle--accent-secondary {
-  background-color: var(--accent-secondary-medium);
-  box-shadow: 0 0 10px var(--accent-secondary-strong);
+  background-color: var(--accent-secondary-strong);
+  box-shadow: 0 0 16px var(--accent-secondary-strong), 0 0 8px var(--accent-secondary);
 }
 
 /* Particle accent primary - vivid royal */
 .floating-particle--accent-primary {
-  background-color: var(--accent-primary-medium);
-  box-shadow: 0 0 10px var(--accent-primary-strong);
+  background-color: var(--accent-primary-strong);
+  box-shadow: 0 0 16px var(--accent-primary-strong), 0 0 8px var(--accent-primary);
 }
 
 /* Particle accent quaternary - neon pink */
 .floating-particle--accent-quaternary {
-  background-color: var(--accent-quaternary-light);
-  box-shadow: 0 0 10px var(--accent-quaternary-medium);
+  background-color: var(--accent-quaternary-medium);
+  box-shadow: 0 0 16px var(--accent-quaternary-strong), 0 0 8px var(--accent-quaternary);
 }
 
 /* Noise texture overlay */

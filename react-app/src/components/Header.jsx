@@ -1,10 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { toggleTheme, selectIsDark } from '@/store/slices/themeSlice'
 
 export default function Header({ user, onLogout, onProfileClick }) {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const isDark = useSelector(selectIsDark)
 
   const handleToggleTheme = () => {
@@ -43,10 +45,13 @@ export default function Header({ user, onLogout, onProfileClick }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative header-logo"
+            className="relative header-logo cursor-pointer"
+            onClick={() => navigate('/quiz')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <img
-              src="/assets/Quizlabs-Full.svg"
+              src="/assets/Quizlabs-Full-BW.svg"
               alt="Quiz Labs Logo"
             />
 
