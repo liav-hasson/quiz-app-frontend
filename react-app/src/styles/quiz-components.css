@@ -82,9 +82,11 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
+  display: inline-block;
   font-weight: 700;
-  -webkit-text-stroke: 0.1px white;
-  text-stroke: 0.1px white;
+  /* -webkit-text-stroke: 0.1px white;
+  text-stroke: 0.1px white; */
 }
 .quiz-setup-generate-btn:hover {
   background: var(--bg-card);
