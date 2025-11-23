@@ -13,6 +13,7 @@ import {
   selectError,
   fetchCategoriesWithSubjects,
   resetQuiz,
+  clearHistory,
 } from '@/store/slices/quizSlice'
 import { selectUser, logout } from '@/store/slices/authSlice'
 
@@ -46,12 +47,17 @@ export default function Quiz() {
   const handleLogout = () => {
     dispatch(logout())
     dispatch(resetQuiz())
+    dispatch(clearHistory())
     navigate('/login')
+  }
+
+  const handleProfileClick = () => {
+    navigate('/profile')
   }
 
   return (
     <>
-      <Header user={user} onLogout={handleLogout} />
+      <Header user={user} onLogout={handleLogout} onProfileClick={handleProfileClick} />
       <Toaster 
         position="top-right"
         toastOptions={{

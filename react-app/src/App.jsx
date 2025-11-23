@@ -7,6 +7,7 @@ import { selectIsDark } from './store/slices/themeSlice'
 import AnimatedBackground from './components/AnimatedBackground'
 import Login from './pages/Login'
 import Quiz from './pages/Quiz'
+import Profile from './pages/Profile'
 
 // Protected route component
 function ProtectedRoute({ children }) {
@@ -55,6 +56,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Quiz />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

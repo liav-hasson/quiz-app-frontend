@@ -18,28 +18,6 @@ export const fetchCategoriesWithSubjects = createAsyncThunk(
   }
 )
 
-export const fetchCategories = createAsyncThunk(
-  'quiz/fetchCategories',
-  async (_, { rejectWithValue }) => {
-    try {
-      return await quizAPI.getCategories()
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
-  }
-)
-
-export const fetchSubjects = createAsyncThunk(
-  'quiz/fetchSubjects',
-  async (category, { rejectWithValue }) => {
-    try {
-      return await quizAPI.getSubjects(category)
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
-  }
-)
-
 export const generateQuestion = createAsyncThunk(
   'quiz/generateQuestion',
   async ({ category, subject, difficulty }, { rejectWithValue }) => {
@@ -53,9 +31,72 @@ export const generateQuestion = createAsyncThunk(
 
 export const submitAnswer = createAsyncThunk(
   'quiz/submitAnswer',
-  async ({ question, answer, difficulty }, { rejectWithValue }) => {
+  async ({ question, answer, difficulty }, { rejectWithValue, getState }) => {
     try {
-      return await quizAPI.evaluateAnswer(question, answer, difficulty)
+      const evaluation = await quizAPI.evaluateAnswer(question, answer, difficulty)
+      const state = getState().quiz
+      const currentQuestion = state.currentQuestion || {}
+      const category = currentQuestion.category || state.selectedCategory
+      const subject = currentQuestion.subject || state.selectedSubject
+      const keyword = currentQuestion.keyword
+      const timestamp = new Date().toISOString()
+
+      let historyEntry = null
+
+      if (category && subject) {
+        const historyPayload = {
+          question,
+          answer,
+          difficulty,
+          category,
+          subject,
+          keyword,
+          score: evaluation.score,
+          evaluation: { feedback: evaluation.feedback },
+          metadata: {
+            submitted_at: timestamp,
+            source: 'quiz-app',
+          },
+        }
+
+        try {
+          const response = await quizAPI.saveAnswerHistory(historyPayload)
+          historyEntry = {
+            id: response.answer_id,
+            summary: {
+              category,
+              subject,
+              difficulty,
+              score: evaluation.score,
+              keyword,
+              created_at: timestamp,
+            },
+            details: {
+              question,
+              answer,
+              evaluation: historyPayload.evaluation,
+              metadata: historyPayload.metadata,
+            },
+          }
+        } catch (err) {
+          console.error('Failed to save answer history:', err)
+          // History save failed but evaluation succeeded - continue
+          // User will still see their score but it won't be in history
+        }
+      }
+
+      return { ...evaluation, historyEntry }
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchUserHistory = createAsyncThunk(
+  'quiz/fetchUserHistory',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserHistory(params)
     } catch (error) {
       return rejectWithValue(error.message)
     }
@@ -77,11 +118,18 @@ const quizSlice = createSlice({
     currentQuestion: null,
     userAnswer: '',
     feedback: null,
+    score: null,
     
     // UI state
     currentPage: 'setup', // 'setup' | 'question' | 'results'
     loading: false,
     error: null,
+
+    // History state
+    history: [],
+    historyLoading: false,
+    historyError: null,
+    historyLoaded: false,
   },
   reducers: {
     // Form actions
@@ -111,6 +159,7 @@ const quizSlice = createSlice({
       state.currentQuestion = null
       state.userAnswer = ''
       state.feedback = null
+      state.score = null
       state.error = null
     },
     goToQuestion: (state) => {
@@ -130,8 +179,15 @@ const quizSlice = createSlice({
       state.currentQuestion = null
       state.userAnswer = ''
       state.feedback = null
+      state.score = null
       state.currentPage = 'setup'
       state.error = null
+    },
+    clearHistory: (state) => {
+      state.history = []
+      state.historyLoading = false
+      state.historyError = null
+      state.historyLoaded = false
     },
   },
   extraReducers: (builder) => {
@@ -155,35 +211,6 @@ const quizSlice = createSlice({
         state.error = action.payload
       })
     
-    // Fetch categories (fallback, less efficient)
-    builder
-      .addCase(fetchCategories.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.loading = false
-        state.categories = action.payload
-      })
-      .addCase(fetchCategories.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload
-      })
-    
-    // Fetch subjects (fallback for individual category)
-    builder
-      .addCase(fetchSubjects.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(fetchSubjects.fulfilled, (state, action) => {
-        state.loading = false
-        state.subjects = action.payload
-      })
-      .addCase(fetchSubjects.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload
-      })
     // Generate question
     builder
       .addCase(generateQuestion.pending, (state) => {
@@ -208,12 +235,49 @@ const quizSlice = createSlice({
       })
       .addCase(submitAnswer.fulfilled, (state, action) => {
         state.loading = false
-        state.feedback = action.payload
+        state.feedback = action.payload.feedback
+        state.score = action.payload.score
         state.currentPage = 'results'
+        const historyEntry = action.payload.historyEntry
+        if (historyEntry?.summary?.category && historyEntry?.summary?.subject) {
+          const exists = state.history.findIndex((entry) => entry.id === historyEntry.id)
+          if (exists === -1) {
+            state.history = [historyEntry, ...state.history].slice(0, 50)
+          } else {
+            // Consistent immutable update pattern
+            state.history = [
+              ...state.history.slice(0, exists),
+              historyEntry,
+              ...state.history.slice(exists + 1)
+            ]
+          }
+        }
       })
       .addCase(submitAnswer.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+      })
+
+    builder
+      .addCase(fetchUserHistory.pending, (state) => {
+        state.historyLoading = true
+        state.historyError = null
+      })
+      .addCase(fetchUserHistory.fulfilled, (state, action) => {
+        state.historyLoading = false
+        // Merge local unsaved entries with fetched history
+        const fetched = action.payload || []
+        // Find local entries not present in fetched (by id)
+        const fetchedIds = new Set(fetched.map(entry => entry.id))
+        const localUnsaved = state.history.filter(entry => !fetchedIds.has(entry.id))
+        // Prepend local unsaved entries to fetched history (or append, as desired)
+        state.history = [...localUnsaved, ...fetched].slice(0, 50)
+        state.historyLoaded = true
+      })
+      .addCase(fetchUserHistory.rejected, (state, action) => {
+        state.historyLoading = false
+        state.historyError = action.payload
+        state.historyLoaded = false
       })
   },
 })
@@ -228,6 +292,7 @@ export const {
   goToResults,
   clearForm,
   resetQuiz,
+  clearHistory,
 } = quizSlice.actions
 
 // Selectors - Easy access to quiz state
@@ -240,8 +305,13 @@ export const selectSelectedDifficulty = (state) => state.quiz.selectedDifficulty
 export const selectCurrentQuestion = (state) => state.quiz.currentQuestion
 export const selectUserAnswer = (state) => state.quiz.userAnswer
 export const selectFeedback = (state) => state.quiz.feedback
+export const selectScore = (state) => state.quiz.score
 export const selectCurrentPage = (state) => state.quiz.currentPage
 export const selectLoading = (state) => state.quiz.loading
 export const selectError = (state) => state.quiz.error
+export const selectHistory = (state) => state.quiz.history
+export const selectHistoryLoading = (state) => state.quiz.historyLoading
+export const selectHistoryError = (state) => state.quiz.historyError
+export const selectHistoryLoaded = (state) => state.quiz.historyLoaded
 
 export default quizSlice.reducer

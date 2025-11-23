@@ -3,12 +3,18 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { toggleTheme, selectIsDark } from '@/store/slices/themeSlice'
 
-export default function Header({ user, onLogout }) {
+export default function Header({ user, onLogout, onProfileClick }) {
   const dispatch = useDispatch()
   const isDark = useSelector(selectIsDark)
 
   const handleToggleTheme = () => {
     dispatch(toggleTheme())
+  }
+
+  const handleProfileClick = () => {
+    if (typeof onProfileClick === 'function') {
+      onProfileClick()
+    }
   }
   return (
     <header className="header-base">
@@ -73,10 +79,13 @@ export default function Header({ user, onLogout }) {
               {user && (
                 <>
                   {/* User info */}
-                  <motion.div
+                  <motion.button
+                    type="button"
                     initial={{ borderColor: 'var(--accent-primary-light)' }}
                     className="header-user-badge"
                     whileHover={{ scale: 1.02, borderColor: 'var(--accent-primary-strong)' }}
+                    onClick={handleProfileClick}
+                    aria-label={`View profile for ${user.name || user.email}`}
                   >
                     <img
                       src={user?.picture ?? '/default-avatar.png'}
@@ -88,7 +97,7 @@ export default function Header({ user, onLogout }) {
                     <span className="header-user-name">
                       {user.name || user.email}
                     </span>
-                  </motion.div>
+                  </motion.button>
 
                   {/* Logout button */}
                   <Button

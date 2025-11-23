@@ -16,6 +16,7 @@
 @import "./styles/quiz-components.css";
 @import "./styles/header.css";
 @import "./styles/login.css";
+@import "./styles/profile.css";
 
 /* 5. Background & Visual Effects */
 @import "./styles/background.css";
