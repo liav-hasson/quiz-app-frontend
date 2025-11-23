@@ -21,12 +21,12 @@ function ProtectedRoute({ children }) {
 export default function App() {
   const isDark = useSelector(selectIsDark)
 
-  // Sync .dark class on <html> with Redux state
+  // Sync .light class on <html> with Redux state (dark is default)
   useEffect(() => {
     if (isDark) {
-      document.documentElement.classList.add('dark')
+      document.documentElement.classList.remove('light')
     } else {
-      document.documentElement.classList.remove('dark')
+      document.documentElement.classList.add('light')
     }
   }, [isDark])
 
@@ -44,6 +44,7 @@ export default function App() {
             color: 'var(--text-primary)',
             border: '1px solid var(--accent-quinary-light)',
           },
+          duration: 4000,
         }}
       />
       

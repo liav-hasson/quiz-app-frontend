@@ -61,13 +61,36 @@
   box-shadow: var(--card-shadow-subtle);
   transition: all 0.2s;
 }
+.quiz-setup-clear-btn:hover {
+  background-color: var(--bg-card);
+  border-color: var(--accent-tertiary);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-md);
+}
 .quiz-setup-generate-btn {
   flex: 1;
-  background: var(--gradient-primary);
+  background: var(--bg-card-light);
   color: var(--color-white);
   font-weight: 600;
   box-shadow: var(--card-shadow-btn);
   transition: all 0.2s;
+  position: relative;
+  border: var(--card-border);
+}
+.quiz-setup-generate-btn span {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  -webkit-text-stroke: 0.1px white;
+  text-stroke: 0.1px white;
+}
+.quiz-setup-generate-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--accent-secondary);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-lg);
 }
 
 /* Quiz Question Component */
@@ -134,6 +157,12 @@
   box-shadow: var(--card-shadow-subtle);
   transition: all 0.2s;
 }
+.quiz-question-back-btn:hover {
+  background-color: var(--bg-card);
+  border-color: var(--accent-tertiary);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-md);
+}
 .quiz-question-submit-btn {
   flex: 1;
   background: var(--gradient-primary);
@@ -141,6 +170,11 @@
   font-weight: 600;
   box-shadow: var(--card-shadow-btn);
   transition: all 0.2s;
+}
+.quiz-question-submit-btn:hover {
+  background: var(--gradient-cool-warm);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-xl);
 }
 .quiz-question-difficulty-badge {
   background-color: var(--accent-tertiary-light);
@@ -207,4 +241,9 @@
   font-weight: 600;
   box-shadow: var(--card-shadow-btn);
   transition: all 0.2s;
+}
+.quiz-results-new-btn:hover {
+  background: var(--gradient-cool-warm);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-xl);
 }

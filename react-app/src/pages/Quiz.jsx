@@ -66,6 +66,7 @@ export default function Quiz() {
             color: 'var(--text-primary)',
             border: '1px solid var(--accent-quinary-light)',
           },
+          duration: 4000,
         }}
       />
       
