@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -18,6 +18,7 @@ import {
   resetQuiz,
   clearHistory,
 } from '@/store/slices/quizSlice'
+import { fetchUserBestCategory, selectBestCategory } from '@/store/slices/quizSlice'
 import { selectUser, logout } from '@/store/slices/authSlice'
 
 const parseScoreValue = (score) => {
@@ -73,8 +74,13 @@ export default function Profile() {
       ? Math.round(numericScores.reduce((sum, value) => sum + value, 0) / numericScores.length)
       : null
     const bestScore = numericScores.length ? Math.max(...numericScores) : null
-    const lastActivity = history[0]?.summary?.created_at
-
+    // Determine last activity (most recent created_at)
+    const lastActivity = history
+      .map((e) => e?.summary?.created_at)
+      .filter(Boolean)
+      .map((d) => new Date(d))
+      .filter((d) => !Number.isNaN(d.getTime()))
+      .sort((a, b) => b - a)[0]
     return {
       totalAnswers,
       averageScore,
@@ -82,6 +88,13 @@ export default function Profile() {
       lastActivity: formatDate(lastActivity),
     }
   }, [history])
+  // Fetch bestCategory from backend (via Redux thunk)
+  const bestCategory = useSelector(selectBestCategory)
+  useEffect(() => {
+    if (user) dispatch(fetchUserBestCategory())
+  }, [dispatch, user])
+
+  const displayBestCategory = typeof bestCategory === 'string' ? bestCategory : null
 
   const handleRefreshHistory = () => {
     dispatch(fetchUserHistory())
@@ -167,13 +180,13 @@ export default function Profile() {
               </Card>
               <Card className="profile-card">
                 <CardHeader>
-                  <CardTitle>Best Subject</CardTitle>
+                  <CardTitle>Best Category</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="profile-stat-value">
-                    {typeof stats.bestSubject === 'string' ? `${stats.bestSubject}` : '—'}
-                  </p>
-                  <p className="profile-stat-label">Peak Subject</p>
+                    <p className="profile-stat-value">
+                      {typeof displayBestCategory === 'string' ? `${displayBestCategory}` : '—'}
+                    </p>
+                  <p className="profile-stat-label">Peak Category</p>
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -194,10 +207,7 @@ export default function Profile() {
                 <CardTitle>Performance Over Time</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="profile-chart-subtitle text-muted-foreground mb-4">
-                  Visualize your score trends and improvement areas.
-                </p>
-                <PerformanceChart history={history} />
+                <PerformanceChart />
               </CardContent>
             </Card>
           </section>

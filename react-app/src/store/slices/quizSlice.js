@@ -103,6 +103,28 @@ export const fetchUserHistory = createAsyncThunk(
   }
 )
 
+export const fetchUserBestCategory = createAsyncThunk(
+  'quiz/fetchUserBestCategory',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserBestCategory()
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchUserPerformance = createAsyncThunk(
+  'quiz/fetchUserPerformance',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserPerformance(params)
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 const quizSlice = createSlice({
   name: 'quiz',
   initialState: {
@@ -124,6 +146,17 @@ const quizSlice = createSlice({
     currentPage: 'setup', // 'setup' | 'question' | 'results'
     loading: false,
     error: null,
+
+    // Best category (server provided)
+    bestCategory: null,
+    bestCategoryLoading: false,
+    bestCategoryError: null,
+
+    // Performance data for charts
+    performance: [],
+    performanceLoading: false,
+    performanceError: null,
+    performanceLoaded: false,
 
     // History state
     history: [],
@@ -279,6 +312,45 @@ const quizSlice = createSlice({
         state.historyError = action.payload
         state.historyLoaded = false
       })
+
+      // Best category (server-provided)
+      builder
+        .addCase(fetchUserBestCategory.pending, (state) => {
+          state.bestCategoryLoading = true
+          state.bestCategoryError = null
+        })
+        .addCase(fetchUserBestCategory.fulfilled, (state, action) => {
+          state.bestCategoryLoading = false
+          // Only accept string value; otherwise keep null
+          state.bestCategory = typeof action.payload === 'string' ? action.payload : null
+        })
+        .addCase(fetchUserBestCategory.rejected, (state, action) => {
+          state.bestCategoryLoading = false
+          state.bestCategoryError = action.payload
+          state.bestCategory = null
+        })
+
+      // Performance data
+      builder
+        .addCase(fetchUserPerformance.pending, (state) => {
+          state.performanceLoading = true
+          state.performanceError = null
+        })
+        .addCase(fetchUserPerformance.fulfilled, (state, action) => {
+          state.performanceLoading = false
+          // Normalize payload to array if possible
+          const payload = action.payload || []
+          const arr = Array.isArray(payload)
+            ? payload
+            : (payload.performance || payload.data || [])
+          state.performance = arr
+          state.performanceLoaded = true
+        })
+        .addCase(fetchUserPerformance.rejected, (state, action) => {
+          state.performanceLoading = false
+          state.performanceError = action.payload
+          state.performanceLoaded = false
+        })
   },
 })
 
@@ -313,5 +385,12 @@ export const selectHistory = (state) => state.quiz.history
 export const selectHistoryLoading = (state) => state.quiz.historyLoading
 export const selectHistoryError = (state) => state.quiz.historyError
 export const selectHistoryLoaded = (state) => state.quiz.historyLoaded
+export const selectBestCategory = (state) => state.quiz.bestCategory
+export const selectBestCategoryLoading = (state) => state.quiz.bestCategoryLoading
+export const selectBestCategoryError = (state) => state.quiz.bestCategoryError
+
+export const selectPerformance = (state) => state.quiz.performance
+export const selectPerformanceLoading = (state) => state.quiz.performanceLoading
+export const selectPerformanceLoaded = (state) => state.quiz.performanceLoaded
 
 export default quizSlice.reducer

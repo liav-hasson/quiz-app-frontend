@@ -170,3 +170,41 @@ export async function getUserHistory(params = {}) {
   const response = await fetchAPI(`/api/user/history${query ? `?${query}` : ''}`)
   return response.history || []
 }
+
+/**
+ * Fetch user performance summary suitable for charting
+ * Preferred response shape (example):
+ * {
+ *   performance: [
+ *     { date: '2025-11-01T12:00:00Z', overall: 7, categories: { DevOps: 7, Programming: 6 } },
+ *     ...
+ *   ]
+ * }
+ */
+export async function getUserPerformance(params = {}) {
+  const searchParams = new URLSearchParams()
+  if (params.limit) searchParams.set('limit', params.limit)
+  if (params.before) searchParams.set('before', params.before)
+  const query = searchParams.toString()
+
+  const response = await fetchAPI(`/api/user/performance${query ? `?${query}` : ''}`)
+  // Try common keys: data.performance, performance, data
+  return response.performance || response.data?.performance || response.data || response
+}
+
+/**
+ * Fetch user's best category as a single string (backend-preferred)
+ * Preferred endpoint: GET /api/user/best-category -> { bestCategory: 'DevOps' }
+ * Falls back to common keys if backend returns different shape.
+ */
+export async function getUserBestCategory() {
+  const response = await fetchAPI('/api/user/best-category')
+  return (
+    response.bestCategory ||
+    response.best_category ||
+    response.data?.bestCategory ||
+    response.data?.best_category ||
+    response.category ||
+    null
+  )
+}
