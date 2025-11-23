@@ -338,11 +338,20 @@ const quizSlice = createSlice({
         })
         .addCase(fetchUserPerformance.fulfilled, (state, action) => {
           state.performanceLoading = false
-          // Normalize payload to array if possible
-          const payload = action.payload || []
-          const arr = Array.isArray(payload)
-            ? payload
-            : (payload.performance || payload.data || [])
+          // Normalize payload to array if possible. If API returned an error object
+          // (e.g., { ok: false, error: '...' }) convert to empty array so UI
+          // components receive a predictable array shape.
+          const payload = action.payload
+          let arr = []
+          if (Array.isArray(payload)) {
+            arr = payload
+          } else if (payload && Array.isArray(payload.performance)) {
+            arr = payload.performance
+          } else if (payload && Array.isArray(payload.data)) {
+            arr = payload.data
+          } else {
+            arr = []
+          }
           state.performance = arr
           state.performanceLoaded = true
         })

@@ -43,26 +43,42 @@ async function fetchAPI(url, options = {}) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-    
-    // Handle authentication errors - clear session and redirect to login
-    if (response.status === 401 || 
+
+      // Handle authentication errors - clear session and redirect to login
+      if (
+        response.status === 401 ||
         (response.status === 404 && errorData.error?.includes('User not found')) ||
-        (response.status === 400 && errorData.error?.includes('Authentication required'))) {
-      localStorage.removeItem('quiz_user')
-      window.location.href = '/login'
-      throw new Error(errorData.error || 'Session expired. Please login again.')
-    }
-    
-      throw new Error(errorData.error || `API Error: ${response.status}`)
+        (response.status === 400 && errorData.error?.includes('Authentication required'))
+      ) {
+        localStorage.removeItem('quiz_user')
+        window.location.href = '/login'
+        // keep throwing here to stop further execution if auth is invalid
+        throw new Error(errorData.error || 'Session expired. Please login again.')
+      }
+
+      // For other non-auth errors (backend down, 403, 404 generic, etc.) return a structured
+      // error object instead of throwing. Callers should handle missing data gracefully.
+      return {
+        ok: false,
+        status: response.status,
+        error: errorData.error || `API Error: ${response.status}`,
+        data: errorData,
+      }
     }
 
-    return response.json()
+    const json = await response.json().catch(() => null)
+    return {
+      ok: true,
+      status: response.status,
+      data: json,
+      ...json,
+    }
   } catch (error) {
     clearTimeout(timeoutId)
     if (error.name === 'AbortError') {
-      throw new Error('Request timeout - please try again')
+      return { ok: false, status: null, error: 'Request timeout - please try again' }
     }
-    throw error
+    return { ok: false, status: null, error: error.message || String(error) }
   }
 }
 
@@ -188,8 +204,15 @@ export async function getUserPerformance(params = {}) {
   const query = searchParams.toString()
 
   const response = await fetchAPI(`/api/user/performance${query ? `?${query}` : ''}`)
-  // Try common keys: data.performance, performance, data
-  return response.performance || response.data?.performance || response.data || response
+
+  // If the request failed (backend down, 403, etc.), return an empty array so callers
+  // (charts/components) can render a friendly empty state without throwing.
+  if (!response || response.ok === false) return []
+
+  // Try common shapes: top-level `performance`, `data.performance`, or `data` as array
+  return (
+    response.performance || response.data?.performance || response.data || response
+  )
 }
 
 /**
