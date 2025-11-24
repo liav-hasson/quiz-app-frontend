@@ -13,3 +13,6 @@ dist/
 # React / node build artifacts
 react-app/node_modules/
 react-app/dist/
+
+#MacOS system files
+.DS_Store
