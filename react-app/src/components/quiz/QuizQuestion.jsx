@@ -120,6 +120,7 @@ export default function QuizQuestion() {
             </Label>
             <Textarea
               id="answer"
+              name="answer"
               value={userAnswer}
               onChange={handleAnswerChange}
               placeholder="Type your answer here..."

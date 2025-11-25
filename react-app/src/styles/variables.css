@@ -109,9 +109,9 @@
 
   /* shadcn/ui compatibility tokens - Dark Mode */
   --background: 234 71% 20%;
-  --foreground: 0 0% 96%;
+  --foreground: 0 0% 98%;
   --card: 234 63% 25%;
-  --card-foreground: 0 0% 96%;
+  --card-foreground: 0 0% 98%;
   --popover: 234 63% 25%;
   --popover-foreground: 0 0% 96%;
   --primary: 266 58% 58%;

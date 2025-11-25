@@ -39,7 +39,7 @@ export default function PerformanceChart() {
   // Load performance via Redux thunk (no fallback to history)
   useEffect(() => {
     if (!perfLoaded && !perfLoading) {
-      dispatch(fetchUserPerformance({ limit: 100 }))
+      dispatch(fetchUserPerformance({ period: '30d', granularity: 'day' }))
     }
   }, [dispatch, perfLoaded, perfLoading])
   useEffect(() => {

@@ -109,7 +109,7 @@ export default function QuizSetup() {
               <Label htmlFor="category" className="quiz-setup-label">
                 Category
               </Label>
-              <Select value={selectedCategory} onValueChange={handleCategoryChange} disabled={loading}>
+              <Select value={selectedCategory} onValueChange={handleCategoryChange} disabled={loading} name="category">
                 <SelectTrigger 
                   id="category"
                   className="quiz-setup-select"
@@ -134,7 +134,7 @@ export default function QuizSetup() {
               <Label htmlFor="subject" className="quiz-setup-label">
                 Subject
               </Label>
-              <Select value={selectedSubject} onValueChange={handleSubjectChange} disabled={!selectedCategory || loading}>
+              <Select value={selectedSubject} onValueChange={handleSubjectChange} disabled={!selectedCategory || loading} name="subject">
                 <SelectTrigger 
                   id="subject"
                   className="quiz-setup-select"
@@ -159,7 +159,7 @@ export default function QuizSetup() {
               <Label htmlFor="difficulty" className="quiz-setup-label">
                 Difficulty
               </Label>
-              <Select value={selectedDifficulty.toString()} onValueChange={handleDifficultyChange} disabled={loading}>
+              <Select value={selectedDifficulty.toString()} onValueChange={handleDifficultyChange} disabled={loading} name="difficulty">
                 <SelectTrigger 
                   id="difficulty"
                   className="quiz-setup-select"
