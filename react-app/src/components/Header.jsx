@@ -148,8 +148,8 @@ export default function Header({ user, onLogout, onProfileClick }) {
                       <DropdownMenuItem onClick={handleProfileClick}>
                         Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/leaderboard')}>
-                        Leaderboard
+                      <DropdownMenuItem onClick={() => navigate('/history')}>
+                        History
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleLogout}>

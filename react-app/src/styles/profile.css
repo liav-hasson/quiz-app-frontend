@@ -13,9 +13,16 @@
   width: 100%;
   max-width: 1400px;
   display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 2rem;
+  grid-template-columns: 200px 1fr 200px;
+  gap: 1.5rem;
   align-items: start;
+}
+
+/* History page container */
+.history-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 /* Responsive: stack on mobile */
@@ -26,6 +33,10 @@
   
   .profile-leaderboard-sidebar {
     order: 2;
+  }
+  
+  .profile-right-sidebar {
+    display: none;
   }
 }
 

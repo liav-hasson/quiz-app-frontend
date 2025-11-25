@@ -9,7 +9,7 @@ import AnimatedBackground from './components/AnimatedBackground'
 const Login = lazy(() => import('./pages/Login'))
 const Quiz = lazy(() => import('./pages/Quiz'))
 const Profile = lazy(() => import('./pages/Profile'))
-const Leaderboard = lazy(() => import('./pages/Leaderboard'))
+const History = lazy(() => import('./pages/History'))
 
 // Protected route component
 function ProtectedRoute({ children }) {
@@ -74,10 +74,10 @@ export default function App() {
               }
             />
             <Route
-              path="/leaderboard"
+              path="/history"
               element={
                 <ProtectedRoute>
-                  <Leaderboard />
+                  <History />
                 </ProtectedRoute>
               }
             />

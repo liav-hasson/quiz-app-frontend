@@ -117,10 +117,6 @@ export default function Profile() {
     }
   }, [history, userProfile])
 
-  const handleRefreshHistory = () => {
-    dispatch(fetchUserHistory())
-  }
-
   const handleBackToQuiz = () => {
     navigate('/quiz')
   }
@@ -158,14 +154,14 @@ export default function Profile() {
                       <div
                         key={entry._id || index}
                         className={`leaderboard-item ${
-                          entry.username === user?.name || entry.username === user?.email
+                          entry.username === user?.name || entry.username === user?.email || entry.email === user?.email
                             ? 'leaderboard-item-current'
                             : ''
                         }`}
                       >
                         <span className="leaderboard-rank">#{entry.rank}</span>
-                        <span className="leaderboard-username" title={entry.username}>
-                          {entry.username}
+                        <span className="leaderboard-username" title={entry.username || entry.email}>
+                          {entry.username || entry.name || entry.email}
                         </span>
                       </div>
                     ))}
@@ -278,39 +274,12 @@ export default function Profile() {
             </Card>
           </section>
 
-          <section className="profile-history">
-            <div className="profile-history-header">
-              <div>
-                <h2>Question history</h2>
-                <p>Expandable cards show your prompts, answers, and AI feedback.</p>
-              </div>
-              <div className="profile-history-actions">
-                <Button variant="secondary" onClick={handleRefreshHistory} disabled={historyLoading}>
-                  {historyLoading ? 'Refreshing…' : 'Refresh'}
-                </Button>
-              </div>
-            </div>
-            {historyError && (
-              <div className="profile-history-error">
-                Unable to load history right now. {historyError}
-              </div>
-            )}
-            {!history.length && !historyLoading && !historyError && (
-              <div className="profile-history-empty">
-                Your evaluated answers will appear here after you complete a quiz question.
-              </div>
-            )}
-            {historyLoading && history.length > 0 && (
-              <div className="profile-history-loading">Refreshing history…</div>
-            )}
-            <div className="profile-history-list">
-              {history.map((entry, index) => (
-                // Use entry.id if available, otherwise fall back to index (not ideal if list order can change)
-                <HistoryCard key={entry.id ?? index} entry={entry} defaultOpen={index === 0} />
-              ))}
-            </div>
-          </section>
           </div>
+
+          {/* Right Sidebar - Empty for now */}
+          <aside className="profile-right-sidebar">
+            {/* Placeholder for future content */}
+          </aside>
         </div>
       </main>
     </>

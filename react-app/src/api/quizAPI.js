@@ -262,7 +262,7 @@ export async function getUserBestCategory() {
  * Returns top 10 leaderboard entries and authenticated user's rank
  */
 export async function getLeaderboard() {
-  const response = await fetchAPI('/api/user/leaderboard/enhanced')
+  const response = await fetchAPI('/api/user/leaderboard')
   
   // If the request failed, return empty data
   if (!response || response.ok === false) {
@@ -270,7 +270,7 @@ export async function getLeaderboard() {
   }
   
   return {
-    topTen: response.topTen || response.top_ten || response.data?.topTen || [],
-    userRank: response.userRank ?? response.user_rank ?? response.data?.userRank ?? null,
+    topTen: response.leaderboard || response.data?.leaderboard || [],
+    userRank: response.current_user?.rank ?? response.currentUser?.rank ?? null,
   }
 }
