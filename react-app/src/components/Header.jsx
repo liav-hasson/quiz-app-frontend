@@ -54,94 +54,38 @@ export default function Header({ user, onLogout, onProfileClick }) {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          {/* Animated Logo with Dropdown (only when logged in) */}
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative header-logo cursor-pointer"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <img
-                    src="/assets/Quizlabs-Full-BW.svg"
-                    alt="Quiz Labs Logo"
-                  />
+          {/* Logo - Links to home/quiz */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="relative header-logo cursor-pointer"
+            onClick={() => navigate(user ? '/quiz' : '/login')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <img
+              src="/assets/Quizlabs-Full-BW.svg"
+              alt="Quiz Labs Logo"
+            />
 
-                  {/* Subtle pulsing aura effect */}
-                  <motion.div
-                    className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
-                    }}
-                    animate={{
-                      scale: [1, 1.15, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </motion.div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-card">
-                <DropdownMenuItem onClick={() => navigate('/quiz')}>
-                  <span className="mr-2">🎯</span>
-                  Quiz
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleProfileClick}>
-                  <span className="mr-2">👤</span>
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/leaderboard')}>
-                  <span className="mr-2">🏆</span>
-                  Leaderboard
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <span className="mr-2">🚪</span>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
+            {/* Subtle pulsing aura effect */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="relative header-logo cursor-pointer"
-              onClick={() => navigate('/login')}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <img
-                src="/assets/Quizlabs-Full-BW.svg"
-                alt="Quiz Labs Logo"
-              />
-
-              {/* Subtle pulsing aura effect */}
-              <motion.div
-                className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
-                }}
-                animate={{
-                  scale: [1, 1.15, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.div>
-          )}
+              className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
+              style={{
+                background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
+              }}
+              animate={{
+                scale: [1, 1.15, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.div>
 
           {/* Right side - Stats or Actions */}
           <div className="ml-auto flex items-center gap-4">
@@ -174,7 +118,7 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     </span>
                   </motion.button>
 
-                  {/* Theme toggle button - rightmost */}
+                  {/* Theme toggle button */}
                   <Button
                     onClick={handleToggleTheme}
                     variant="outline"
@@ -182,8 +126,37 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     className="header-theme-btn"
                     title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                   >
-                    {isDark ? '☀️' : '🌙'}
+                    {isDark ? 'Light' : 'Dark'}
                   </Button>
+
+                  {/* Burger Menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xl"
+                        aria-label="Menu"
+                      >
+                        ☰
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-card">
+                      <DropdownMenuItem onClick={() => navigate('/quiz')}>
+                        Quiz
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleProfileClick}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/leaderboard')}>
+                        Leaderboard
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               )}
               
@@ -207,7 +180,7 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     className="header-theme-btn"
                     title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                   >
-                    {isDark ? '☀️' : '🌙'}
+                    {isDark ? 'Light' : 'Dark'}
                   </Button>
                 </>
               )}
