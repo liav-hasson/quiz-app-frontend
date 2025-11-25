@@ -261,7 +261,7 @@ export default function Profile() {
                   <CardTitle>Last Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="profile-stat-value text-base">{stats.lastActivity}</p>
+                  <p className="profile-stat-value text-xs">{stats.lastActivity}</p>
                   <p className="profile-stat-label">Most recent answer</p>
                 </CardContent>
               </Card>

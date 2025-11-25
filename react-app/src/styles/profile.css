@@ -4,7 +4,7 @@
 
 .profile-page {
   min-height: 100vh;
-  padding: 7rem 1.5rem 3rem;
+  padding: 7rem 0 3rem;
   display: flex;
   justify-content: center;
 }
@@ -16,7 +16,6 @@
   grid-template-columns: 200px 1fr 200px;
   gap: 0 1.5rem;
   align-items: start;
-  padding-left: 0;
 }
 
 /* History page container */
@@ -39,6 +38,10 @@
   .profile-right-sidebar {
     display: none;
   }
+  
+  .profile-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
 }
 
 .profile-container {
@@ -46,6 +49,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding: 0 1rem;
 }
 
 /* Leaderboard Sidebar */
@@ -168,19 +172,14 @@
 
 .profile-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
 }
 
 .profile-stat-value {
   font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
-}
-
-.profile-card .profile-stat-value.text-base {
-  font-size: 0.95rem;
-  line-height: 1.4;
 }
 
 .profile-stat-label {
