@@ -14,8 +14,9 @@
   max-width: 1400px;
   display: grid;
   grid-template-columns: 200px 1fr 200px;
-  gap: 1.5rem;
+  gap: 0 1.5rem;
   align-items: start;
+  padding-left: 0;
 }
 
 /* History page container */
@@ -86,12 +87,26 @@
   min-width: 2rem;
 }
 
+.leaderboard-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+
 .leaderboard-username {
   font-size: 0.875rem;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.leaderboard-xp {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .profile-hero {
@@ -161,6 +176,11 @@
   font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
+}
+
+.profile-card .profile-stat-value.text-base {
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 .profile-stat-label {

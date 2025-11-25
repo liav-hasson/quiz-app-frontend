@@ -160,9 +160,14 @@ export default function Profile() {
                         }`}
                       >
                         <span className="leaderboard-rank">#{entry.rank}</span>
-                        <span className="leaderboard-username" title={entry.username || entry.email}>
-                          {entry.username || entry.name || entry.email}
-                        </span>
+                        <div className="leaderboard-user-info">
+                          <span className="leaderboard-username" title={entry.username || entry.email}>
+                            {entry.username || entry.name || entry.email}
+                          </span>
+                          <span className="leaderboard-xp">
+                            {entry.total_score || 0} XP
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>

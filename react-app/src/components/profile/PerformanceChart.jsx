@@ -83,7 +83,9 @@ export default function PerformanceChart() {
         const obj = {
           name: formatDate(p.date) || `#${idx + 1}`,
           fullDate: p.date,
-          overall: typeof p.overall === 'number' ? p.overall : (p.overall ? Number(p.overall) : 0),
+          // Handle both new format (avg_score) and old format (overall)
+          overall: typeof p.avg_score === 'number' ? p.avg_score : 
+                   (typeof p.overall === 'number' ? p.overall : (p.overall ? Number(p.overall) : 0)),
         }
         categories.forEach((c) => {
           obj[c] = p.categories && p.categories[c] !== undefined ? p.categories[c] : null
@@ -176,7 +178,7 @@ export default function PerformanceChart() {
         !Recharts ? (
           <div className="flex items-center justify-center h-64 text-muted-foreground">Loading chart library…</div>
         ) : (
-          <Recharts.ResponsiveContainer width="100%" height={300}>
+          <Recharts.ResponsiveContainer width="100%" height={240}>
             <Recharts.LineChart data={chartData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <Recharts.CartesianGrid strokeDasharray="3 3" stroke="var(--accent-primary-light)" opacity={0.3} />
               <Recharts.XAxis dataKey="name" stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} angle={-45} textAnchor="end" height={60} />

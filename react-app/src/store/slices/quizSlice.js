@@ -424,6 +424,8 @@ const quizSlice = createSlice({
           let arr = []
           if (Array.isArray(payload)) {
             arr = payload
+          } else if (payload && Array.isArray(payload.data_points)) {
+            arr = payload.data_points
           } else if (payload && Array.isArray(payload.performance)) {
             arr = payload.performance
           } else if (payload && Array.isArray(payload.data)) {

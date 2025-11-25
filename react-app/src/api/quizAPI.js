@@ -210,9 +210,10 @@ export async function getUserPerformance(params = {}) {
   // (charts/components) can render a friendly empty state without throwing.
   if (!response || response.ok === false) return []
 
-  // Try common shapes: top-level `performance`, `data.performance`, or `data` as array
+  // Backend returns { period, data_points, summary }
+  // Check for data_points first, then try common shapes
   return (
-    response.performance || response.data?.performance || response.data || response
+    response.data_points || response.performance || response.data?.performance || response.data || response
   )
 }
 
