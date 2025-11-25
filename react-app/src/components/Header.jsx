@@ -135,13 +135,13 @@ export default function Header({ user, onLogout, onProfileClick }) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-xl"
+                        className="flex items-center justify-center w-10 h-10 text-2xl font-light leading-none"
                         aria-label="Menu"
                       >
-                        ☰
+                        <span className="block" style={{ lineHeight: '1', transform: 'translateY(-1px)' }}>☰</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-card">
+                    <DropdownMenuContent align="end" className="w-48 bg-card border border-border">
                       <DropdownMenuItem onClick={() => navigate('/quiz')}>
                         Quiz
                       </DropdownMenuItem>

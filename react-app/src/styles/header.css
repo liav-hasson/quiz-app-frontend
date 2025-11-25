@@ -14,6 +14,12 @@
   box-shadow: var(--card-shadow-md);
 }
 
+/* Light mode - brighter navbar */
+html.light .header-base {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: var(--backdrop-strong) brightness(1.1);
+}
+
 .header-border-line {
   position: absolute;
   bottom: 0;

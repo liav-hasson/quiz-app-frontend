@@ -9,6 +9,7 @@ import PerformanceChart from '@/components/profile/PerformanceChart'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { getLeaderboard } from '@/api/quizAPI'
 import {
   fetchUserHistory,
   fetchUserProfile,
@@ -58,6 +59,10 @@ export default function Profile() {
   const userProfile = useSelector(selectUserProfile)
   const userProfileLoading = useSelector(selectUserProfileLoading)
   const userProfileLoaded = useSelector(selectUserProfileLoaded)
+  
+  // Leaderboard state
+  const [leaderboardData, setLeaderboardData] = useState({ topTen: [], userRank: null })
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
 
   useEffect(() => {
     // ProtectedRoute already guards pages; avoid redirect here to prevent
@@ -76,6 +81,23 @@ export default function Profile() {
       dispatch(fetchUserHistory())
     }
   }, [dispatch, user, historyLoaded, historyLoading])
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      if (!user) return
+      setLeaderboardLoading(true)
+      try {
+        const data = await getLeaderboard()
+        setLeaderboardData(data)
+      } catch (error) {
+        console.error('Failed to load leaderboard:', error)
+      } finally {
+        setLeaderboardLoading(false)
+      }
+    }
+    loadLeaderboard()
+  }, [user])
 
   const stats = useMemo(() => {
     // Only calculate lastActivity from history (for display formatting)
@@ -118,7 +140,43 @@ export default function Profile() {
     <>
       <Header user={user} onLogout={handleLogout} onProfileClick={handleProfileClick} />
       <main className="profile-page">
-        <div className="profile-container">
+        <div className="profile-layout">
+          {/* Leaderboard Sidebar */}
+          <aside className="profile-leaderboard-sidebar">
+            <Card className="profile-card h-fit sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-lg">Leaderboard</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {leaderboardLoading ? (
+                  <div className="p-4 text-center text-muted-foreground text-sm">Loading...</div>
+                ) : leaderboardData.topTen.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground text-sm">No data</div>
+                ) : (
+                  <div className="leaderboard-list">
+                    {leaderboardData.topTen.map((entry, index) => (
+                      <div
+                        key={entry._id || index}
+                        className={`leaderboard-item ${
+                          entry.username === user?.name || entry.username === user?.email
+                            ? 'leaderboard-item-current'
+                            : ''
+                        }`}
+                      >
+                        <span className="leaderboard-rank">#{entry.rank}</span>
+                        <span className="leaderboard-username" title={entry.username}>
+                          {entry.username}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </aside>
+
+          {/* Main Content */}
+          <div className="profile-container">
           <motion.section
             className="profile-hero"
             initial={{ opacity: 0, y: 20 }}
@@ -252,6 +310,7 @@ export default function Profile() {
               ))}
             </div>
           </section>
+          </div>
         </div>
       </main>
     </>

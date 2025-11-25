@@ -9,12 +9,78 @@
   justify-content: center;
 }
 
+.profile-layout {
+  width: 100%;
+  max-width: 1400px;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile-leaderboard-sidebar {
+    order: 2;
+  }
+}
+
 .profile-container {
   width: 100%;
-  max-width: 1100px;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+/* Leaderboard Sidebar */
+.profile-leaderboard-sidebar {
+  width: 100%;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--accent-primary-light);
+  transition: background-color 0.2s ease;
+}
+
+.leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-item:hover {
+  background-color: var(--accent-primary-light);
+}
+
+.leaderboard-item-current {
+  background-color: var(--accent-quaternary-light);
+  font-weight: 600;
+}
+
+.leaderboard-rank {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-secondary);
+  min-width: 2rem;
+}
+
+.leaderboard-username {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .profile-hero {
