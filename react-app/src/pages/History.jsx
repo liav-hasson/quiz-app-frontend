@@ -1,14 +1,20 @@
-import { useState, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { logout, selectUser } from '@/store/slices/authSlice'
-import { fetchUserHistory, selectHistory, selectHistoryLoading, selectHistoryError, clearHistory } from '@/store/slices/historySlice.js'
-import { resetQuiz } from '@/store/slices/quizSlice'
+import {
+  fetchUserHistory,
+  selectHistory,
+  selectHistoryLoading,
+  selectHistoryError,
+  selectHistoryLoaded,
+  resetQuiz,
+  clearHistory
+} from '@/store/slices/quizSlice'
 import Header from '@/components/Header'
-import HistoryCard from '@/components/HistoryCard'
+import HistoryCard from '@/components/profile/HistoryCard'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import '@/styles/profile.css'
 
 export default function History() {
@@ -18,6 +24,14 @@ export default function History() {
   const history = useSelector(selectHistory)
   const historyLoading = useSelector(selectHistoryLoading)
   const historyError = useSelector(selectHistoryError)
+  const historyLoaded = useSelector(selectHistoryLoaded)
+
+  // Load history on mount if not already loaded
+  useEffect(() => {
+    if (user && !historyLoaded && !historyLoading) {
+      dispatch(fetchUserHistory())
+    }
+  }, [dispatch, user, historyLoaded, historyLoading])
 
   const handleRefreshHistory = () => {
     dispatch(fetchUserHistory())
