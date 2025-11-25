@@ -3,7 +3,6 @@
 A modern, responsive React frontend for the DevOps learning platform. Built with Vite, Tailwind CSS, Framer Motion, and Radix UI.
 
 ---
-
 ## Related Repositories
 
 - Backend: https://github.com/liav-hasson/quiz-app-backend.git
@@ -37,10 +36,15 @@ react-app/
 │   │   ├── Header.jsx         ← Navigation & user info
 │   │   ├── AnimatedBackground.jsx
 │   │   ├── AnimatedBorder.jsx
+│   │   ├── profile/           ← Profile page components
+│   │   │   ├── HistoryCard.jsx
+│   │   │   └── PerformanceChart.jsx
 │   │   └── ui/                ← Radix UI primitives (button, card, input, etc.)
 │   ├── pages/
 │   │   ├── Login.jsx          ← Google OAuth login
-│   │   └── Quiz.jsx           ← Main quiz interface
+│   │   ├── Quiz.jsx           ← Main quiz interface
+│   │   ├── Profile.jsx        ← User profile & stats
+│   │   └── Leaderboard.jsx    ← Global leaderboard
 │   ├── store/
 │   │   ├── index.js           ← Redux store configuration
 │   │   └── slices/            ← Redux Toolkit slices (auth, quiz, theme)
@@ -105,21 +109,34 @@ Usage in JSX:
 ### Authentication
 - Google OAuth 2.0 integration using Redux (`authSlice.js`)
 - User session persistence (state persisted to `localStorage` by the app)
-- Protected routes (quiz only accessible when logged in)
+- Protected routes (quiz, profile, leaderboard only accessible when logged in)
 
 ### Quiz Interface
 - Dynamic category/subject selection with dropdown menus
 - Difficulty levels (Easy, Medium, Hard)
 - Real-time question generation via backend API
-- Answer submission with feedback
+- AI-powered answer evaluation with detailed feedback
+- Answer submission with score and feedback
+
+### User Profile
+- Personal stats dashboard (XP, best category, average score)
+- Answer history with expandable cards (last 20 answers)
+- Performance chart showing trends over time (top 5 categories)
+- Last activity tracking
+
+### Leaderboard
+- Global top 10 users ranked by XP
+- User's current rank display
+- Real-time rankings
 
 ### UI/UX
 - Framer Motion for animations and transitions
 - Animated background component
 - Glass-morphism cards with backdrop blur
 - Dark theme with neon accents
-- Responsive design
+- Responsive design (mobile-first)
 - Toast notifications for user feedback
+- Loading states and error handling
 
 ### Accessibility
 - Radix UI components (semantic, accessible)
@@ -133,11 +150,13 @@ Usage in JSX:
 | Package | Purpose |
 |---------|---------|
 | React | UI library |
+| Redux Toolkit | State management |
 | React Router | Client-side routing |
 | Framer Motion | Animations & transitions |
 | Tailwind CSS | Utility-first styling |
 | Radix UI | Accessible UI components |
 | React Hot Toast | Notifications |
+| Recharts | Performance charts |
 | Vite | Build tool & dev server |
 
 ---
@@ -161,14 +180,36 @@ The `nginx.conf` is configured for production to serve the SPA, handle routing, 
 
 ## API Integration
 
-The frontend communicates with the Flask backend via HTTP requests.
+The frontend communicates with the backend via RESTful API using JWT authentication.
 
-Required backend endpoints:
-- `GET /api/categories`
-- `GET /api/subjects?category=X`
-- `POST /api/question/generate`
+### Core API Endpoints
 
-The frontend API wrapper is implemented in `react-app/src/api/quizAPI.js`.
+**Authentication:**
+- `POST /api/auth/google-login` - Google OAuth verification & JWT issuance
+
+**Quiz:**
+- `GET /api/all-subjects` - Get all categories with subjects (cached)
+- `POST /api/question/generate` - Generate AI question
+- `POST /api/answer/evaluate` - Evaluate answer with AI feedback
+- `POST /api/user/answers` - Save answer to history
+
+**Profile (Optimized - 3 Strategic Calls):**
+- `GET /api/user/profile` - User stats (XP, bestCategory, averageScore, totalAnswers, lastActivity)
+- `GET /api/user/history` - Last 20 full answers with details (paginated)
+- `GET /api/user/performance` - Aggregated chart data (top 5 categories, time-based)
+
+**Leaderboard:**
+- `GET /api/user/leaderboard/enhanced` - Top 10 users + current user rank
+
+### API Client
+All API calls are centralized in `react-app/src/api/quizAPI.js` with:
+- Automatic JWT token injection
+- Error handling and timeout management
+- Response normalization
+- Auth failure detection (auto-logout on 401)
+
+### Backend Requirements
+See `API_REQUIREMENTS.md` for detailed specifications of each endpoint including request/response formats, business logic, and implementation guidelines.
 
 ---
 

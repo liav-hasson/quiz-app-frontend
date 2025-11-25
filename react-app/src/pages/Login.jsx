@@ -19,20 +19,6 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate])
 
-  // This function is used for the "mini-version"
-  // allows for auto-login for localhost development
-  useEffect(() => {
-    if (window.location.hostname === 'localhost' && !isAuthenticated) {
-      console.log('Auto-login enabled for localhost development')
-      const mockUser = {
-        id: 'local-dev-user',
-        email: 'dev@localhost',
-        name: 'Local Developer',
-      }
-      dispatch(loginSuccess(mockUser))
-    }
-  }, [dispatch, isAuthenticated])
-
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     
@@ -67,13 +53,18 @@ export default function Login() {
       // Send Google credential to backend for verification
       const backendResponse = await loginUser({ token: credential })
       
+      // Check if backend call was successful
+      if (!backendResponse || backendResponse.ok === false) {
+        throw new Error(backendResponse?.error || 'Backend authentication failed')
+      }
+      
       // Backend returns our app's JWT token + user info
       const userData = {
         id: payload.sub,
-        email: backendResponse.email,
-        name: backendResponse.name,
-        picture: backendResponse.picture,
-        token: backendResponse.token,  // ✅ Our app's JWT token from backend
+        email: backendResponse.email || payload.email,
+        name: backendResponse.name || payload.name,
+        picture: backendResponse.picture || payload.picture,
+        token: backendResponse.token || credential,
       }
       
       dispatch(loginSuccess(userData))
@@ -81,6 +72,51 @@ export default function Login() {
     } catch (error) {
       console.error('Error processing Google Sign-In:', error)
       toast.error('Failed to login. Please try again.')
+    }
+  }
+
+  // DEV MODE: Simple dev login button (for when Google OAuth is not configured)
+  const handleDevLogin = async () => {
+    try {
+      // Create a mock Google credential for dev user
+      const devPayload = {
+        sub: 'dev-user-123',
+        email: 'developer@test.com',
+        name: 'Dev User',
+        picture: '/assets/Quizlabs-Icon.svg',
+      }
+      
+      // Create a simple JWT-like token for dev mode (not real JWT, just for structure)
+      const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }))
+      const payload = btoa(JSON.stringify(devPayload))
+      const mockCredential = `${header}.${payload}.dev-signature`
+      
+      // Send to backend to create/login dev user
+      const backendResponse = await loginUser({ token: mockCredential })
+      
+      // Use backend response if successful, otherwise use dev data
+      const userData = {
+        id: devPayload.sub,
+        email: backendResponse?.email || devPayload.email,
+        name: backendResponse?.name || devPayload.name,
+        picture: backendResponse?.picture || devPayload.picture,
+        token: backendResponse?.token || mockCredential,
+      }
+      
+      dispatch(loginSuccess(userData))
+      navigate('/quiz')
+    } catch (error) {
+      console.error('Dev login error:', error)
+      // Fallback to local-only dev login if backend fails
+      const devUser = {
+        id: 'dev-user-123',
+        email: 'developer@test.com',
+        name: 'Dev User',
+        picture: '/assets/Quizlabs-Icon.svg',
+        token: 'dev-token-123',
+      }
+      dispatch(loginSuccess(devUser))
+      navigate('/quiz')
     }
   }
 
@@ -115,8 +151,25 @@ export default function Login() {
               </div>
               {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
                 <p className="login-warning">
-                  ⚠️ Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.
+                  ⚠️ Google Client ID not configured. Add VITE_GOOGLE_CLIENT_ID to your .env file.
                 </p>
+              )}
+              
+              {/* DEV MODE: Quick login button for development */}
+              {import.meta.env.DEV && (
+                <>
+                  <div className="my-4 text-center text-sm text-muted-foreground">
+                    — OR —
+                  </div>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleDevLogin}
+                      className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
+                    >
+                      🚀 Dev Login (Skip Google)
+                    </button>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>

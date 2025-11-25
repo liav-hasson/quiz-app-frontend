@@ -8,8 +8,26 @@ import { createSlice } from '@reduxjs/toolkit'
 const loadUserFromStorage = () => {
   try {
     const stored = localStorage.getItem('quiz_user')
-    return stored ? JSON.parse(stored) : null
-  } catch {
+    if (!stored) return null
+    
+    const user = JSON.parse(stored)
+    
+    // Validate that user has at least an email
+    // Clear obvious mock data (dev@localhost without real auth)
+    if (!user || !user.email) {
+      localStorage.removeItem('quiz_user')
+      return null
+    }
+    
+    // Clear mock/dev users
+    if (user.email === 'dev@localhost' || user.id === 'local-dev-user') {
+      localStorage.removeItem('quiz_user')
+      return null
+    }
+    
+    return user
+  } catch (error) {
+    localStorage.removeItem('quiz_user')
     return null
   }
 }

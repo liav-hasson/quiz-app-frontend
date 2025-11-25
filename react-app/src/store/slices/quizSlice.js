@@ -115,6 +115,17 @@ export const fetchUserHistory = createAsyncThunk(
   }
 )
 
+export const fetchUserProfile = createAsyncThunk(
+  'quiz/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserProfile()
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 export const fetchUserBestCategory = createAsyncThunk(
   'quiz/fetchUserBestCategory',
   async (_, { rejectWithValue }) => {
@@ -177,7 +188,13 @@ const quizSlice = createSlice({
     loading: false,
     error: null,
 
-    // Best category (server provided)
+    // User profile stats (XP, bestCategory, etc.)
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    userProfileLoaded: false,
+
+    // Best category (server provided) - DEPRECATED: use userProfile.bestCategory
     bestCategory: null,
     bestCategoryLoading: false,
     bestCategoryError: null,
@@ -344,7 +361,25 @@ const quizSlice = createSlice({
         state.historyLoaded = false
       })
 
-      // Best category (server-provided)
+    // User Profile (XP, bestCategory, stats)
+    builder
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.userProfileLoading = true
+        state.userProfileError = null
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.userProfileLoading = false
+        state.userProfile = action.payload
+        state.userProfileLoaded = true
+        state.userProfileError = null
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.userProfileLoading = false
+        state.userProfileError = action.payload || 'Failed to fetch user profile'
+        state.userProfileLoaded = true
+      })
+
+      // Best category (server-provided) - DEPRECATED: use fetchUserProfile
       builder
         .addCase(fetchUserBestCategory.pending, (state) => {
           state.bestCategoryLoading = true
@@ -438,6 +473,14 @@ export const selectHistory = (state) => state.quiz.history
 export const selectHistoryLoading = (state) => state.quiz.historyLoading
 export const selectHistoryError = (state) => state.quiz.historyError
 export const selectHistoryLoaded = (state) => state.quiz.historyLoaded
+
+// User Profile selectors
+export const selectUserProfile = (state) => state.quiz.userProfile
+export const selectUserProfileLoading = (state) => state.quiz.userProfileLoading
+export const selectUserProfileError = (state) => state.quiz.userProfileError
+export const selectUserProfileLoaded = (state) => state.quiz.userProfileLoaded
+
+// Best Category selectors (deprecated - use selectUserProfile)
 export const selectBestCategory = (state) => state.quiz.bestCategory
 export const selectBestCategoryLoading = (state) => state.quiz.bestCategoryLoading
 export const selectBestCategoryError = (state) => state.quiz.bestCategoryError

@@ -2,6 +2,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 import { toggleTheme, selectIsDark } from '@/store/slices/themeSlice'
 
 export default function Header({ user, onLogout, onProfileClick }) {
@@ -18,6 +25,13 @@ export default function Header({ user, onLogout, onProfileClick }) {
       onProfileClick()
     }
   }
+
+  const handleLogout = () => {
+    if (typeof onLogout === 'function') {
+      onLogout()
+    }
+  }
+
   return (
     <header className="header-base">
       {/* Animated border gradient */}
@@ -40,38 +54,94 @@ export default function Header({ user, onLogout, onProfileClick }) {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          {/* Animated Logo */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="relative header-logo cursor-pointer"
-            onClick={() => navigate('/quiz')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <img
-              src="/assets/Quizlabs-Full-BW.svg"
-              alt="Quiz Labs Logo"
-            />
+          {/* Animated Logo with Dropdown (only when logged in) */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="relative header-logo cursor-pointer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <img
+                    src="/assets/Quizlabs-Full-BW.svg"
+                    alt="Quiz Labs Logo"
+                  />
 
-            {/* Subtle pulsing aura effect */}
+                  {/* Subtle pulsing aura effect */}
+                  <motion.div
+                    className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
+                    style={{
+                      background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
+                    }}
+                    animate={{
+                      scale: [1, 1.15, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </motion.div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-card">
+                <DropdownMenuItem onClick={() => navigate('/quiz')}>
+                  <span className="mr-2">🎯</span>
+                  Quiz
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleProfileClick}>
+                  <span className="mr-2">👤</span>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/leaderboard')}>
+                  <span className="mr-2">🏆</span>
+                  Leaderboard
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <span className="mr-2">🚪</span>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
             <motion.div
-              className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
-              style={{
-                background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
-              }}
-              animate={{
-                scale: [1, 1.15, 1],
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          </motion.div>
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="relative header-logo cursor-pointer"
+              onClick={() => navigate('/login')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <img
+                src="/assets/Quizlabs-Full-BW.svg"
+                alt="Quiz Labs Logo"
+              />
+
+              {/* Subtle pulsing aura effect */}
+              <motion.div
+                className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
+                }}
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </motion.div>
+          )}
 
           {/* Right side - Stats or Actions */}
           <div className="ml-auto flex items-center gap-4">
@@ -93,7 +163,7 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     aria-label={`View profile for ${user.name || user.email}`}
                   >
                     <img
-                      src={user?.picture ?? '/default-avatar.png'}
+                      src={user?.picture ?? '/assets/Quizlabs-Icon.svg'}
                       alt={user?.name ?? user?.email ?? 'User avatar'}
                       className="w-6 h-6 rounded-full"
                       loading="lazy"
@@ -103,16 +173,6 @@ export default function Header({ user, onLogout, onProfileClick }) {
                       {user.name || user.email}
                     </span>
                   </motion.button>
-
-                  {/* Logout button */}
-                  <Button
-                    onClick={onLogout}
-                    variant="outline"
-                    size="sm"
-                    className="header-logout-btn"
-                  >
-                    Logout
-                  </Button>
 
                   {/* Theme toggle button - rightmost */}
                   <Button
@@ -129,39 +189,26 @@ export default function Header({ user, onLogout, onProfileClick }) {
               
               {!user && (
                 <>
-                  {/* Fun fact or tip */}
-                  <motion.div
-                    initial={{ borderColor: 'var(--accent-primary-light)' }}
-                    className="header-guest-badge"
-                    whileHover={{ scale: 1.02, borderColor: 'var(--accent-primary-strong)' }}
+                  {/* Login button */}
+                  <Button
+                    onClick={() => navigate('/login')}
+                    variant="outline"
+                    size="sm"
+                    className="header-logout-btn"
                   >
-                    <motion.span
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                      className="text-lg"
-                    >
-                      💡
-                    </motion.span>
-                    <span className="header-badge-text">
-                      Test Your DevOps Skills
-                    </span>
-                  </motion.div>
+                    Login
+                  </Button>
 
-                  {/* Status indicator */}
-                  <motion.div
-                    initial={{ borderColor: 'var(--accent-secondary-light)' }}
-                    className="header-status-badge"
-                    whileHover={{ scale: 1.05, borderColor: 'var(--accent-secondary-strong)' }}
+                  {/* Theme toggle button */}
+                  <Button
+                    onClick={handleToggleTheme}
+                    variant="outline"
+                    size="sm"
+                    className="header-theme-btn"
+                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                   >
-                    <motion.span 
-                      className="text-lg"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      ⚡
-                    </motion.span>
-                    <span className="header-status-text">Ready</span>
-                  </motion.div>
+                    {isDark ? '☀️' : '🌙'}
+                  </Button>
                 </>
               )}
             </motion.div>

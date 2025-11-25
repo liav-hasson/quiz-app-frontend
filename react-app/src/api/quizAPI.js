@@ -199,8 +199,9 @@ export async function getUserHistory(params = {}) {
  */
 export async function getUserPerformance(params = {}) {
   const searchParams = new URLSearchParams()
-  if (params.limit) searchParams.set('limit', params.limit)
-  if (params.before) searchParams.set('before', params.before)
+  // Backend expects 'period' (7d, 30d, all) and 'granularity' (day, week)
+  if (params.period) searchParams.set('period', params.period)
+  if (params.granularity) searchParams.set('granularity', params.granularity)
   const query = searchParams.toString()
 
   const response = await fetchAPI(`/api/user/performance${query ? `?${query}` : ''}`)
@@ -216,6 +217,29 @@ export async function getUserPerformance(params = {}) {
 }
 
 /**
+ * Fetch authenticated user's profile data including stats
+ * @returns {Promise<{XP: number, bestCategory: string, totalAnswers: number, averageScore: number, lastActivity: string}>}
+ * Returns user stats calculated on backend
+ */
+export async function getUserProfile() {
+  const response = await fetchAPI('/api/user/profile')
+  
+  // If the request failed, return empty data
+  if (!response || response.ok === false) {
+    return { XP: 0, bestCategory: null, totalAnswers: 0, averageScore: null, lastActivity: null }
+  }
+  
+  return {
+    XP: response.XP ?? response.xp ?? 0,
+    bestCategory: response.bestCategory ?? response.best_category ?? null,
+    totalAnswers: response.totalAnswers ?? response.total_answers ?? 0,
+    averageScore: response.averageScore ?? response.average_score ?? null,
+    lastActivity: response.lastActivity ?? response.last_activity ?? null,
+  }
+}
+
+/**
+ * @deprecated Use getUserProfile() instead for user stats
  * Fetch user's best category as a single string (backend-preferred)
  * Preferred endpoint: GET /api/user/best-category -> { bestCategory: 'DevOps' }
  * Falls back to common keys if backend returns different shape.
@@ -230,4 +254,23 @@ export async function getUserBestCategory() {
     response.category ||
     null
   )
+}
+
+/**
+ * Fetch enhanced leaderboard data including top 10 users and current user's rank
+ * @returns {Promise<{topTen: Array<{rank: number, username: string, score: number, _id: string}>, userRank: number|null}>}
+ * Returns top 10 leaderboard entries and authenticated user's rank
+ */
+export async function getLeaderboard() {
+  const response = await fetchAPI('/api/user/leaderboard/enhanced')
+  
+  // If the request failed, return empty data
+  if (!response || response.ok === false) {
+    return { topTen: [], userRank: null }
+  }
+  
+  return {
+    topTen: response.topTen || response.top_ten || response.data?.topTen || [],
+    userRank: response.userRank ?? response.user_rank ?? response.data?.userRank ?? null,
+  }
 }
