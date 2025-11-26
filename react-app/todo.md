@@ -35,6 +35,7 @@
 
 - [ ] Logo
 	- [ ] Update to new logo
+	- [ ] Create animated logo
 
 ---
 
