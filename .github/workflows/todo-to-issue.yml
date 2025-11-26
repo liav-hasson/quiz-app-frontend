@@ -11,9 +11,7 @@ jobs:
       - name: Parse TODO.md and create issues
         uses: alstr/todo-to-issue-action@v4
         with:
-          FILES: react-app/todo.md
           LABEL: 'auto-todo'
-          REPO_TAG: ${{ github.repository }}
       - name: Auto-assign issues
         uses: kentaro-m/auto-assign-action@v1.2.1
   
