@@ -20,10 +20,12 @@ Required - JWT Bearer token in `Authorization` header
 ```json
 {
   "XP": 1250,
+  "streak": 12,
   "bestCategory": "DevOps",
   "totalAnswers": 47,
   "averageScore": 7.5,
   "lastActivity": "2025-11-24T15:30:00Z",
+  "joiningDate":  "2025-10-05T12:30:00Z",
   "name": "John Doe",
   "email": "john.doe@example.com",
   "picture": "https://example.com/avatar.jpg",
@@ -36,10 +38,12 @@ Required - JWT Bearer token in `Authorization` header
 | Field | Type | Description | Calculation |
 |-------|------|-------------|-------------|
 | `XP` | number | Total experience points earned | Sum of all XP from completed answers |
+| `streak` | number | Numbers of days in a row with site activity | alculated in acticity
 | `bestCategory` | string | Category with highest average score | Category name where user has best performance (avg score) |
 | `totalAnswers` | number | Total number of answers submitted | Count of all answer records |
 | `averageScore` | number | Average score across all answers | `SUM(scores) / COUNT(answers)` rounded to 1 decimal |
 | `lastActivity` | string (ISO 8601) | Most recent answer timestamp | MAX(created_at) from answers table |
+| `joiningDate` | string (ISO 8601) | User creation timestamp | From user profile
 | `name` | string | User's display name | From user profile |
 | `email` | string | User's email address | From user profile |
 | `picture` | string | User's avatar URL | From user profile |
