@@ -27,11 +27,7 @@
 	- [ ] Add background
 	- [ ] Use white text color (consider app-wide)
 	- [ ] Remove icons
-	- [ ] Appear on hover; click navigates to quiz (home)
-
-- [ ] History Section
-	- [ ] Add "Collapse All" / "Open All" toggle
-	- [ ] Highlight best/worst answer
+	- [ ] Move to right side of header (not from logo)
 
 - [ ] Logo
 	- [ ] Update to new logo
@@ -43,6 +39,8 @@
 
 - [ ] History
 	- [ ] Add pagination to history list
+	- [ ] Add "Collapse All" / "Open All" toggle
+	- [ ] Highlight best/worst answer
 
 ---
 
