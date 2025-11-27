@@ -7,13 +7,8 @@
 // Check if we should use mock API (for frontend-only development)
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
 
-// If using mock API, import and re-export all functions from mockAPI
-if (USE_MOCK_API) {
-  console.log('🎭 Using Mock API - No backend required!')
-  export * from './mockAPI.js'
-} else {
-  // Normal API implementation below
-}
+// If using mock API, import all functions from mockAPI
+import * as mockAPI from './mockAPI.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 const DEFAULT_TIMEOUT = 30000 // 30 seconds
@@ -101,6 +96,10 @@ async function fetchAPI(url, options = {}) {
  * @returns {Promise<{email: string, name: string, picture: string, token: string}>} Login response with JWT token and user info
  */
 export async function loginUser(userData) {
+  if (USE_MOCK_API) {
+    console.log('🎭 Using Mock API - No backend required!')
+    return mockAPI.loginUser(userData)
+  }
   return await fetchAPI('/api/auth/google-login', {
     method: 'POST',
     body: JSON.stringify({
@@ -118,6 +117,7 @@ export async function loginUser(userData) {
  * @throws {Error} If API request fails
  */
 export async function getCategoriesWithSubjects() {
+  if (USE_MOCK_API) return mockAPI.getCategoriesWithSubjects()
   const response = await fetchAPI('/api/all-subjects')
   return response.data || {}
 }
@@ -131,6 +131,7 @@ export async function getCategoriesWithSubjects() {
  * @throws {Error} If API request fails or generation fails
  */
 export async function generateQuestion(category, subject, difficulty) {
+  if (USE_MOCK_API) return mockAPI.generateQuestion(category, subject, difficulty)
   return await fetchAPI('/api/question/generate', {
     method: 'POST',
     body: JSON.stringify({ category, subject, difficulty }),
@@ -146,6 +147,7 @@ export async function generateQuestion(category, subject, difficulty) {
  * @throws {Error} If API request fails or evaluation fails
  */
 export async function evaluateAnswer(question, answer, difficulty) {
+  if (USE_MOCK_API) return mockAPI.evaluateAnswer(question, answer, difficulty)
   const data = await fetchAPI('/api/answer/evaluate', {
     method: 'POST',
     body: JSON.stringify({ question, answer, difficulty }),
@@ -171,6 +173,7 @@ export async function evaluateAnswer(question, answer, difficulty) {
  * @throws {Error} If API request fails
  */
 export async function saveAnswerHistory(payload) {
+  if (USE_MOCK_API) return mockAPI.saveAnswerHistory(payload)
   return await fetchAPI('/api/user/answers', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -186,6 +189,7 @@ export async function saveAnswerHistory(payload) {
  * @throws {Error} If API request fails or user not authenticated
  */
 export async function getUserHistory(params = {}) {
+  if (USE_MOCK_API) return mockAPI.getUserHistory(params)
   const searchParams = new URLSearchParams()
   if (params.limit) {
     searchParams.set('limit', params.limit)
@@ -209,6 +213,7 @@ export async function getUserHistory(params = {}) {
  * }
  */
 export async function getUserPerformance(params = {}) {
+  if (USE_MOCK_API) return mockAPI.getUserPerformance(params)
   const searchParams = new URLSearchParams()
   // Backend expects 'period' (7d, 30d, all) and 'granularity' (day, week)
   if (params.period) searchParams.set('period', params.period)
@@ -233,6 +238,7 @@ export async function getUserPerformance(params = {}) {
  * Returns user stats calculated on backend
  */
 export async function getUserProfile() {
+  if (USE_MOCK_API) return mockAPI.getUserProfile()
   const response = await fetchAPI('/api/user/profile')
   
   // If the request failed, return empty data
@@ -256,6 +262,7 @@ export async function getUserProfile() {
  * Falls back to common keys if backend returns different shape.
  */
 export async function getUserBestCategory() {
+  if (USE_MOCK_API) return mockAPI.getUserBestCategory()
   const response = await fetchAPI('/api/user/best-category')
   return (
     response.bestCategory ||
@@ -273,6 +280,7 @@ export async function getUserBestCategory() {
  * Returns top 10 leaderboard entries and authenticated user's rank
  */
 export async function getLeaderboard() {
+  if (USE_MOCK_API) return mockAPI.getLeaderboard()
   const response = await fetchAPI('/api/user/leaderboard/enhanced')
   
   // If the request failed, return empty data
