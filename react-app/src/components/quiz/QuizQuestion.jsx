@@ -120,6 +120,7 @@ export default function QuizQuestion() {
             </Label>
             <Textarea
               id="answer"
+              name="answer"
               value={userAnswer}
               onChange={handleAnswerChange}
               placeholder="Type your answer here..."
@@ -139,11 +140,11 @@ export default function QuizQuestion() {
           </Button>
           <Button 
             onClick={handleSubmit}
-            className="quiz-question-submit-btn"
+            className="quiz-setup-generate-btn"
             size="lg"
             disabled={loading || !userAnswer.trim()}
           >
-            {loading ? 'Evaluating...' : 'Submit Answer'}
+            <span>{loading ? 'Evaluating...' : 'Submit Answer'}</span>
           </Button>
         </CardFooter>
       </Card>

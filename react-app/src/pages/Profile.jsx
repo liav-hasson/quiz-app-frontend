@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -11,10 +11,14 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   fetchUserHistory,
+  fetchUserProfile,
   selectHistory,
   selectHistoryLoading,
   selectHistoryError,
   selectHistoryLoaded,
+  selectUserProfile,
+  selectUserProfileLoading,
+  selectUserProfileLoaded,
   resetQuiz,
   clearHistory,
 } from '@/store/slices/quizSlice'
@@ -51,37 +55,45 @@ export default function Profile() {
   const historyLoading = useSelector(selectHistoryLoading)
   const historyError = useSelector(selectHistoryError)
   const historyLoaded = useSelector(selectHistoryLoaded)
+  const userProfile = useSelector(selectUserProfile)
+  const userProfileLoading = useSelector(selectUserProfileLoading)
+  const userProfileLoaded = useSelector(selectUserProfileLoaded)
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login')
-    }
+    // ProtectedRoute already guards pages; avoid redirect here to prevent
+    // accidental blank render during transient auth state (e.g. hydration).
   }, [user, navigate])
 
+  // Fetch user profile (XP, bestCategory, stats) on mount
   useEffect(() => {
-    if (user && !historyLoaded) {
+    if (user && !userProfileLoaded && !userProfileLoading) {
+      dispatch(fetchUserProfile())
+    }
+  }, [dispatch, user, userProfileLoaded, userProfileLoading])
+
+  useEffect(() => {
+    if (user && !historyLoaded && !historyLoading) {
       dispatch(fetchUserHistory())
     }
-  }, [dispatch, user, historyLoaded])
+  }, [dispatch, user, historyLoaded, historyLoading])
 
   const stats = useMemo(() => {
-    const numericScores = history
-      .map((entry) => parseScoreValue(entry?.summary?.score))
-      .filter((value) => typeof value === 'number')
-    const totalAnswers = history.length
-    const averageScore = numericScores.length
-      ? Math.round(numericScores.reduce((sum, value) => sum + value, 0) / numericScores.length)
-      : null
-    const bestScore = numericScores.length ? Math.max(...numericScores) : null
-    const lastActivity = history[0]?.summary?.created_at
-
+    // Only calculate lastActivity from history (for display formatting)
+    // All other stats come from userProfile API
+    const lastActivity = history
+      .map((e) => e?.summary?.created_at)
+      .filter(Boolean)
+      .map((d) => new Date(d))
+      .filter((d) => !Number.isNaN(d.getTime()))
+      .sort((a, b) => b - a)[0]
+    
     return {
-      totalAnswers,
-      averageScore,
-      bestScore,
+      totalAnswers: userProfile?.totalAnswers ?? history.length,
+      averageScore: userProfile?.averageScore ?? null,
+      bestCategory: userProfile?.bestCategory ?? null,
       lastActivity: formatDate(lastActivity),
     }
-  }, [history])
+  }, [history, userProfile])
 
   const handleRefreshHistory = () => {
     dispatch(fetchUserHistory())
@@ -127,7 +139,7 @@ export default function Profile() {
                     <CardTitle className="profile-user-name">{user?.name || 'Quiz Explorer'}</CardTitle>
                     <p className="profile-user-email">{user?.email}</p>
                     <Badge variant="secondary" className="profile-role-pill">
-                      Lifelong Learner
+                      {typeof user?.role === 'string' ? user.role : 'Lifelong Learner'}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -147,11 +159,13 @@ export default function Profile() {
             <div className="profile-stats-grid">
               <Card className="profile-card">
                 <CardHeader>
-                  <CardTitle>Total Answers</CardTitle>
+                  <CardTitle>Total XP</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="profile-stat-value">{stats.totalAnswers}</p>
-                  <p className="profile-stat-label">Recorded attempts</p>
+                  <p className="profile-stat-value">
+                    {typeof userProfile?.XP === 'number' ? `${userProfile.XP}` : '—'}
+                  </p>
+                  {/* <p className="profile-stat-label">Recorded attempts</p> */}
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -160,20 +174,27 @@ export default function Profile() {
                 </CardHeader>
                 <CardContent>
                   <p className="profile-stat-value">
-                    {typeof stats.averageScore === 'number' ? `${stats.averageScore}/10` : '—'}
+                    {typeof stats.averageScore === 'number' ? `${stats.averageScore}` : '—'}
                   </p>
-                  <p className="profile-stat-label">Across saved answers</p>
+                  {/* <p className="profile-stat-label">Across all answers</p> */}
                 </CardContent>
               </Card>
               <Card className="profile-card">
                 <CardHeader>
-                  <CardTitle>Best Subject</CardTitle>
+                  <CardTitle>Best Category</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="profile-stat-value">
-                    {typeof stats.bestSubject === 'string' ? `${stats.bestSubject}` : '—'}
-                  </p>
-                  <p className="profile-stat-label">Peak Subject</p>
+                    <p className="profile-stat-value">{stats.bestCategory || '—'}</p>
+                  {/* <p className="profile-stat-label">Peak Category</p> */}
+                </CardContent>
+              </Card>
+              <Card className="profile-card">
+                <CardHeader>
+                  <CardTitle>Total Answers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="profile-stat-value">{stats.totalAnswers}</p>
+                  <p className="profile-stat-label">Recorded attempts</p>
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -194,10 +215,7 @@ export default function Profile() {
                 <CardTitle>Performance Over Time</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="profile-chart-subtitle text-muted-foreground mb-4">
-                  Visualize your score trends and improvement areas.
-                </p>
-                <PerformanceChart history={history} />
+                <PerformanceChart />
               </CardContent>
             </Card>
           </section>

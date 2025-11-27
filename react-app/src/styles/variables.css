@@ -9,6 +9,10 @@
   --color-vivid-purple: #B24DDD;   /* Vibrant purple - middle */
   --color-bright-blue: #2976C7;    /* Bright blue - lightest */
 
+  --color-purple-bright: #D7ABE0;
+  --color-navy-bright: #91a3db;
+  --color-blue-bright: #82cdf3;
+
   /* RGB helpers (for rgba variants) */
   --color-deep-navy-rgb: 10, 17, 93;
   --color-vivid-purple-rgb: 178, 77, 221;
@@ -84,6 +88,13 @@
   --accent-septenary-medium: rgba(var(--color-vivid-purple-rgb), 0.4);
   --accent-septenary-strong: rgba(var(--color-vivid-purple-rgb), 0.65);
 
+  /* Chart color variables (used by PerformanceChart) */
+  --chart-color-1: var(--accent-secondary);
+  --chart-color-2: #E86666;
+  --chart-color-3: #4FA3FF;
+  --chart-color-4: #7AE582;
+  --chart-color-5: #F6C85F;
+  --chart-color-6: #C88CFF;
 
   /* Background & Text - DARK MODE (default) */
   --bg-dark: var(--color-dark-bg);
@@ -98,9 +109,9 @@
 
   /* shadcn/ui compatibility tokens - Dark Mode */
   --background: 234 71% 20%;
-  --foreground: 0 0% 96%;
+  --foreground: 0 0% 98%;
   --card: 234 63% 25%;
-  --card-foreground: 0 0% 96%;
+  --card-foreground: 0 0% 98%;
   --popover: 234 63% 25%;
   --popover-foreground: 0 0% 96%;
   --primary: 266 58% 58%;
@@ -122,10 +133,10 @@
      GRADIENT CSS VARIABLES - Using the 3-color gradient
      ======================================================================== */
   --gradient-primary: linear-gradient(
-    135deg,
-    var(--color-deep-navy) 0%,
-    var(--color-vivid-purple) 50%,
-    var(--color-bright-blue) 100%
+    120deg,
+    var(--accent-secondary) 0%,
+    var(--color-purple-bright) 50%,
+    var(--accent-secondary) 100%
   );
   --gradient-neon-purple: linear-gradient(
     135deg,

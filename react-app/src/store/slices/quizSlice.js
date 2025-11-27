@@ -100,6 +100,69 @@ export const fetchUserHistory = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message)
     }
+  },
+  {
+    // Prevent duplicate fetches when a request is already in-flight or
+    // when data is already loaded. Pass `{ force: true }` in params to
+    // bypass this guard and force a re-fetch.
+    condition: (params = {}, { getState }) => {
+      const state = getState()
+      const quiz = state.quiz || {}
+      if (quiz.historyLoading) return false
+      if (quiz.historyLoaded && !params.force) return false
+      return true
+    },
+  }
+)
+
+export const fetchUserProfile = createAsyncThunk(
+  'quiz/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserProfile()
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
+export const fetchUserBestCategory = createAsyncThunk(
+  'quiz/fetchUserBestCategory',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserBestCategory()
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  },
+  {
+    condition: (_arg, { getState }) => {
+      const state = getState()
+      const quiz = state.quiz || {}
+      if (quiz.bestCategoryLoading) return false
+      if (quiz.bestCategoryLoaded) return false
+      return true
+    },
+  }
+)
+
+export const fetchUserPerformance = createAsyncThunk(
+  'quiz/fetchUserPerformance',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserPerformance(params)
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  },
+  {
+    condition: (params = {}, { getState }) => {
+      const state = getState()
+      const quiz = state.quiz || {}
+      if (quiz.performanceLoading) return false
+      if (quiz.performanceLoaded && !params.force) return false
+      return true
+    },
   }
 )
 
@@ -124,6 +187,24 @@ const quizSlice = createSlice({
     currentPage: 'setup', // 'setup' | 'question' | 'results'
     loading: false,
     error: null,
+
+    // User profile stats (XP, bestCategory, etc.)
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    userProfileLoaded: false,
+
+    // Best category (server provided) - DEPRECATED: use userProfile.bestCategory
+    bestCategory: null,
+    bestCategoryLoading: false,
+    bestCategoryError: null,
+    bestCategoryLoaded: false,
+
+    // Performance data for charts
+    performance: [],
+    performanceLoading: false,
+    performanceError: null,
+    performanceLoaded: false,
 
     // History state
     history: [],
@@ -279,6 +360,85 @@ const quizSlice = createSlice({
         state.historyError = action.payload
         state.historyLoaded = false
       })
+
+    // User Profile (XP, bestCategory, stats)
+    builder
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.userProfileLoading = true
+        state.userProfileError = null
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.userProfileLoading = false
+        state.userProfile = action.payload
+        state.userProfileLoaded = true
+        state.userProfileError = null
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.userProfileLoading = false
+        state.userProfileError = action.payload || 'Failed to fetch user profile'
+        state.userProfileLoaded = true
+      })
+
+      // Best category (server-provided) - DEPRECATED: use fetchUserProfile
+      builder
+        .addCase(fetchUserBestCategory.pending, (state) => {
+          state.bestCategoryLoading = true
+          state.bestCategoryError = null
+          state.bestCategoryLoaded = false
+        })
+        .addCase(fetchUserBestCategory.fulfilled, (state, action) => {
+          state.bestCategoryLoading = false
+          // Accept string value or try to coerce common shapes. If the backend
+          // returns a nested object, attempt to extract a string value. If
+          // extraction fails keep null but mark as loaded so we don't keep
+          // refetching indefinitely.
+          if (typeof action.payload === 'string') {
+            state.bestCategory = action.payload
+          } else if (action.payload && typeof action.payload === 'object') {
+            const v = action.payload.bestCategory || action.payload.best_category || action.payload.category || null
+            state.bestCategory = typeof v === 'string' ? v : null
+          } else {
+            state.bestCategory = null
+          }
+          state.bestCategoryLoaded = true
+        })
+        .addCase(fetchUserBestCategory.rejected, (state, action) => {
+          state.bestCategoryLoading = false
+          state.bestCategoryError = action.payload
+          state.bestCategory = null
+          state.bestCategoryLoaded = true
+        })
+
+      // Performance data
+      builder
+        .addCase(fetchUserPerformance.pending, (state) => {
+          state.performanceLoading = true
+          state.performanceError = null
+        })
+        .addCase(fetchUserPerformance.fulfilled, (state, action) => {
+          state.performanceLoading = false
+          // Normalize payload to array if possible. If API returned an error object
+          // (e.g., { ok: false, error: '...' }) convert to empty array so UI
+          // components receive a predictable array shape.
+          const payload = action.payload
+          let arr = []
+          if (Array.isArray(payload)) {
+            arr = payload
+          } else if (payload && Array.isArray(payload.performance)) {
+            arr = payload.performance
+          } else if (payload && Array.isArray(payload.data)) {
+            arr = payload.data
+          } else {
+            arr = []
+          }
+          state.performance = arr
+          state.performanceLoaded = true
+        })
+        .addCase(fetchUserPerformance.rejected, (state, action) => {
+          state.performanceLoading = false
+          state.performanceError = action.payload
+          state.performanceLoaded = false
+        })
   },
 })
 
@@ -313,5 +473,21 @@ export const selectHistory = (state) => state.quiz.history
 export const selectHistoryLoading = (state) => state.quiz.historyLoading
 export const selectHistoryError = (state) => state.quiz.historyError
 export const selectHistoryLoaded = (state) => state.quiz.historyLoaded
+
+// User Profile selectors
+export const selectUserProfile = (state) => state.quiz.userProfile
+export const selectUserProfileLoading = (state) => state.quiz.userProfileLoading
+export const selectUserProfileError = (state) => state.quiz.userProfileError
+export const selectUserProfileLoaded = (state) => state.quiz.userProfileLoaded
+
+// Best Category selectors (deprecated - use selectUserProfile)
+export const selectBestCategory = (state) => state.quiz.bestCategory
+export const selectBestCategoryLoading = (state) => state.quiz.bestCategoryLoading
+export const selectBestCategoryError = (state) => state.quiz.bestCategoryError
+export const selectBestCategoryLoaded = (state) => state.quiz.bestCategoryLoaded
+
+export const selectPerformance = (state) => state.quiz.performance
+export const selectPerformanceLoading = (state) => state.quiz.performanceLoading
+export const selectPerformanceLoaded = (state) => state.quiz.performanceLoaded
 
 export default quizSlice.reducer

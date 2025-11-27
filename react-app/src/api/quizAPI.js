@@ -43,26 +43,42 @@ async function fetchAPI(url, options = {}) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-    
-    // Handle authentication errors - clear session and redirect to login
-    if (response.status === 401 || 
+
+      // Handle authentication errors - clear session and redirect to login
+      if (
+        response.status === 401 ||
         (response.status === 404 && errorData.error?.includes('User not found')) ||
-        (response.status === 400 && errorData.error?.includes('Authentication required'))) {
-      localStorage.removeItem('quiz_user')
-      window.location.href = '/login'
-      throw new Error(errorData.error || 'Session expired. Please login again.')
-    }
-    
-      throw new Error(errorData.error || `API Error: ${response.status}`)
+        (response.status === 400 && errorData.error?.includes('Authentication required'))
+      ) {
+        localStorage.removeItem('quiz_user')
+        window.location.href = '/login'
+        // keep throwing here to stop further execution if auth is invalid
+        throw new Error(errorData.error || 'Session expired. Please login again.')
+      }
+
+      // For other non-auth errors (backend down, 403, 404 generic, etc.) return a structured
+      // error object instead of throwing. Callers should handle missing data gracefully.
+      return {
+        ok: false,
+        status: response.status,
+        error: errorData.error || `API Error: ${response.status}`,
+        data: errorData,
+      }
     }
 
-    return response.json()
+    const json = await response.json().catch(() => null)
+    return {
+      ok: true,
+      status: response.status,
+      data: json,
+      ...json,
+    }
   } catch (error) {
     clearTimeout(timeoutId)
     if (error.name === 'AbortError') {
-      throw new Error('Request timeout - please try again')
+      return { ok: false, status: null, error: 'Request timeout - please try again' }
     }
-    throw error
+    return { ok: false, status: null, error: error.message || String(error) }
   }
 }
 
@@ -169,4 +185,92 @@ export async function getUserHistory(params = {}) {
   const query = searchParams.toString()
   const response = await fetchAPI(`/api/user/history${query ? `?${query}` : ''}`)
   return response.history || []
+}
+
+/**
+ * Fetch user performance summary suitable for charting
+ * Preferred response shape (example):
+ * {
+ *   performance: [
+ *     { date: '2025-11-01T12:00:00Z', overall: 7, categories: { DevOps: 7, Programming: 6 } },
+ *     ...
+ *   ]
+ * }
+ */
+export async function getUserPerformance(params = {}) {
+  const searchParams = new URLSearchParams()
+  // Backend expects 'period' (7d, 30d, all) and 'granularity' (day, week)
+  if (params.period) searchParams.set('period', params.period)
+  if (params.granularity) searchParams.set('granularity', params.granularity)
+  const query = searchParams.toString()
+
+  const response = await fetchAPI(`/api/user/performance${query ? `?${query}` : ''}`)
+
+  // If the request failed (backend down, 403, etc.), return an empty array so callers
+  // (charts/components) can render a friendly empty state without throwing.
+  if (!response || response.ok === false) return []
+
+  // Try common shapes: top-level `performance`, `data.performance`, or `data` as array
+  return (
+    response.performance || response.data?.performance || response.data || response
+  )
+}
+
+/**
+ * Fetch authenticated user's profile data including stats
+ * @returns {Promise<{XP: number, bestCategory: string, totalAnswers: number, averageScore: number, lastActivity: string}>}
+ * Returns user stats calculated on backend
+ */
+export async function getUserProfile() {
+  const response = await fetchAPI('/api/user/profile')
+  
+  // If the request failed, return empty data
+  if (!response || response.ok === false) {
+    return { XP: 0, bestCategory: null, totalAnswers: 0, averageScore: null, lastActivity: null }
+  }
+  
+  return {
+    XP: response.XP ?? response.xp ?? 0,
+    bestCategory: response.bestCategory ?? response.best_category ?? null,
+    totalAnswers: response.totalAnswers ?? response.total_answers ?? 0,
+    averageScore: response.averageScore ?? response.average_score ?? null,
+    lastActivity: response.lastActivity ?? response.last_activity ?? null,
+  }
+}
+
+/**
+ * @deprecated Use getUserProfile() instead for user stats
+ * Fetch user's best category as a single string (backend-preferred)
+ * Preferred endpoint: GET /api/user/best-category -> { bestCategory: 'DevOps' }
+ * Falls back to common keys if backend returns different shape.
+ */
+export async function getUserBestCategory() {
+  const response = await fetchAPI('/api/user/best-category')
+  return (
+    response.bestCategory ||
+    response.best_category ||
+    response.data?.bestCategory ||
+    response.data?.best_category ||
+    response.category ||
+    null
+  )
+}
+
+/**
+ * Fetch enhanced leaderboard data including top 10 users and current user's rank
+ * @returns {Promise<{topTen: Array<{rank: number, username: string, score: number, _id: string}>, userRank: number|null}>}
+ * Returns top 10 leaderboard entries and authenticated user's rank
+ */
+export async function getLeaderboard() {
+  const response = await fetchAPI('/api/user/leaderboard/enhanced')
+  
+  // If the request failed, return empty data
+  if (!response || response.ok === false) {
+    return { topTen: [], userRank: null }
+  }
+  
+  return {
+    topTen: response.topTen || response.top_ten || response.data?.topTen || [],
+    userRank: response.userRank ?? response.user_rank ?? response.data?.userRank ?? null,
+  }
 }

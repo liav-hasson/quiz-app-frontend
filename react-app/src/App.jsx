@@ -1,13 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { useEffect } from 'react'
+import { useEffect, Suspense, lazy } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { selectIsAuthenticated } from './store/slices/authSlice'
 import { selectIsDark } from './store/slices/themeSlice'
 import AnimatedBackground from './components/AnimatedBackground'
-import Login from './pages/Login'
-import Quiz from './pages/Quiz'
-import Profile from './pages/Profile'
+// Lazy-loaded pages to enable route-based code-splitting
+const Login = lazy(() => import('./pages/Login'))
+const Quiz = lazy(() => import('./pages/Quiz'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Leaderboard = lazy(() => import('./pages/Leaderboard'))
 
 // Protected route component
 function ProtectedRoute({ children }) {
@@ -50,27 +52,39 @@ export default function App() {
       
       {/* Routes are rendered on top of the background */}
       <div className="relative z-10">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/quiz"
-            element={
-              <ProtectedRoute>
-                <Quiz />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/quiz" replace />} />
-          <Route path="*" element={<Navigate to="/quiz" replace />} />
-        </Routes>
+        <Suspense fallback={(
+          <div className="flex items-center justify-center h-64 text-muted-foreground">Loading…</div>
+        )}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/quiz"
+              element={
+                <ProtectedRoute>
+                  <Quiz />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leaderboard"
+              element={
+                <ProtectedRoute>
+                  <Leaderboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/quiz" replace />} />
+            <Route path="*" element={<Navigate to="/quiz" replace />} />
+          </Routes>
+        </Suspense>
       </div>
     </>
   )
