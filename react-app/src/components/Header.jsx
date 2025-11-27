@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -131,33 +132,6 @@ export default function Header({ user, onLogout, onProfileClick }) {
             >
               {user && (
                 <>
-                  {/* Navigation Dropdown Menu */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="header-menu-btn"
-                      >
-                        Menu
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-sm">
-                      <DropdownMenuItem onClick={() => navigate('/quiz')} className="text-white">
-                        Quiz
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleProfileClick} className="text-white">
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="text-white">
-                        Leaderboard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleLogout} className="text-white">
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
                   {/* User info */}
                   <motion.button
                     type="button"
@@ -179,7 +153,7 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     </span>
                   </motion.button>
 
-                  {/* Theme toggle button - rightmost */}
+                  {/* Theme toggle button */}
                   <Button
                     onClick={handleToggleTheme}
                     variant="outline"
@@ -189,6 +163,34 @@ export default function Header({ user, onLogout, onProfileClick }) {
                   >
                     {isDark ? '☀️' : '🌙'}
                   </Button>
+
+                  {/* Navigation Dropdown Menu - rightmost */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="header-menu-btn"
+                        aria-label="Menu"
+                      >
+                        <Menu className="w-5 h-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-sm">
+                      <DropdownMenuItem onClick={() => navigate('/quiz')} className="text-white">
+                        Quiz
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleProfileClick} className="text-white">
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="text-white">
+                        Leaderboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout} className="text-white">
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               )}
               

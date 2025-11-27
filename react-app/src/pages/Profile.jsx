@@ -6,8 +6,13 @@ import Header from '@/components/Header'
 import AnimatedBorder from '@/components/AnimatedBorder'
 import HistoryCard from '@/components/profile/HistoryCard'
 import PerformanceChart from '@/components/profile/PerformanceChart'
+import CategoryRadarChart from '@/components/profile/CategoryRadarChart'
+import StreakCard from '@/components/profile/StreakCard'
+import StudyRecommendations from '@/components/profile/StudyRecommendations'
+import ShareProfile from '@/components/profile/ShareProfile'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import {
   fetchUserHistory,
@@ -58,6 +63,9 @@ export default function Profile() {
   const userProfile = useSelector(selectUserProfile)
   const userProfileLoading = useSelector(selectUserProfileLoading)
   const userProfileLoaded = useSelector(selectUserProfileLoaded)
+  
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   useEffect(() => {
     // ProtectedRoute already guards pages; avoid redirect here to prevent
@@ -78,25 +86,32 @@ export default function Profile() {
   }, [dispatch, user, historyLoaded, historyLoading])
 
   const stats = useMemo(() => {
-    // Only calculate lastActivity from history (for display formatting)
-    // All other stats come from userProfile API
-    const lastActivity = history
-      .map((e) => e?.summary?.created_at)
-      .filter(Boolean)
-      .map((d) => new Date(d))
-      .filter((d) => !Number.isNaN(d.getTime()))
-      .sort((a, b) => b - a)[0]
-    
+    // Stats come from userProfile API
     return {
       totalAnswers: userProfile?.totalAnswers ?? history.length,
       averageScore: userProfile?.averageScore ?? null,
       bestCategory: userProfile?.bestCategory ?? null,
-      lastActivity: formatDate(lastActivity),
     }
   }, [history, userProfile])
 
+  // Pagination for history
+  const paginatedHistory = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return history.slice(startIndex, endIndex)
+  }, [history, currentPage, itemsPerPage])
+
+  const totalPages = Math.ceil(history.length / itemsPerPage)
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage)
+    // Scroll to history section
+    document.querySelector('.profile-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const handleRefreshHistory = () => {
     dispatch(fetchUserHistory())
+    setCurrentPage(1) // Reset to first page on refresh
   }
 
   const handleBackToQuiz = () => {
@@ -139,14 +154,39 @@ export default function Profile() {
                     <CardTitle className="profile-user-name">{user?.name || 'Quiz Explorer'}</CardTitle>
                     <p className="profile-user-email">{user?.email}</p>
                     <Badge variant="secondary" className="profile-role-pill">
-                      {typeof user?.role === 'string' ? user.role : 'Lifelong Learner'}
+                      {userProfile?.levelName || 'Novice'}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="profile-user-copy">
+                  <p className="profile-user-copy mb-4">
                     Track your AI-evaluated answers, monitor progress, and keep sharpening your DevOps mastery.
                   </p>
+                  {userProfile?.levelProgress && (
+                    <div className="profile-progress-card">
+                      <div className="profile-progress-header">
+                        <div>
+                          <p className="profile-progress-label">Next Level</p>
+                          <p className="profile-progress-value">
+                            {userProfile.levelProgress.nextLevelName}
+                          </p>
+                        </div>
+                        <div className="profile-progress-percentage">
+                          <p className="profile-progress-label">Progress</p>
+                          <p className="profile-progress-value">
+                            {Math.round(userProfile.levelProgress.progressPercentage || 0)}%
+                          </p>
+                        </div>
+                      </div>
+                      <Progress 
+                        value={userProfile.levelProgress.progressPercentage || 0} 
+                        className="profile-progress-bar"
+                      />
+                      <p className="profile-progress-xp">
+                        {userProfile.levelProgress.xpIntoLevel || 0} / {userProfile.levelProgress.xpNeeded || 0} XP
+                      </p>
+                    </div>
+                  )}
                   <div className="profile-user-actions">
                     <Button variant="outline" onClick={handleBackToQuiz}>
                       Back to Quiz
@@ -165,7 +205,6 @@ export default function Profile() {
                   <p className="profile-stat-value">
                     {typeof userProfile?.XP === 'number' ? `${userProfile.XP}` : '—'}
                   </p>
-                  {/* <p className="profile-stat-label">Recorded attempts</p> */}
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -176,7 +215,6 @@ export default function Profile() {
                   <p className="profile-stat-value">
                     {typeof stats.averageScore === 'number' ? `${stats.averageScore}` : '—'}
                   </p>
-                  {/* <p className="profile-stat-label">Across all answers</p> */}
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -185,7 +223,6 @@ export default function Profile() {
                 </CardHeader>
                 <CardContent>
                     <p className="profile-stat-value">{stats.bestCategory || '—'}</p>
-                  {/* <p className="profile-stat-label">Peak Category</p> */}
                 </CardContent>
               </Card>
               <Card className="profile-card">
@@ -197,17 +234,16 @@ export default function Profile() {
                   <p className="profile-stat-label">Recorded attempts</p>
                 </CardContent>
               </Card>
-              <Card className="profile-card">
-                <CardHeader>
-                  <CardTitle>Last Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="profile-stat-value text-base">{stats.lastActivity}</p>
-                  <p className="profile-stat-label">Most recent answer</p>
-                </CardContent>
-              </Card>
             </div>
           </motion.section>
+
+          <section className="profile-streak-section">
+            <Card className="profile-card">
+              <CardContent className="profile-streak-content">
+                <StreakCard />
+              </CardContent>
+            </Card>
+          </section>
 
           <section className="profile-chart-section">
             <Card className="profile-card">
@@ -218,6 +254,25 @@ export default function Profile() {
                 <PerformanceChart />
               </CardContent>
             </Card>
+          </section>
+
+          <section className="profile-chart-section">
+            <Card className="profile-card">
+              <CardHeader>
+                <CardTitle>Knowledge by Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CategoryRadarChart />
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="profile-chart-section">
+            <StudyRecommendations />
+          </section>
+
+          <section className="profile-chart-section">
+            <ShareProfile user={user} userProfile={userProfile} />
           </section>
 
           <section className="profile-history">
@@ -242,15 +297,47 @@ export default function Profile() {
                 Your evaluated answers will appear here after you complete a quiz question.
               </div>
             )}
-            {historyLoading && history.length > 0 && (
-              <div className="profile-history-loading">Refreshing history…</div>
+            {historyLoading && !history.length && (
+              <div className="profile-history-loading">Loading history…</div>
             )}
             <div className="profile-history-list">
-              {history.map((entry, index) => (
+              {paginatedHistory.map((entry, index) => (
                 // Use entry.id if available, otherwise fall back to index (not ideal if list order can change)
-                <HistoryCard key={entry.id ?? index} entry={entry} defaultOpen={index === 0} />
+                <HistoryCard 
+                  key={entry.id ?? index} 
+                  entry={entry} 
+                  defaultOpen={index === 0 && currentPage === 1} 
+                />
               ))}
             </div>
+            {history.length > itemsPerPage && (
+              <div className="profile-history-pagination">
+                <Button
+                  variant="outline"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="pagination-button"
+                >
+                  Previous
+                </Button>
+                <div className="pagination-info">
+                  <span className="pagination-current">Page {currentPage}</span>
+                  <span className="pagination-separator">of</span>
+                  <span className="pagination-total">{totalPages}</span>
+                  <span className="pagination-count">
+                    ({history.length} total)
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="pagination-button"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </section>
         </div>
       </main>

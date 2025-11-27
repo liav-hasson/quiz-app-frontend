@@ -21,7 +21,7 @@ const mockStore = {
     { rank: 3, username: 'Charlie', score: 680, _id: '3' },
     { rank: 4, username: 'Diana', score: 650, _id: '4' },
     { rank: 5, username: 'Eve', score: 620, _id: '5' },
-    { rank: 6, username: 'Frank', score: 580, _id: '6' },
+    { rank: 6, username: 'Mock User', score: 580, _id: '6' },
     { rank: 7, username: 'Grace', score: 550, _id: '7' },
     { rank: 8, username: 'Hank', score: 520, _id: '8' },
     { rank: 9, username: 'Ivy', score: 490, _id: '9' },
@@ -31,6 +31,70 @@ const mockStore = {
 
 // Simulate network delay
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Level system data
+const levelData = [
+  { level: 1, name: 'Novice', xpRequired: 0, description: 'Just starting your learning journey' },
+  { level: 2, name: 'Beginner', xpRequired: 100, description: 'Taking your first steps' },
+  { level: 3, name: 'Learner', xpRequired: 300, description: 'Building foundational knowledge' },
+  { level: 4, name: 'Student', xpRequired: 600, description: 'Actively studying and practicing' },
+  { level: 5, name: 'Practitioner', xpRequired: 1000, description: 'Applying knowledge in practice' },
+  { level: 6, name: 'Specialist', xpRequired: 1500, description: 'Developing specialized skills' },
+  { level: 7, name: 'Professional', xpRequired: 2100, description: 'Working with professional proficiency' },
+  { level: 8, name: 'Expert', xpRequired: 2800, description: 'Demonstrating expert-level mastery' },
+  { level: 9, name: 'Master', xpRequired: 3600, description: 'Achieving mastery in your field' },
+  { level: 10, name: 'Virtuoso', xpRequired: 4500, description: 'Exceptional skill and artistry' },
+  { level: 11, name: 'Guru', xpRequired: 5500, description: 'Teaching and guiding others' },
+  { level: 12, name: 'Legend', xpRequired: 6600, description: 'Legendary achievements and recognition' },
+  { level: 13, name: 'Mythic', xpRequired: 7800, description: 'Reaching mythical status' },
+  { level: 14, name: 'Transcendent', xpRequired: 9100, description: 'Transcending ordinary boundaries' },
+  { level: 15, name: 'Immortal', xpRequired: 10500, description: 'Achieving immortal status' },
+]
+
+// Calculate level from XP using progressive curve
+const calculateLevel = (xp) => {
+  if (xp < 0) return levelData[0]
+  
+  // Find the highest level where xpRequired <= user's XP
+  for (let i = levelData.length - 1; i >= 0; i--) {
+    if (xp >= levelData[i].xpRequired) {
+      return levelData[i]
+    }
+  }
+  
+  return levelData[0]
+}
+
+// Calculate progress to next level
+const calculateLevelProgress = (xp) => {
+  const currentLevelData = calculateLevel(xp)
+  const currentLevelIndex = levelData.findIndex(l => l.level === currentLevelData.level)
+  
+  if (currentLevelIndex === levelData.length - 1) {
+    // Already at max level
+    return {
+      currentLevelXP: currentLevelData.xpRequired,
+      nextLevelXP: currentLevelData.xpRequired,
+      xpIntoLevel: xp - currentLevelData.xpRequired,
+      xpNeeded: 0,
+      progressPercentage: 100
+    }
+  }
+  
+  const nextLevelData = levelData[currentLevelIndex + 1]
+  const xpIntoLevel = xp - currentLevelData.xpRequired
+  const xpNeeded = nextLevelData.xpRequired - currentLevelData.xpRequired
+  const progressPercentage = Math.min(100, (xpIntoLevel / xpNeeded) * 100)
+  
+  return {
+    currentLevelXP: currentLevelData.xpRequired,
+    nextLevelXP: nextLevelData.xpRequired,
+    nextLevelName: nextLevelData.name,
+    xpIntoLevel,
+    xpNeeded,
+    progressPercentage: Math.round(progressPercentage * 10) / 10
+  }
+}
 
 // Generate random score based on difficulty
 const getRandomScore = (difficulty) => {
@@ -80,7 +144,7 @@ export async function loginUser(userData) {
   const mockUser = {
     email: 'mock.user@example.com',
     name: 'Mock User',
-    picture: 'https://via.placeholder.com/150',
+    picture: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="150"%3E%3Crect fill="%23ddd" width="150" height="150"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EMock User%3C/text%3E%3C/svg%3E',
     token: 'mock-jwt-token-' + Date.now(),
   }
   
@@ -100,11 +164,7 @@ export async function loginUser(userData) {
  */
 export async function getCategoriesWithSubjects() {
   await delay(300)
-  return {
-    ok: true,
-    status: 200,
-    data: mockStore.categories,
-  }
+  return mockStore.categories
 }
 
 /**
@@ -187,11 +247,15 @@ export async function getUserHistory(params = {}) {
   
   const limit = params.limit || 20
   const history = []
+  const categories = Object.keys(mockStore.categories)
   
-  // Generate mock history
+  // Generate mock history - ensure all categories are represented at least once
   for (let i = 0; i < Math.min(limit, 15); i++) {
-    const categories = Object.keys(mockStore.categories)
-    const randomCategory = categories[Math.floor(Math.random() * categories.length)]
+    // For the first 4 entries, use each category once to guarantee representation
+    const randomCategory = i < categories.length 
+      ? categories[i] 
+      : categories[Math.floor(Math.random() * categories.length)]
+    
     const subjects = mockStore.categories[randomCategory]
     const randomSubject = subjects[Math.floor(Math.random() * subjects.length)]
     const randomDifficulty = Math.floor(Math.random() * 3) + 1
@@ -202,27 +266,30 @@ export async function getUserHistory(params = {}) {
     history.push({
       id: 'h-' + i,
       summary: {
-        question: mockQuestions[randomCategory]?.[randomSubject]?.[0] || 'Sample question?',
-        answer: 'This is a mock answer for testing purposes.',
-        score: getRandomScore(randomDifficulty),
-        date: date.toISOString(),
-      },
-      details: {
         category: randomCategory,
         subject: randomSubject,
         difficulty: randomDifficulty,
+        score: getRandomScore(randomDifficulty),
+        created_at: date.toISOString(),
+      },
+      details: {
+        question: mockQuestions[randomCategory]?.[randomSubject]?.[0] || 'Sample question?',
+        answer: 'This is a mock answer for testing purposes.',
         keyword: randomSubject,
-        feedback: 'Good work! Keep learning.',
+        evaluation: {
+          feedback: 'Good work! Keep learning and practicing.',
+        },
+        metadata: {
+          category: randomCategory,
+          subject: randomSubject,
+          difficulty: randomDifficulty,
+        },
       },
     })
   }
   
-  return {
-    ok: true,
-    status: 200,
-    history,
-    data: { history },
-  }
+  // Return just the history array to match real API behavior
+  return history
 }
 
 /**
@@ -257,12 +324,8 @@ export async function getUserPerformance(params = {}) {
     })
   }
   
-  return {
-    ok: true,
-    status: 200,
-    performance,
-    data: { performance },
-  }
+  // Return just the performance array to match real API behavior
+  return performance
 }
 
 /**
@@ -271,20 +334,24 @@ export async function getUserPerformance(params = {}) {
 export async function getUserProfile() {
   await delay(300)
   
+  const XP = 1250
+  const levelInfo = calculateLevel(XP)
+  const levelProgress = calculateLevelProgress(XP)
+  
   const profile = {
-    XP: 450,
+    XP,
+    level: levelInfo.level,
+    levelName: levelInfo.name,
+    levelDescription: levelInfo.description,
     bestCategory: 'DevOps',
     totalAnswers: 23,
     averageScore: 7.5,
     lastActivity: new Date().toISOString(),
+    levelProgress,
   }
   
-  return {
-    ok: true,
-    status: 200,
-    ...profile,
-    data: profile,
-  }
+  // Return just the profile data to match real API behavior
+  return profile
 }
 
 /**
@@ -293,12 +360,8 @@ export async function getUserProfile() {
 export async function getUserBestCategory() {
   await delay(200)
   
-  return {
-    ok: true,
-    status: 200,
-    bestCategory: 'DevOps',
-    data: { bestCategory: 'DevOps' },
-  }
+  // Return an object with bestCategory to match real API behavior
+  return { bestCategory: 'DevOps' }
 }
 
 /**
@@ -307,27 +370,33 @@ export async function getUserBestCategory() {
 export async function getLeaderboard() {
   await delay(400)
   
-  // Add current user to leaderboard if not already there
-  const currentUser = mockStore.user
+  // Get current user from localStorage (since mockStore.user might not persist)
+  const userStr = localStorage.getItem('quiz_user')
+  const currentUser = userStr ? JSON.parse(userStr) : mockStore.user
+  
+  if (!currentUser) {
+    return {
+      topTen: mockStore.leaderboard,
+      userRank: null,
+    }
+  }
+  
+  // Find user in leaderboard by name or email
   const userInLeaderboard = mockStore.leaderboard.find(
-    entry => entry.username === currentUser?.name
+    entry => entry.username === currentUser?.name || entry.username === currentUser?.email
   )
   
   let userRank = null
-  if (currentUser && !userInLeaderboard) {
-    userRank = 15 // Mock rank outside top 10
-  } else if (userInLeaderboard) {
+  if (userInLeaderboard) {
     userRank = userInLeaderboard.rank
+  } else {
+    // User not in top 10, assign rank 15
+    userRank = 15
   }
   
+  // Return clean data matching real API behavior
   return {
-    ok: true,
-    status: 200,
     topTen: mockStore.leaderboard,
     userRank,
-    data: {
-      topTen: mockStore.leaderboard,
-      userRank,
-    },
   }
 }

@@ -36,10 +36,10 @@ export default function QuizQuestion() {
 
   const difficultyLabel = difficulty === 1 ? 'Easy' : difficulty === 2 ? 'Medium' : 'Hard'
   
-  const getDifficultyColor = () => {
-    if (difficulty === 1) return 'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/50'
-    if (difficulty === 2) return 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/50'
-    return 'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/50'
+  const getDifficultyClass = () => {
+    if (difficulty === 1) return 'quiz-difficulty-easy'
+    if (difficulty === 2) return 'quiz-difficulty-medium'
+    return 'quiz-difficulty-hard'
   }
 
   const handleAnswerChange = (e) => {
@@ -92,9 +92,9 @@ export default function QuizQuestion() {
                   {subject}
                 </Badge>
               )}
-              <Badge variant="secondary" className={`quiz-question-difficulty-badge border ${getDifficultyColor()}`}>
+              <div className={`quiz-difficulty-badge ${getDifficultyClass()}`}>
                 {difficultyLabel}
-              </Badge>
+              </div>
             </div>
           </div>
         </CardHeader>

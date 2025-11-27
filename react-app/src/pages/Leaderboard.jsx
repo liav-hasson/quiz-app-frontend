@@ -7,6 +7,7 @@ import AnimatedBorder from '@/components/AnimatedBorder'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { selectUser, logout } from '@/store/slices/authSlice'
+import { selectUserProfile } from '@/store/slices/quizSlice'
 import { getLeaderboard } from '@/api/quizAPI'
 import toast from 'react-hot-toast'
 
@@ -14,6 +15,7 @@ export default function Leaderboard() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const user = useSelector(selectUser)
+  const userProfile = useSelector(selectUserProfile)
   const [leaderboardData, setLeaderboardData] = useState({ topTen: [], userRank: null })
   const [loading, setLoading] = useState(true)
 
@@ -43,11 +45,11 @@ export default function Leaderboard() {
     navigate('/profile')
   }
 
-  const getRankBadgeColor = (rank) => {
+  const getRankBadgeStyle = (rank) => {
     if (rank === 1) return 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white'
     if (rank === 2) return 'bg-gradient-to-r from-gray-300 to-gray-500 text-white'
     if (rank === 3) return 'bg-gradient-to-r from-amber-600 to-amber-800 text-white'
-    return 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+    return 'bg-gradient-primary text-white'
   }
 
   const getRankEmoji = (rank) => {
@@ -74,7 +76,7 @@ export default function Leaderboard() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+              className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent"
             >
               🏆 Leaderboard
             </motion.h1>
@@ -88,21 +90,31 @@ export default function Leaderboard() {
               transition={{ delay: 0.4 }}
             >
               <AnimatedBorder>
-                <Card className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="text-5xl">{getRankEmoji(leaderboardData.userRank)}</div>
-                        <div>
-                          <h3 className="text-xl font-semibold text-purple-600 dark:text-purple-400">Your Rank</h3>
-                          <p className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+                <Card className="bg-gradient-to-br from-accent-secondary/15 to-accent-tertiary/15 border-2 border-accent-secondary/30 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-center gap-6">
+                      <div className="flex items-center justify-center flex-shrink-0 w-1/4">
+                        <div className="text-center">
+                          <h3 className="text-lg font-semibold mb-1 text-accent-secondary">Your Rank</h3>
+                          <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                             #{leaderboardData.userRank}
                           </p>
                         </div>
                       </div>
-                      <Badge className={`${getRankBadgeColor(leaderboardData.userRank)} text-lg px-4 py-2 shadow-md`}>
-                        {user?.name || user?.email}
-                      </Badge>
+                      <div className="flex-1 grid grid-cols-2 gap-6">
+                        <div className="flex flex-col justify-center text-center">
+                          <p className="text-sm text-muted-foreground mb-2">Total XP</p>
+                          <p className="text-xl font-bold text-accent-secondary">
+                            {typeof userProfile?.XP === 'number' ? userProfile.XP : '—'}
+                          </p>
+                        </div>
+                        <div className="flex flex-col justify-center text-center">
+                          <p className="text-sm text-muted-foreground mb-2">Level</p>
+                          <p className="text-xl font-medium">
+                            {userProfile?.levelName || '—'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -150,15 +162,17 @@ export default function Leaderboard() {
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.6 + index * 0.05 }}
                               className={`border-b border-border hover:bg-accent/50 transition-colors ${
-                                entry.username === user?.email || entry.username === user?.name
-                                  ? 'bg-purple-500/10'
+                                (entry.username === user?.email || 
+                                 entry.username === user?.name || 
+                                 entry.rank === leaderboardData.userRank)
+                                  ? 'bg-accent-secondary/15 border-l-4 border-l-accent-secondary'
                                   : ''
                               }`}
                             >
                               <td className="py-4 px-4">
                                 <div className="flex items-center gap-2">
                                   <span className="text-2xl">{getRankEmoji(entry.rank)}</span>
-                                  <Badge className={getRankBadgeColor(entry.rank)}>
+                                  <Badge className={getRankBadgeStyle(entry.rank)}>
                                     #{entry.rank}
                                   </Badge>
                                 </div>
@@ -166,13 +180,15 @@ export default function Leaderboard() {
                               <td className="py-4 px-4">
                                 <div className="font-medium">
                                   {entry.username}
-                                  {(entry.username === user?.email || entry.username === user?.name) && (
-                                    <Badge variant="outline" className="ml-2">You</Badge>
+                                  {(entry.username === user?.email || 
+                                    entry.username === user?.name || 
+                                    entry.rank === leaderboardData.userRank) && (
+                                    <Badge variant="outline" className="ml-2 bg-accent-secondary/15 border-accent-secondary">You</Badge>
                                   )}
                                 </div>
                               </td>
                               <td className="py-4 px-4 text-right">
-                                <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                <span className="text-lg font-bold text-accent-secondary">
                                   {typeof entry.score === 'number' ? entry.score.toFixed(2) : entry.score}
                                 </span>
                               </td>
@@ -193,7 +209,7 @@ export default function Leaderboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
-            <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+            <Card className="bg-gradient-to-r from-accent-tertiary/10 to-accent-secondary/10">
               <CardContent className="py-6">
                 <p className="text-center text-sm text-muted-foreground">
                   Rankings are based on your weighted average score across all quizzes.
