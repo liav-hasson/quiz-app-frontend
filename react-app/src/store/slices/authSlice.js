@@ -13,16 +13,19 @@ const loadUserFromStorage = () => {
     const user = JSON.parse(stored)
     
     // Validate that user has at least an email
-    // Clear obvious mock data (dev@localhost without real auth)
     if (!user || !user.email) {
       localStorage.removeItem('quiz_user')
       return null
     }
     
-    // Clear mock/dev users
-    if (user.email === 'dev@localhost' || user.id === 'local-dev-user') {
-      localStorage.removeItem('quiz_user')
-      return null
+    // Allow dev users when in development mode
+    const isDevMode = import.meta.env.VITE_DEV_MODE === 'true'
+    if (!isDevMode) {
+      // In production, clear obvious mock data
+      if (user.email === 'dev@localhost' || user.id === 'local-dev-user' || user.id?.startsWith('dev-user-')) {
+        localStorage.removeItem('quiz_user')
+        return null
+      }
     }
     
     return user

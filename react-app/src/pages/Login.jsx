@@ -75,47 +75,63 @@ export default function Login() {
     }
   }
 
+  // DEV MODE: Mock users for local testing
+  const mockUsers = [
+    {
+      sub: 'dev-user-alice',
+      email: 'alice@test.com',
+      name: 'Alice Developer',
+      picture: '/assets/Quizlabs-Icon.svg',
+    },
+    {
+      sub: 'dev-user-bob',
+      email: 'bob@test.com',
+      name: 'Bob Tester',
+      picture: '/assets/Quizlabs-Icon.svg',
+    },
+    {
+      sub: 'dev-user-charlie',
+      email: 'charlie@test.com',
+      name: 'Charlie Admin',
+      picture: '/assets/Quizlabs-Icon.svg',
+    },
+  ]
+
   // DEV MODE: Simple dev login button (for when Google OAuth is not configured)
-  const handleDevLogin = async () => {
+  const handleDevLogin = async (mockUser = mockUsers[0]) => {
     try {
-      // Create a mock Google credential for dev user
-      const devPayload = {
-        sub: 'dev-user-123',
-        email: 'developer@test.com',
-        name: 'Dev User',
-        picture: '/assets/Quizlabs-Icon.svg',
-      }
-      
       // Create a simple JWT-like token for dev mode (not real JWT, just for structure)
       const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }))
-      const payload = btoa(JSON.stringify(devPayload))
+      const payload = btoa(JSON.stringify(mockUser))
       const mockCredential = `${header}.${payload}.dev-signature`
       
-      // Send to backend to create/login dev user
+      // Try to send to backend to create/login dev user
       const backendResponse = await loginUser({ token: mockCredential })
       
       // Use backend response if successful, otherwise use dev data
       const userData = {
-        id: devPayload.sub,
-        email: backendResponse?.email || devPayload.email,
-        name: backendResponse?.name || devPayload.name,
-        picture: backendResponse?.picture || devPayload.picture,
+        id: mockUser.sub,
+        email: backendResponse?.email || mockUser.email,
+        name: backendResponse?.name || mockUser.name,
+        picture: backendResponse?.picture || mockUser.picture,
         token: backendResponse?.token || mockCredential,
       }
       
       dispatch(loginSuccess(userData))
+      toast.success(`Logged in as ${userData.name}`)
       navigate('/quiz')
     } catch (error) {
       console.error('Dev login error:', error)
       // Fallback to local-only dev login if backend fails
       const devUser = {
-        id: 'dev-user-123',
-        email: 'developer@test.com',
-        name: 'Dev User',
-        picture: '/assets/Quizlabs-Icon.svg',
-        token: 'dev-token-123',
+        id: mockUser.sub,
+        email: mockUser.email,
+        name: mockUser.name,
+        picture: mockUser.picture,
+        token: `dev-token-${mockUser.sub}`,
       }
       dispatch(loginSuccess(devUser))
+      toast.success(`Logged in as ${devUser.name} (offline mode)`)
       navigate('/quiz')
     }
   }
@@ -155,20 +171,26 @@ export default function Login() {
                 </p>
               )}
               
-              {/* DEV MODE: Quick login button for development */}
-              {import.meta.env.DEV && (
+              {/* DEV MODE: Quick login buttons for development with mock users */}
+              {import.meta.env.VITE_DEV_MODE === 'true' && (
                 <>
                   <div className="my-4 text-center text-sm text-muted-foreground">
-                    — OR —
+                    — DEV MODE —
                   </div>
-                  <div className="flex justify-center">
-                    <button
-                      onClick={handleDevLogin}
-                      className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
-                    >
-                      🚀 Dev Login (Skip Google)
-                    </button>
+                  <div className="flex flex-col gap-2">
+                    {mockUsers.map((user) => (
+                      <button
+                        key={user.sub}
+                        onClick={() => handleDevLogin(user)}
+                        className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-md transition-all duration-200 text-sm font-medium"
+                      >
+                        🚀 Login as {user.name}
+                      </button>
+                    ))}
                   </div>
+                  <p className="mt-3 text-xs text-center text-muted-foreground">
+                    Dev mode enabled - no Google OAuth required
+                  </p>
                 </>
               )}
             </CardContent>
