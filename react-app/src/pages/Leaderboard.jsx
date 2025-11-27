@@ -78,14 +78,6 @@ export default function Leaderboard() {
             >
               🏆 Leaderboard
             </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-muted-foreground"
-            >
-              Top performers and your ranking
-            </motion.p>
           </div>
 
           {/* User Rank Card */}
@@ -96,19 +88,19 @@ export default function Leaderboard() {
               transition={{ delay: 0.4 }}
             >
               <AnimatedBorder>
-                <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10">
+                <Card className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="text-5xl">{getRankEmoji(leaderboardData.userRank)}</div>
                         <div>
-                          <h3 className="text-xl font-semibold">Your Rank</h3>
-                          <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+                          <h3 className="text-xl font-semibold text-purple-600 dark:text-purple-400">Your Rank</h3>
+                          <p className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
                             #{leaderboardData.userRank}
                           </p>
                         </div>
                       </div>
-                      <Badge className={`${getRankBadgeColor(leaderboardData.userRank)} text-lg px-4 py-2`}>
+                      <Badge className={`${getRankBadgeColor(leaderboardData.userRank)} text-lg px-4 py-2 shadow-md`}>
                         {user?.name || user?.email}
                       </Badge>
                     </div>

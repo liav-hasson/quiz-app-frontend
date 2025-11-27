@@ -4,6 +4,17 @@
  * Makes it easy to maintain and update API endpoints
  */
 
+// Check if we should use mock API (for frontend-only development)
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
+
+// If using mock API, import and re-export all functions from mockAPI
+if (USE_MOCK_API) {
+  console.log('🎭 Using Mock API - No backend required!')
+  export * from './mockAPI.js'
+} else {
+  // Normal API implementation below
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 const DEFAULT_TIMEOUT = 30000 // 30 seconds
 

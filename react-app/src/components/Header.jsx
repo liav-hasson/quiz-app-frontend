@@ -54,61 +54,39 @@ export default function Header({ user, onLogout, onProfileClick }) {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          {/* Animated Logo with Dropdown (only when logged in) */}
+          {/* Animated Logo (no dropdown when logged in) */}
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative header-logo cursor-pointer"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <img
-                    src="/assets/Quizlabs-Full-BW.svg"
-                    alt="Quiz Labs Logo"
-                  />
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="relative header-logo cursor-pointer"
+              onClick={() => navigate('/quiz')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <img
+                src="/assets/Quizlabs-Full-BW.svg"
+                alt="Quiz Labs Logo"
+              />
 
-                  {/* Subtle pulsing aura effect */}
-                  <motion.div
-                    className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
-                    }}
-                    animate={{
-                      scale: [1, 1.15, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </motion.div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-card">
-                <DropdownMenuItem onClick={() => navigate('/quiz')}>
-                  <span className="mr-2">🎯</span>
-                  Quiz
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleProfileClick}>
-                  <span className="mr-2">👤</span>
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/leaderboard')}>
-                  <span className="mr-2">🏆</span>
-                  Leaderboard
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <span className="mr-2">🚪</span>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              {/* Subtle pulsing aura effect */}
+              <motion.div
+                className="absolute -inset-4 rounded-lg blur-2xl -z-10 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle, var(--accent-quinary-medium) 0%, var(--accent-tertiary-light) 50%, transparent 100%)`,
+                }}
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </motion.div>
           ) : (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -153,6 +131,33 @@ export default function Header({ user, onLogout, onProfileClick }) {
             >
               {user && (
                 <>
+                  {/* Navigation Dropdown Menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="header-menu-btn"
+                      >
+                        Menu
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-sm">
+                      <DropdownMenuItem onClick={() => navigate('/quiz')} className="text-white">
+                        Quiz
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleProfileClick} className="text-white">
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="text-white">
+                        Leaderboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout} className="text-white">
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
                   {/* User info */}
                   <motion.button
                     type="button"
