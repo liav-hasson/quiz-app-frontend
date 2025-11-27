@@ -134,6 +134,13 @@ export default function PerformanceChart() {
     <div>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex flex-wrap gap-2 items-center">
+          <div
+            className="inline-flex items-center gap-2 px-2 py-1 text-sm rounded-md border"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <span style={{ width: 12, height: 12, background: 'var(--chart-color-1)', display: 'inline-block', borderRadius: 2 }} />
+            <span>Overall</span>
+          </div>
           {chartData?.categories?.map((c, i) => (
             <button
               key={c}
@@ -142,7 +149,7 @@ export default function PerformanceChart() {
               className={`inline-flex items-center gap-2 px-2 py-1 text-sm rounded-md border ${hiddenCategories[c] ? 'opacity-40' : ''}`}
               style={{ borderColor: 'var(--border)' }}
             >
-              <span style={{ width: 12, height: 12, background: palette[i % palette.length], display: 'inline-block', borderRadius: 2 }} />
+              <span style={{ width: 12, height: 12, background: palette[(i + 1) % palette.length], display: 'inline-block', borderRadius: 2 }} />
               <span>{c}</span>
             </button>
           ))}
@@ -185,7 +192,7 @@ export default function PerformanceChart() {
               <Recharts.YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke="var(--text-secondary)" style={{ fontSize: '0.75rem' }} />
               <Recharts.Tooltip content={<CustomTooltip />} />
               {/* overall line - always visible */}
-              <Recharts.Line type="monotone" dataKey="overall" stroke="var(--accent-secondary)" strokeWidth={3} dot={{ r: 4 }} name="Overall" />
+              <Recharts.Line type="monotone" dataKey="overall" stroke="var(--chart-color-1)" strokeWidth={3} dot={{ r: 4 }} name="Overall" />
 
               {/* per-category lines */}
               {chartData.categories.map((c, i) => (

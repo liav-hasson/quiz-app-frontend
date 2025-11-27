@@ -12,6 +12,8 @@ import {
   selectCurrentQuestion,
   selectUserAnswer,
   selectSelectedDifficulty,
+  selectSelectedCategory,
+  selectSelectedSubject,
   selectLoading,
   setUserAnswer,
   goToSetup,
@@ -28,9 +30,17 @@ export default function QuizQuestion() {
   const currentQuestion = useSelector(selectCurrentQuestion)
   const userAnswer = useSelector(selectUserAnswer)
   const difficulty = useSelector(selectSelectedDifficulty)
+  const category = useSelector(selectSelectedCategory)
+  const subject = useSelector(selectSelectedSubject)
   const loading = useSelector(selectLoading)
 
   const difficultyLabel = difficulty === 1 ? 'Easy' : difficulty === 2 ? 'Medium' : 'Hard'
+  
+  const getDifficultyClass = () => {
+    if (difficulty === 1) return 'quiz-difficulty-easy'
+    if (difficulty === 2) return 'quiz-difficulty-medium'
+    return 'quiz-difficulty-hard'
+  }
 
   const handleAnswerChange = (e) => {
     dispatch(setUserAnswer(e.target.value))
@@ -69,18 +79,24 @@ export default function QuizQuestion() {
     <AnimatedBorder delay={0.5}>
       <Card className="quiz-question-card">
         <CardHeader>
-          <CardTitle className="quiz-question-title flex items-center justify-center gap-3">
-            <motion.span
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
-            >
-              🤔
-            </motion.span>
-            Question
-            <Badge variant="secondary" className="quiz-question-difficulty-badge ml-2">
-              {difficultyLabel}
-            </Badge>
-          </CardTitle>
+          <div className="flex flex-col items-center gap-2">
+            <CardTitle className="quiz-question-title">Question</CardTitle>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {category && (
+                <Badge variant="outline" className="text-sm">
+                  {category}
+                </Badge>
+              )}
+              {subject && (
+                <Badge variant="outline" className="text-sm">
+                  {subject}
+                </Badge>
+              )}
+              <div className={`quiz-difficulty-badge ${getDifficultyClass()}`}>
+                {difficultyLabel}
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="quiz-question-content">
           {/* Question Display */}

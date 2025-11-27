@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -129,30 +130,29 @@ export default function Header({ user, onLogout, onProfileClick }) {
                     {isDark ? 'Light' : 'Dark'}
                   </Button>
 
-                  {/* Burger Menu */}
+                  {/* Navigation Dropdown Menu - rightmost */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center justify-center w-10 h-10 text-2xl font-light leading-none"
+                        className="header-menu-btn"
                         aria-label="Menu"
                       >
-                        <span className="block" style={{ lineHeight: '1', transform: 'translateY(-1px)' }}>☰</span>
+                        <Menu className="w-5 h-5" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-card border border-border">
-                      <DropdownMenuItem onClick={() => navigate('/quiz')}>
+                    <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-sm">
+                      <DropdownMenuItem onClick={() => navigate('/quiz')} className="text-white">
                         Quiz
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleProfileClick}>
+                      <DropdownMenuItem onClick={handleProfileClick} className="text-white">
                         Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/history')}>
-                        History
+                      <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="text-white">
+                        Leaderboard
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout}>
+                      <DropdownMenuItem onClick={handleLogout} className="text-white">
                         Logout
                       </DropdownMenuItem>
                     </DropdownMenuContent>

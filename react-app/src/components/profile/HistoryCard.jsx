@@ -63,10 +63,7 @@ export default function HistoryCard({ entry, defaultOpen = false }) {
           <span className="history-card-date">{formatDate(summary.created_at)}</span>
         </div>
         <div className="history-card-meta">
-          <Badge variant="secondary" className="history-meta-pill">
-            {difficultyLabel}
-          </Badge>
-          <Badge variant="outline" className="history-meta-pill">
+         <Badge variant="outline" className="history-meta-pill">
             {scoreLabel}
           </Badge>
           <span className="history-card-chevron" aria-hidden="true">
@@ -104,11 +101,17 @@ export default function HistoryCard({ entry, defaultOpen = false }) {
                 <div className="history-body-section">
                   <p className="history-body-label">Metadata</p>
                   <div className="history-metadata-grid">
-                    {metadataEntries.map(([key, value]) => (
-                      <span key={key} className="history-metadata-chip">
-                        <strong>{key}:</strong> {String(value)}
-                      </span>
-                    ))}
+                    {metadataEntries.map(([key, value]) => {
+                      // Convert difficulty number to text
+                      const displayValue = key === 'difficulty' && typeof value === 'number' 
+                        ? DIFFICULTY_MAP[value] || String(value)
+                        : String(value)
+                      return (
+                        <span key={key} className="history-metadata-chip">
+                          <strong>{key}:</strong> {displayValue}
+                        </span>
+                      )
+                    })}
                   </div>
                 </div>
               </>

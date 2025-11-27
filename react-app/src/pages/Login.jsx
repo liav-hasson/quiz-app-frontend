@@ -171,8 +171,8 @@ export default function Login() {
                 </p>
               )}
               
-              {/* DEV MODE: Quick login buttons for development with mock users */}
-              {import.meta.env.VITE_DEV_MODE === 'true' && (
+              {/* DEV MODE: Quick login button for local development only */}
+              {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
                 <>
                   <div className="my-4 text-center text-sm text-muted-foreground">
                     — DEV MODE —

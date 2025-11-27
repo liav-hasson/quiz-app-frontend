@@ -106,6 +106,7 @@
   --bg-card-dark: rgba(19, 27, 107, 0.95);
   --text-primary: var(--color-near-white);
   --text-secondary: var(--color-pale-grey);
+  --text-highlight: var(--accent-secondary);
 
   /* shadcn/ui compatibility tokens - Dark Mode */
   --background: 234 71% 20%;
@@ -199,4 +200,5 @@
   --bg-card-dark: rgba(255, 255, 255, 0.95);
   --text-primary: var(--color-near-black);
   --text-secondary: var(--color-mid-grey);
+  --text-highlight: var(--accent-secondary);
 }
