@@ -9,7 +9,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install required packages and tools
 # - bash, curl, git: basic tooling for scripts and GitOps updates
-# - Node.js 18 runtime: required for building the React frontend
+# - Node.js 22 runtime: required for building the React frontend (Vite 7+ requires Node 20.19+ or 22.12+)
 # - docker-cli, buildctl: BuildKit client to build/push Docker images
 # - hadolint: Dockerfile linter used in the pipeline
 # - jq: handy JSON processor (used by npm audit output)
@@ -25,9 +25,9 @@ RUN apt-get update && \
         build-essential \
         jq \
         unzip && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
-    npm install -g npm@10.2.3 && \
+    npm install -g npm@latest && \
     # Install AWS CLI v2
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
     unzip -q /tmp/awscliv2.zip -d /tmp && \
