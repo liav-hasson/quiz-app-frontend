@@ -178,6 +178,7 @@ pipeline {
                         aws ssm get-parameter \
                             --name "/devops-quiz/frontend/google-client-id" \
                             --region eu-north-1 \
+                            --with-decryption \
                             --query "Parameter.Value" \
                             --output text
                     ''').trim()
