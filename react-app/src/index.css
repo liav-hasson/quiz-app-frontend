@@ -1,28 +1,123 @@
-/* ============================================================================
-   MAIN STYLESHEET - MODULAR ARCHITECTURE
-   Import order matters: variables must come first, then components
-   ============================================================================ */
-
-/* 1. Tailwind CSS */
 @import "tailwindcss";
 
-/* 2. CSS Variables & Theme Configuration */
-@import "./styles/variables.css";
+@theme {
+  --font-arcade: "Press Start 2P", cursive;
+  --font-orbitron: "Orbitron", sans-serif;
+}
 
-/* 3. UI Primitives (Buttons, Cards, Inputs, etc.) */
-@import "./styles/ui-primitives.css";
+:root {
+  /* Neon Arcade Palette */
+  --bg-dark: #050505;
+  --bg-card: #121212;
+  --bg-card-light: #1e1e1e;
 
-/* 4. Component-Specific Styles */
-@import "./styles/quiz-components.css";
-@import "./styles/header.css";
-@import "./styles/login.css";
-@import "./styles/profile.css";
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-highlight: #22d3ee; /* Cyan */
 
-/* 5. Background & Visual Effects */
-@import "./styles/background.css";
+  /* Neon Accents */
+  --accent-primary: #d946ef;   /* Fuchsia */
+  --accent-secondary: #06b6d4; /* Cyan */
+  --accent-tertiary: #8b5cf6;  /* Violet */
+  --accent-quaternary: #ec4899; /* Pink */
+  --accent-quinary: #10b981;   /* Emerald */
 
-/* 6. Animations & Transitions */
-@import "./styles/animations.css";
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+  --gradient-neon-purple: linear-gradient(to right, #c026d3, #7c3aed);
+  --gradient-cool-warm: linear-gradient(to right, #06b6d4, #ec4899);
+}
 
-/* 7. Utility Classes */
-@import "./styles/utilities.css";
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: 'Orbitron', sans-serif; /* Default to Orbitron for a techy feel */
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-card-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* Neon Text Cycle Animation */
+@keyframes neon-cycle {
+  0%, 100% { color: var(--accent-primary); text-shadow: 0 0 10px var(--accent-primary); }
+  25% { color: var(--accent-secondary); text-shadow: 0 0 10px var(--accent-secondary); }
+  50% { color: var(--accent-quinary); text-shadow: 0 0 10px var(--accent-quinary); }
+  75% { color: var(--accent-quaternary); text-shadow: 0 0 10px var(--accent-quaternary); }
+}
+
+.animate-neon-cycle {
+  animation: neon-cycle 4s linear infinite;
+}
+
+/* Neon Flicker Animation */
+@keyframes neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 10px currentColor;
+  }
+  20%, 24%, 55% {
+    opacity: 0.5;
+    text-shadow: none;
+  }
+}
+
+.hover-flicker:hover {
+  animation: neon-flicker 1.5s infinite alternate;
+}
+
+/* Score Pop Animation */
+@keyframes score-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); text-shadow: 0 0 20px currentColor; }
+  100% { transform: scale(1); }
+}
+
+.animate-score-pop {
+  animation: score-pop 0.5s ease-out;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+/* Retro Arcade Dropdown Styling */
+select {
+  font-family: 'Press Start 2P', cursive;
+}
+
+select option {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  background-color: var(--bg-card-light);
+  color: var(--text-primary);
+  padding: 12px 8px;
+  line-height: 1.8;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+  color: white;
+  text-shadow: 0 0 10px var(--accent-primary);
+}
+

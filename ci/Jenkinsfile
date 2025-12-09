@@ -12,7 +12,7 @@ pipeline {
                 spec:
                   containers:
                     - name: jnlp
-                      image: liavvv/jenkins-agent-front:1.3
+                      image: liavvv/jenkins-agent-front:1.4
                       imagePullPolicy: Always
                       volumeMounts:
                         - name: workspace-volume
@@ -178,6 +178,7 @@ pipeline {
                         aws ssm get-parameter \
                             --name "/devops-quiz/frontend/google-client-id" \
                             --region eu-north-1 \
+                            --with-decryption \
                             --query "Parameter.Value" \
                             --output text
                     ''').trim()

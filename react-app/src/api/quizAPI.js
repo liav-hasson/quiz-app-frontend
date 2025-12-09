@@ -4,14 +4,47 @@
  * Makes it easy to maintain and update API endpoints
  */
 
-// Check if we should use mock API (for frontend-only development)
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
+import { USE_MOCK_API, API_BASE_URL, DEFAULT_TIMEOUT } from '../config.js'
 
 // If using mock API, import all functions from mockAPI
 import * as mockAPI from './mockAPI.js'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
-const DEFAULT_TIMEOUT = 30000 // 30 seconds
+/**
+ * Get custom AI settings from localStorage (Redux persists settings there)
+ * @returns {{apiKey: string|null, model: string|null}} Custom AI settings
+ */
+function getCustomAISettings() {
+  try {
+    const settingsStr = localStorage.getItem('quiz_ai_settings')
+    if (!settingsStr) return { apiKey: null, model: null }
+    
+    const settings = JSON.parse(settingsStr)
+    return {
+      apiKey: settings.customApiKey || null,
+      model: settings.selectedModel || null,
+    }
+  } catch {
+    return { apiKey: null, model: null }
+  }
+}
+
+/**
+ * Build headers for AI-related API calls
+ * @returns {Object} Headers object with custom AI settings if available
+ */
+function getAIHeaders() {
+  const { apiKey, model } = getCustomAISettings()
+  const headers = {}
+  
+  if (apiKey) {
+    headers['X-OpenAI-API-Key'] = apiKey
+  }
+  if (model) {
+    headers['X-OpenAI-Model'] = model
+  }
+  
+  return headers
+}
 
 /**
  * Generic fetch wrapper with error handling and timeout
@@ -31,12 +64,23 @@ async function fetchAPI(url, options = {}) {
   const userStr = localStorage.getItem('quiz_user')
   const user = userStr ? JSON.parse(userStr) : null
   
+  console.log(`🔍 fetchAPI ${url}:`, { 
+    hasUser: !!user, 
+    hasToken: !!user?.token, 
+    tokenPrefix: user?.token?.substring(0, 20) 
+  })
+  
   const headers = {
     'Content-Type': 'application/json',
     // Use Bearer token authentication (secure)
     ...(user?.token && { 'Authorization': `Bearer ${user.token}` }),
     ...options.headers,
   }
+  
+  console.log(`📤 Request headers for ${url}:`, {
+    hasAuthHeader: !!headers.Authorization,
+    authHeaderPrefix: headers.Authorization?.substring(0, 20)
+  })
   
   try {
     const response = await fetch(`${API_BASE_URL}${url}`, {
@@ -50,20 +94,54 @@ async function fetchAPI(url, options = {}) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
 
-      // Handle authentication errors - clear session and redirect to login
+      // Handle authentication errors - BUT don't redirect on 401 during initial page load
+      // Only redirect if we had a token that was rejected (token expired/invalid)
       if (
         response.status === 401 ||
-        (response.status === 404 && errorData.error?.includes('User not found')) ||
-        (response.status === 400 && errorData.error?.includes('Authentication required'))
+        (response.status === 400 && errorData.error?.includes('Authentication required')) ||
+        errorData.error?.toLowerCase().includes('token expired') ||
+        errorData.error?.toLowerCase().includes('invalid token')
       ) {
-        localStorage.removeItem('quiz_user')
-        window.location.href = '/login'
-        // keep throwing here to stop further execution if auth is invalid
-        throw new Error(errorData.error || 'Session expired. Please login again.')
+        console.error(`❌ ${url} returned 401`, { 
+          status: response.status, 
+          errorData,
+          hadUser: !!user,
+          hadToken: !!user?.token,
+          tokenPrefix: user?.token?.substring(0, 20)
+        })
+        
+        // Only clear session and redirect if we actually sent a token that was rejected
+        const hadToken = user && user.token
+        if (hadToken) {
+          console.warn('🔐 Token rejected by backend, clearing session')
+          localStorage.removeItem('quiz_user')
+          window.location.href = '/login'
+          throw new Error(errorData.error || 'Session expired. Please login again.')
+        }
+        // Otherwise just return the error without redirecting (let components handle it)
+        console.warn('⚠️ 401 error but no token was sent, not redirecting')
       }
 
-      // For other non-auth errors (backend down, 403, 404 generic, etc.) return a structured
+      // For other non-auth errors (backend down, 403, 404, etc.) return a structured
       // error object instead of throwing. Callers should handle missing data gracefully.
+      // 404 User not found is NOT an auth error - just means endpoint doesn't exist yet
+      
+      // Handle rate limiting specifically
+      if (response.status === 429) {
+        const resetTime = response.headers.get('X-RateLimit-Reset')
+        const limit = response.headers.get('X-RateLimit-Limit')
+        console.warn('⏱️ Rate limit exceeded:', { limit, resetTime, errorData })
+        return {
+          ok: false,
+          status: 429,
+          error: errorData.error || 'Rate limit exceeded. Please wait before trying again.',
+          isRateLimited: true,
+          limit: parseInt(limit) || errorData.limit,
+          resetTime: parseInt(resetTime) || errorData.reset_time,
+          windowSeconds: errorData.window_seconds,
+        }
+      }
+      
       return {
         ok: false,
         status: response.status,
@@ -100,12 +178,19 @@ export async function loginUser(userData) {
     console.log('🎭 Using Mock API - No backend required!')
     return mockAPI.loginUser(userData)
   }
-  return await fetchAPI('/api/auth/google-login', {
+  console.log('🔑 Sending credential to backend:', { 
+    endpoint: '/api/auth/google-login',
+    hasCredential: !!userData.token,
+    credentialLength: userData.token?.length 
+  })
+  const response = await fetchAPI('/api/auth/google-login', {
     method: 'POST',
     body: JSON.stringify({
       credential: userData.token,
     }),
   })
+  console.log('📨 Raw backend response:', response)
+  return response
 }
 
 /**
@@ -132,9 +217,23 @@ export async function getCategoriesWithSubjects() {
  */
 export async function generateQuestion(category, subject, difficulty) {
   if (USE_MOCK_API) return mockAPI.generateQuestion(category, subject, difficulty)
+  
+  // Debug: Check if user/token exists
+  const userStr = localStorage.getItem('quiz_user')
+  const user = userStr ? JSON.parse(userStr) : null
+  console.log('🎯 generateQuestion called:', { 
+    category, 
+    subject, 
+    difficulty,
+    hasUser: !!user,
+    hasToken: !!user?.token,
+    email: user?.email 
+  })
+  
   return await fetchAPI('/api/question/generate', {
     method: 'POST',
     body: JSON.stringify({ category, subject, difficulty }),
+    headers: getAIHeaders(),
   })
 }
 
@@ -151,10 +250,49 @@ export async function evaluateAnswer(question, answer, difficulty) {
   const data = await fetchAPI('/api/answer/evaluate', {
     method: 'POST',
     body: JSON.stringify({ question, answer, difficulty }),
+    headers: getAIHeaders(),
   })
   
   // Return the whole response object with score and feedback
   return data
+}
+
+/**
+ * Test custom AI configuration by making a minimal API call
+ * @param {string} [apiKey] - Optional custom API key to test (uses saved settings if not provided)
+ * @param {string} [model] - Optional model to test (uses saved settings if not provided)
+ * @returns {Promise<{ok: boolean, message: string, model: string}>} Test result
+ */
+export async function testAIConfiguration(apiKey, model) {
+  if (USE_MOCK_API) {
+    // Mock always succeeds
+    return { 
+      ok: true, 
+      message: 'Mock API test successful!', 
+      model: model || 'mock-model' 
+    }
+  }
+  
+  // Build headers - use provided values or fall back to saved settings
+  const headers = {}
+  const { apiKey: savedApiKey, model: savedModel } = getCustomAISettings()
+  
+  const testApiKey = apiKey !== undefined ? apiKey : savedApiKey
+  const testModel = model !== undefined ? model : savedModel
+  
+  if (testApiKey) {
+    headers['X-OpenAI-API-Key'] = testApiKey
+  }
+  if (testModel) {
+    headers['X-OpenAI-Model'] = testModel
+  }
+  
+  const response = await fetchAPI('/api/ai/test', {
+    method: 'POST',
+    headers,
+  })
+  
+  return response
 }
 
 /**
@@ -190,6 +328,11 @@ export async function saveAnswerHistory(payload) {
  */
 export async function getUserHistory(params = {}) {
   if (USE_MOCK_API) return mockAPI.getUserHistory(params)
+  
+  // Get user email from localStorage to support Dev Login without valid token
+  const userStr = localStorage.getItem('quiz_user')
+  const user = userStr ? JSON.parse(userStr) : null
+
   const searchParams = new URLSearchParams()
   if (params.limit) {
     searchParams.set('limit', params.limit)
@@ -197,6 +340,12 @@ export async function getUserHistory(params = {}) {
   if (params.before) {
     searchParams.set('before', params.before)
   }
+  
+  // Add email if available and not already in params
+  if (user?.email && !params.email) {
+    searchParams.set('email', user.email)
+  }
+
   const query = searchParams.toString()
   const response = await fetchAPI(`/api/user/history${query ? `?${query}` : ''}`)
   return response.history || []
@@ -226,9 +375,10 @@ export async function getUserPerformance(params = {}) {
   // (charts/components) can render a friendly empty state without throwing.
   if (!response || response.ok === false) return []
 
-  // Try common shapes: top-level `performance`, `data.performance`, or `data` as array
+  // Backend returns { period, data_points, summary }
+  // Check for data_points first, then try common shapes
   return (
-    response.performance || response.data?.performance || response.data || response
+    response.data_points || response.performance || response.data?.performance || response.data || response
   )
 }
 
@@ -239,7 +389,19 @@ export async function getUserPerformance(params = {}) {
  */
 export async function getUserProfile() {
   if (USE_MOCK_API) return mockAPI.getUserProfile()
-  const response = await fetchAPI('/api/user/profile')
+  
+  // Get user email from localStorage to support the case where token isn't available yet
+  const userStr = localStorage.getItem('quiz_user')
+  const user = userStr ? JSON.parse(userStr) : null
+
+  const searchParams = new URLSearchParams()
+  // Add email if available and not already in params
+  if (user?.email) {
+    searchParams.set('email', user.email)
+  }
+  
+  const query = searchParams.toString()
+  const response = await fetchAPI(`/api/user/profile${query ? `?${query}` : ''}`)
   
   // If the request failed, return empty data
   if (!response || response.ok === false) {
@@ -281,7 +443,7 @@ export async function getUserBestCategory() {
  */
 export async function getLeaderboard() {
   if (USE_MOCK_API) return mockAPI.getLeaderboard()
-  const response = await fetchAPI('/api/user/leaderboard/enhanced')
+  const response = await fetchAPI('/api/user/leaderboard')
   
   // If the request failed, return empty data
   if (!response || response.ok === false) {
@@ -289,7 +451,141 @@ export async function getLeaderboard() {
   }
   
   return {
-    topTen: response.topTen || response.top_ten || response.data?.topTen || [],
-    userRank: response.userRank ?? response.user_rank ?? response.data?.userRank ?? null,
+    topTen: response.leaderboard || response.data?.leaderboard || [],
+    userRank: response.current_user?.rank ?? response.currentUser?.rank ?? null,
   }
+}
+
+/**
+ * Create a new multiplayer lobby
+ * @param {Object} settings - Game settings
+ * @param {string[]} [settings.categories] - Categories for questions
+ * @param {number} [settings.difficulty] - Difficulty level (1-3)
+ * @param {number} [settings.question_timer] - Seconds per question
+ * @param {number} [settings.max_players] - Maximum players allowed
+ * @returns {Promise<{code: string, lobbyId: string, lobby: Object}>}
+ */
+export async function createLobby(settings) {
+  if (USE_MOCK_API) return mockAPI.createLobby(settings)
+  return await fetchAPI('/api/multiplayer/lobby', {
+    method: 'POST',
+    body: JSON.stringify(settings),
+  })
+}
+
+/**
+ * Join an existing multiplayer lobby
+ * @param {string} code - Lobby code
+ * @returns {Promise<{code: string, lobby: Object}>}
+ */
+export async function joinLobby(code) {
+  if (USE_MOCK_API) return mockAPI.joinLobby(code)
+  return await fetchAPI('/api/multiplayer/join', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  })
+}
+
+/**
+ * Get lobby details by code
+ * @param {string} lobbyCode - The 6-character lobby code
+ * @returns {Promise<{lobby: Object}>}
+ */
+export async function getLobbyDetails(lobbyCode) {
+  if (USE_MOCK_API) return mockAPI.getLobbyDetails(lobbyCode)
+  return await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}`)
+}
+
+/**
+ * Update lobby settings (creator only)
+ * @param {string} lobbyCode - The 6-character lobby code
+ * @param {Object} settings - Settings to update
+ * @param {string[]} [settings.categories] - Categories for questions
+ * @param {number} [settings.difficulty] - Difficulty level (1-3)
+ * @param {number} [settings.question_timer] - Seconds per question
+ * @param {number} [settings.max_players] - Maximum players allowed
+ * @param {Array} [settings.question_sets] - Array of question set objects
+ * @returns {Promise<{lobby: Object}>}
+ */
+export async function updateLobbySettings(lobbyCode, settings) {
+  if (USE_MOCK_API) return mockAPI.getLobbyDetails(lobbyCode) // Mock doesn't support updates yet
+  return await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/settings`, {
+    method: 'PATCH',
+    body: JSON.stringify(settings),
+  })
+}
+
+/**
+ * Leave a lobby
+ * @param {string} lobbyCode - The 6-character lobby code
+ * @returns {Promise<{success: boolean}>}
+ */
+export async function leaveLobby(lobbyCode) {
+  if (USE_MOCK_API) return mockAPI.leaveLobby(lobbyCode)
+  return await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/leave`, {
+    method: 'POST',
+  })
+}
+
+/**
+ * Toggle ready status in lobby
+ * @param {string} lobbyCode - The 6-character lobby code
+ * @param {boolean} ready - Ready state
+ * @returns {Promise<{lobby: Object, all_ready: boolean}>}
+ */
+export async function toggleReady(lobbyCode, ready) {
+  if (USE_MOCK_API) return mockAPI.toggleReady(lobbyCode, ready)
+  return await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/ready`, {
+    method: 'POST',
+    body: JSON.stringify({ ready }),
+  })
+}
+
+/**
+ * Start the game (creator only)
+ * @param {string} lobbyCode - The 6-character lobby code
+ * @returns {Promise<{success: boolean, status: string}>}
+ */
+export async function startGame(lobbyCode) {
+  if (USE_MOCK_API) {
+    return { ok: true, success: true, status: 'countdown' }
+  }
+  const response = await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/start`, {
+    method: 'POST',
+  })
+  
+  // Handle rate limiting and errors explicitly
+  if (!response.ok) {
+    if (response.isRateLimited) {
+      // Rate limit error - pass through for special handling
+      throw new Error(response.error || 'Rate limit exceeded')
+    }
+    // Other errors (question generation, validation, etc.)
+    throw new Error(response.error || 'Failed to start game')
+  }
+  
+  return response
+}
+
+/**
+ * Get list of active lobbies
+ * @returns {Promise<{lobbies: Array}>}
+ */
+export async function getActiveLobbies() {
+  if (USE_MOCK_API) return mockAPI.getActiveLobbies()
+  return await fetchAPI('/api/multiplayer/lobbies')
+}
+
+/**
+ * Claim bonus XP from daily missions or other rewards
+ * @param {number} xp - Amount of XP to claim
+ * @param {string} source - Source of the XP (e.g., 'daily_mission')
+ * @returns {Promise<{success: boolean, xp_claimed: number}>}
+ */
+export async function claimBonusXP(xp, source = 'daily_mission') {
+  if (USE_MOCK_API) return { success: true, xp_claimed: xp }
+  return await fetchAPI('/api/user/claim-bonus-xp', {
+    method: 'POST',
+    body: JSON.stringify({ xp, source }),
+  })
 }

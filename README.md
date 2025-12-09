@@ -184,19 +184,21 @@ The frontend communicates with the backend via RESTful API using JWT authenticat
 
 ### Core API Endpoints
 
+> **Full API documentation**: See `FRONTEND_DEV_GUIDE.md` and project root `README.md` for complete endpoint specifications.
+
 **Authentication:**
 - `POST /api/auth/google-login` - Google OAuth verification & JWT issuance
 
 **Quiz:**
-- `GET /api/all-subjects` - Get all categories with subjects (cached)
+- `GET /api/all-subjects` - Get all categories with subjects (cached 30m)
 - `POST /api/question/generate` - Generate AI question
 - `POST /api/answer/evaluate` - Evaluate answer with AI feedback
 - `POST /api/user/answers` - Save answer to history
 
 **Profile (Optimized - 3 Strategic Calls):**
-- `GET /api/user/profile` - User stats (XP, bestCategory, averageScore, totalAnswers, lastActivity)
-- `GET /api/user/history` - Last 20 full answers with details (paginated)
-- `GET /api/user/performance` - Aggregated chart data (top 5 categories, time-based)
+- `GET /api/user/profile` - User stats + level system (XP, level, levelProgress, bestCategory, averageScore, streak, totalAnswers, lastActivity)
+- `GET /api/user/history` - Answer history with summary + details structure (paginated via `before` param)
+- `GET /api/user/performance` - Time-bucketed performance data (period: 7d/30d/90d/all, granularity: day/week/month)
 
 **Leaderboard:**
 - `GET /api/user/leaderboard/enhanced` - Top 10 users + current user rank
@@ -208,8 +210,11 @@ All API calls are centralized in `react-app/src/api/quizAPI.js` with:
 - Response normalization
 - Auth failure detection (auto-logout on 401)
 
-### Backend Requirements
-See `API_REQUIREMENTS.md` for detailed specifications of each endpoint including request/response formats, business logic, and implementation guidelines.
+### Backend Integration Status
+See `FRONTEND_DEV_GUIDE.md` for:
+- Current tasks blocked by backend endpoints (profile, history, performance)
+- Integration sequence and testing strategy
+- Data shape contracts and validation
 
 ---
 
@@ -221,3 +226,13 @@ Create a `.env` file in `react-app/`:
 VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
 VITE_API_BASE_URL=http://localhost:5000  # Backend API URL (optional)
 ```
+
+---
+
+## Documentation
+
+- **`README.md`** (project root) - High-level architecture, unified task board, quick commands
+- **`FRONTEND_DEV_GUIDE.md`** - Frontend-specific tasks, roadmap, integration sequence
+- **`BACKEND_DEV_GUIDE.md`** - Backend endpoints, tasks, data model, security
+
+For detailed endpoint specifications, implementation status, and cross-team coordination, see the project root documentation.

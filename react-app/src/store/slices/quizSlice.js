@@ -7,6 +7,17 @@ import * as quizAPI from '../../api/quizAPI'
  */
 
 // Async thunks for API calls
+export const fetchUserProfile = createAsyncThunk(
+  'quiz/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await quizAPI.getUserProfile()
+    } catch (error) {
+      return rejectWithValue(error.message)
+    }
+  }
+)
+
 export const fetchCategoriesWithSubjects = createAsyncThunk(
   'quiz/fetchCategoriesWithSubjects',
   async (_, { rejectWithValue }) => {
@@ -22,7 +33,25 @@ export const generateQuestion = createAsyncThunk(
   'quiz/generateQuestion',
   async ({ category, subject, difficulty }, { rejectWithValue }) => {
     try {
-      return await quizAPI.generateQuestion(category, subject, difficulty)
+      const result = await quizAPI.generateQuestion(category, subject, difficulty)
+      
+      // Handle rate limiting
+      if (result.isRateLimited) {
+        return rejectWithValue({
+          message: result.error,
+          isRateLimited: true,
+          limit: result.limit,
+          resetTime: result.resetTime,
+          windowSeconds: result.windowSeconds,
+        })
+      }
+      
+      // Handle other errors
+      if (!result.ok && result.error) {
+        return rejectWithValue(result.error)
+      }
+      
+      return result
     } catch (error) {
       return rejectWithValue(error.message)
     }
@@ -31,10 +60,27 @@ export const generateQuestion = createAsyncThunk(
 
 export const submitAnswer = createAsyncThunk(
   'quiz/submitAnswer',
-  async ({ question, answer, difficulty }, { rejectWithValue, getState }) => {
+  async ({ question, answer, difficulty }, { rejectWithValue, getState, dispatch }) => {
     try {
       const evaluation = await quizAPI.evaluateAnswer(question, answer, difficulty)
+      
+      // Handle rate limiting
+      if (evaluation.isRateLimited) {
+        return rejectWithValue({
+          message: evaluation.error,
+          isRateLimited: true,
+          limit: evaluation.limit,
+          resetTime: evaluation.resetTime,
+        })
+      }
+      
+      // Handle other errors
+      if (!evaluation.ok && evaluation.error) {
+        return rejectWithValue(evaluation.error)
+      }
+      
       const state = getState().quiz
+      const authUser = getState().auth?.user
       const currentQuestion = state.currentQuestion || {}
       const category = currentQuestion.category || state.selectedCategory
       const subject = currentQuestion.subject || state.selectedSubject
@@ -57,6 +103,7 @@ export const submitAnswer = createAsyncThunk(
             submitted_at: timestamp,
             source: 'quiz-app',
           },
+          email: authUser?.email,
         }
 
         try {
@@ -78,6 +125,8 @@ export const submitAnswer = createAsyncThunk(
               metadata: historyPayload.metadata,
             },
           }
+          // Refresh profile to update XP
+          dispatch(fetchUserProfile())
         } catch (err) {
           console.error('Failed to save answer history:', err)
           // History save failed but evaluation succeeded - continue
@@ -112,17 +161,6 @@ export const fetchUserHistory = createAsyncThunk(
       if (quiz.historyLoaded && !params.force) return false
       return true
     },
-  }
-)
-
-export const fetchUserProfile = createAsyncThunk(
-  'quiz/fetchUserProfile',
-  async (_, { rejectWithValue }) => {
-    try {
-      return await quizAPI.getUserProfile()
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
   }
 )
 
@@ -187,6 +225,9 @@ const quizSlice = createSlice({
     currentPage: 'setup', // 'setup' | 'question' | 'results'
     loading: false,
     error: null,
+    
+    // Rate limiting state
+    rateLimitInfo: null, // { resetTime, limit, windowSeconds }
 
     // User profile stats (XP, bestCategory, etc.)
     userProfile: null,
@@ -214,6 +255,11 @@ const quizSlice = createSlice({
   },
   reducers: {
     // Form actions
+    setGameSettings: (state, action) => {
+      state.selectedCategory = action.payload.category
+      state.selectedSubject = action.payload.subject
+      state.selectedDifficulty = action.payload.difficulty
+    },
     setCategory: (state, action) => {
       state.selectedCategory = action.payload
       state.selectedSubject = '' // Reset subject when category changes
@@ -264,6 +310,9 @@ const quizSlice = createSlice({
       state.currentPage = 'setup'
       state.error = null
     },
+    clearRateLimitInfo: (state) => {
+      state.rateLimitInfo = null
+    },
     clearHistory: (state) => {
       state.history = []
       state.historyLoading = false
@@ -302,10 +351,20 @@ const quizSlice = createSlice({
         state.loading = false
         state.currentQuestion = action.payload
         state.currentPage = 'question'
+        state.userAnswer = ''
+        state.rateLimitInfo = null // Clear rate limit on success
       })
       .addCase(generateQuestion.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+        // Store rate limit info if present
+        if (action.payload?.isRateLimited) {
+          state.rateLimitInfo = {
+            resetTime: action.payload.resetTime,
+            limit: action.payload.limit,
+            windowSeconds: action.payload.windowSeconds,
+          }
+        }
       })
     
     // Submit answer
@@ -346,8 +405,15 @@ const quizSlice = createSlice({
       })
       .addCase(fetchUserHistory.fulfilled, (state, action) => {
         state.historyLoading = false
-        // Merge local unsaved entries with fetched history
-        const fetched = action.payload || []
+        // Ensure fetched is always an array
+        let fetched = action.payload
+        if (!Array.isArray(fetched)) {
+          if (fetched && typeof fetched === 'object') {
+            fetched = [fetched]
+          } else {
+            fetched = []
+          }
+        }
         // Find local entries not present in fetched (by id)
         const fetchedIds = new Set(fetched.map(entry => entry.id))
         const localUnsaved = state.history.filter(entry => !fetchedIds.has(entry.id))
@@ -424,6 +490,8 @@ const quizSlice = createSlice({
           let arr = []
           if (Array.isArray(payload)) {
             arr = payload
+          } else if (payload && Array.isArray(payload.data_points)) {
+            arr = payload.data_points
           } else if (payload && Array.isArray(payload.performance)) {
             arr = payload.performance
           } else if (payload && Array.isArray(payload.data)) {
@@ -443,6 +511,7 @@ const quizSlice = createSlice({
 })
 
 export const {
+  setGameSettings,
   setCategory,
   setSubject,
   setDifficulty,
@@ -452,6 +521,7 @@ export const {
   goToResults,
   clearForm,
   resetQuiz,
+  clearRateLimitInfo,
   clearHistory,
 } = quizSlice.actions
 
@@ -469,6 +539,7 @@ export const selectScore = (state) => state.quiz.score
 export const selectCurrentPage = (state) => state.quiz.currentPage
 export const selectLoading = (state) => state.quiz.loading
 export const selectError = (state) => state.quiz.error
+export const selectRateLimitInfo = (state) => state.quiz.rateLimitInfo
 export const selectHistory = (state) => state.quiz.history
 export const selectHistoryLoading = (state) => state.quiz.historyLoading
 export const selectHistoryError = (state) => state.quiz.historyError
