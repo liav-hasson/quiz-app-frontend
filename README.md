@@ -1,6 +1,7 @@
 # Quiz App - Frontend Repository
 
 A modern, responsive React frontend for the DevOps learning platform. Built with Vite, Tailwind CSS, Framer Motion, and Radix UI.
+New version v2.0.0 stable is live!
 
 ---
 ## Related Repositories
