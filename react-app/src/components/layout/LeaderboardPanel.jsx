@@ -239,7 +239,7 @@ const LeaderboardPanel = () => {
               showRankChangeIndicator={showRankChanges}
             />
           ))}
-        </AnimatePresence>e>
+        </AnimatePresence>
 
         {userRank && userRank > 100 && (
           <>
