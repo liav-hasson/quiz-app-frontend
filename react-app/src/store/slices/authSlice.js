@@ -43,14 +43,19 @@ const authSlice = createSlice({
   },
   reducers: {
     loginSuccess: (state, action) => {
+      console.log('🔐 Redux loginSuccess called with:', action.payload)
       state.user = action.payload
       state.isAuthenticated = true
       localStorage.setItem('quiz_user', JSON.stringify(action.payload))
+      console.log('💾 User saved to localStorage and state updated')
     },
     logout: (state) => {
+      console.log('🚪 Redux logout called')
       state.user = null
       state.isAuthenticated = false
       localStorage.removeItem('quiz_user')
+      // Clear lobby state on logout
+      localStorage.removeItem('lobby_state')
     },
   },
 })

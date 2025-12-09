@@ -1,0 +1,25 @@
+# Ignore local environment files - these contain development settings
+.env
+.env.local
+.env.development
+.env.development.local
+
+# Node modules - installed fresh in Docker
+node_modules
+
+# Build output - built fresh in Docker  
+dist
+
+# IDE/editor files
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

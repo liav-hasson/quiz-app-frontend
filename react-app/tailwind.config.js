@@ -28,6 +28,11 @@ export default {
         'gradient-cool-warm': 'var(--gradient-cool-warm)',
         'gradient-neon-purple': 'var(--gradient-neon-purple)',
       },
+      fontFamily: {
+        arcade: ['"Press Start 2P"', 'cursive'],
+        orbitron: ['"Orbitron"', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
       animation: {
         'gradient-shift': 'gradient-shift 15s ease infinite',
         'float': 'float 20s ease-in-out infinite',

@@ -16,16 +16,16 @@ const mockStore = {
     'Networking': ['TCP/IP', 'DNS', 'Load Balancing'],
   },
   leaderboard: [
-    { rank: 1, username: 'Alice', score: 850, _id: '1' },
-    { rank: 2, username: 'Bob', score: 720, _id: '2' },
-    { rank: 3, username: 'Charlie', score: 680, _id: '3' },
-    { rank: 4, username: 'Diana', score: 650, _id: '4' },
-    { rank: 5, username: 'Eve', score: 620, _id: '5' },
-    { rank: 6, username: 'Mock User', score: 580, _id: '6' },
-    { rank: 7, username: 'Grace', score: 550, _id: '7' },
-    { rank: 8, username: 'Hank', score: 520, _id: '8' },
-    { rank: 9, username: 'Ivy', score: 490, _id: '9' },
-    { rank: 10, username: 'Jack', score: 460, _id: '10' },
+    { rank: 1, username: 'Alice', XP: 8500, _id: '1' },
+    { rank: 2, username: 'Bob', XP: 7200, _id: '2' },
+    { rank: 3, username: 'Charlie', XP: 6800, _id: '3' },
+    { rank: 4, username: 'Diana', XP: 6500, _id: '4' },
+    { rank: 5, username: 'Eve', XP: 6200, _id: '5' },
+    { rank: 6, username: 'Mock User', XP: 5800, _id: '6' },
+    { rank: 7, username: 'Grace', XP: 5500, _id: '7' },
+    { rank: 8, username: 'Hank', XP: 5200, _id: '8' },
+    { rank: 9, username: 'Ivy', XP: 4900, _id: '9' },
+    { rank: 10, username: 'Jack', XP: 4600, _id: '10' },
   ],
 }
 
@@ -131,6 +131,40 @@ const mockQuestions = {
       'What is closure in JavaScript?',
       'Explain async/await in JavaScript.',
       'What is the event loop?',
+    ],
+  },
+  'Cloud': {
+    'AWS': [
+      'What is EC2?',
+      'Explain S3 storage classes.',
+      'What is a VPC?',
+    ],
+    'Azure': [
+      'What is Azure Functions?',
+      'Explain Azure Blob Storage.',
+      'What is a Resource Group?',
+    ],
+    'GCP': [
+      'What is Google Compute Engine?',
+      'Explain BigQuery.',
+      'What is Cloud Spanner?',
+    ],
+  },
+  'Networking': {
+    'TCP/IP': [
+      'What is the difference between TCP and UDP?',
+      'Explain the 3-way handshake.',
+      'What is an IP address?',
+    ],
+    'DNS': [
+      'What is a DNS record?',
+      'Explain DNS propagation.',
+      'What is a CNAME?',
+    ],
+    'Load Balancing': [
+      'What is Round Robin?',
+      'Explain Layer 4 vs Layer 7 load balancing.',
+      'What is a health check?',
     ],
   },
 }
@@ -398,5 +432,193 @@ export async function getLeaderboard() {
   return {
     topTen: mockStore.leaderboard,
     userRank,
+  }
+}
+
+/**
+ * Mock create lobby
+ */
+export async function createLobby(settings) {
+  await delay(600)
+  
+  const lobbyCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+  const userStr = localStorage.getItem('quiz_user')
+  const currentUser = userStr ? JSON.parse(userStr) : { name: 'Mock User', email: 'mock@example.com' }
+  
+  const lobby = {
+    lobby_code: lobbyCode,
+    creator_id: 'mock-user-id',
+    creator_username: currentUser.name,
+    categories: settings.categories || ['General'],
+    difficulty: settings.difficulty || 2,
+    question_timer: settings.question_timer || 30,
+    max_players: settings.max_players || 8,
+    players: [{
+      user_id: 'mock-user-id',
+      username: currentUser.name,
+      picture: currentUser.picture || '',
+      ready: false,
+      score: 0,
+      connected: true
+    }],
+    status: 'waiting',
+    created_at: new Date().toISOString(),
+  }
+  
+  // Store in mockStore for getLobbyDetails
+  mockStore.lobbies = mockStore.lobbies || {}
+  mockStore.lobbies[lobbyCode] = lobby
+  
+  return {
+    ok: true,
+    code: lobbyCode,
+    lobbyId: 'lobby-' + Date.now(),
+    lobby
+  }
+}
+
+/**
+ * Mock join lobby
+ */
+export async function joinLobby(code) {
+  await delay(600)
+  
+  code = code.toUpperCase()
+  
+  if (code === 'INVALID') {
+    throw new Error('Lobby not found')
+  }
+  
+  const userStr = localStorage.getItem('quiz_user')
+  const currentUser = userStr ? JSON.parse(userStr) : { name: 'Mock User', email: 'mock@example.com' }
+  
+  // Create a mock lobby if it doesn't exist
+  const lobby = mockStore.lobbies?.[code] || {
+    lobby_code: code,
+    creator_id: 'other-user-id',
+    creator_username: 'Host Player',
+    categories: ['General'],
+    difficulty: 2,
+    question_timer: 30,
+    max_players: 8,
+    players: [{
+      user_id: 'other-user-id',
+      username: 'Host Player',
+      picture: '',
+      ready: true,
+      score: 0,
+      connected: true
+    }],
+    status: 'waiting',
+    created_at: new Date().toISOString(),
+  }
+  
+  // Add current user to players if not already there
+  if (!lobby.players.find(p => p.username === currentUser.name)) {
+    lobby.players.push({
+      user_id: 'mock-user-id',
+      username: currentUser.name,
+      picture: currentUser.picture || '',
+      ready: false,
+      score: 0,
+      connected: true
+    })
+  }
+  
+  mockStore.lobbies = mockStore.lobbies || {}
+  mockStore.lobbies[code] = lobby
+  
+  return {
+    ok: true,
+    code,
+    lobby
+  }
+}
+
+/**
+ * Mock get lobby details
+ */
+export async function getLobbyDetails(lobbyCode) {
+  await delay(300)
+  
+  const code = lobbyCode.toUpperCase()
+  const lobby = mockStore.lobbies?.[code]
+  
+  if (!lobby) {
+    throw new Error('Lobby not found')
+  }
+  
+  return {
+    ok: true,
+    lobby
+  }
+}
+
+/**
+ * Mock leave lobby
+ */
+export async function leaveLobby(lobbyCode) {
+  await delay(300)
+  
+  const code = lobbyCode.toUpperCase()
+  const lobby = mockStore.lobbies?.[code]
+  
+  if (lobby) {
+    // Remove mock user from players
+    lobby.players = lobby.players.filter(p => p.user_id !== 'mock-user-id')
+  }
+  
+  return {
+    ok: true,
+    success: true
+  }
+}
+
+/**
+ * Mock toggle ready status
+ */
+export async function toggleReady(lobbyCode, ready) {
+  await delay(200)
+  
+  const code = lobbyCode.toUpperCase()
+  const lobby = mockStore.lobbies?.[code]
+  
+  if (lobby) {
+    const player = lobby.players.find(p => p.user_id === 'mock-user-id')
+    if (player) {
+      player.ready = ready
+    }
+  }
+  
+  const allReady = lobby?.players.every(p => p.ready) || false
+  
+  return {
+    ok: true,
+    lobby,
+    all_ready: allReady
+  }
+}
+
+/**
+ * Mock get active lobbies
+ */
+export async function getActiveLobbies() {
+  await delay(400)
+  
+  const lobbies = Object.values(mockStore.lobbies || {})
+    .filter(l => l.status === 'waiting')
+    .map(l => ({
+      lobby_code: l.lobby_code,
+      creator_username: l.creator_username,
+      categories: l.categories,
+      difficulty: l.difficulty,
+      player_count: l.players.length,
+      max_players: l.max_players,
+      status: l.status
+    }))
+  
+  return {
+    ok: true,
+    lobbies
   }
 }
