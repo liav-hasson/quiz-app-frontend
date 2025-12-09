@@ -225,46 +225,49 @@ const LeaderboardPanel = () => {
   }
 
   return (
-    <div className="space-y-3">
-      <AnimatePresence mode="popLayout">
-        {leaderboard.map((user, index) => (
-          <LeaderboardEntry
-            key={user._id || index}
-            user={user}
-            index={index}
-            previousRank={previousRanks[user._id]}
-            isCurrentUser={userProfile && user._id === userProfile._id}
-            showRankChangeIndicator={showRankChanges}
-          />
-        ))}
-      </AnimatePresence>
+    <div className="flex flex-col">
+      {/* Leaderboard entries - fixed height with scroll like chat */}
+      <div className="max-h-[70vh] overflow-y-auto space-y-3 custom-scrollbar">
+        <AnimatePresence mode="popLayout">
+          {leaderboard.map((user, index) => (
+            <LeaderboardEntry
+              key={user._id || index}
+              user={user}
+              index={index}
+              previousRank={previousRanks[user._id]}
+              isCurrentUser={userProfile && user._id === userProfile._id}
+              showRankChangeIndicator={showRankChanges}
+            />
+          ))}
+        </AnimatePresence>e>
 
-      {userRank && userRank > 10 && (
-        <>
-          <div className="flex items-center justify-center py-2">
-            <div className="w-1 h-1 bg-white/20 rounded-full mx-1"></div>
-            <div className="w-1 h-1 bg-white/20 rounded-full mx-1"></div>
-            <div className="w-1 h-1 bg-white/20 rounded-full mx-1"></div>
-          </div>
-          <motion.div 
-            layout
-            className="flex items-center gap-3 p-3 rounded-lg border border-accent-primary/50 bg-accent-primary/10"
-            style={{ boxShadow: '0 0 15px rgba(217, 70, 239, 0.3)' }}
-          >
-            <div className="w-8 h-8 rounded flex items-center justify-center font-arcade text-sm text-accent-primary">
-              #{userRank}
+        {userRank && userRank > 100 && (
+          <>
+            <div className="flex items-center justify-center py-2">
+              <div className="w-1 h-1 bg-white/20 rounded-full mx-1"></div>
+              <div className="w-1 h-1 bg-white/20 rounded-full mx-1"></div>
+              <div className="w-1 h-1 bg-white/20 rounded-full mx-1"></div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-orbitron text-sm text-white truncate">You</p>
-            </div>
-            <div className="text-right">
-              <p className="font-arcade text-xs text-accent-secondary">
-                <AnimatedXP value={totalUserXP} duration={0.8} /> XP
-              </p>
-            </div>
-          </motion.div>
-        </>
-      )}
+            <motion.div 
+              layout
+              className="flex items-center gap-3 p-3 rounded-lg border border-accent-primary/50 bg-accent-primary/10"
+              style={{ boxShadow: '0 0 15px rgba(217, 70, 239, 0.3)' }}
+            >
+              <div className="w-8 h-8 rounded flex items-center justify-center font-arcade text-sm text-accent-primary">
+                #{userRank}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-orbitron text-sm text-white truncate">You</p>
+              </div>
+              <div className="text-right">
+                <p className="font-arcade text-xs text-accent-secondary">
+                  <AnimatedXP value={totalUserXP} duration={0.8} /> XP
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
