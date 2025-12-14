@@ -161,23 +161,6 @@ Usage in JSX:
 
 ---
 
-## Build & Deployment
-
-### Development
-```bash
-npm run dev
-```
-
-### Production Build
-```bash
-npm run build
-```
-
-### Docker Deployment
-The `nginx.conf` is configured for production to serve the SPA, handle routing, and enable gzip compression. See the Dockerfile in `ci/app-dockerfile` for the multi-stage build.
-
----
-
 ## API Integration
 
 The frontend communicates with the backend via RESTful API using JWT authentication.
@@ -209,30 +192,3 @@ All API calls are centralized in `react-app/src/api/quizAPI.js` with:
 - Error handling and timeout management
 - Response normalization
 - Auth failure detection (auto-logout on 401)
-
-### Backend Integration Status
-See `FRONTEND_DEV_GUIDE.md` for:
-- Current tasks blocked by backend endpoints (profile, history, performance)
-- Integration sequence and testing strategy
-- Data shape contracts and validation
-
----
-
-## Environment Variables
-
-Create a `.env` file in `react-app/`:
-
-```env
-VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
-VITE_API_BASE_URL=http://localhost:5000  # Backend API URL (optional)
-```
-
----
-
-## Documentation
-
-- **`README.md`** (project root) - High-level architecture, unified task board, quick commands
-- **`FRONTEND_DEV_GUIDE.md`** - Frontend-specific tasks, roadmap, integration sequence
-- **`BACKEND_DEV_GUIDE.md`** - Backend endpoints, tasks, data model, security
-
-For detailed endpoint specifications, implementation status, and cross-team coordination, see the project root documentation.
