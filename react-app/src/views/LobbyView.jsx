@@ -503,7 +503,7 @@ const LobbyView = () => {
     return quizContents.reduce((sum, set) => sum + set.count, 0)
   }
 
-  const allReady = players.length >= 2 && players.every(p => p.ready)
+  const allReady = players.length >= 1 && players.every(p => p.ready)
   const hasValidQuiz = quizContents.length > 0 && getTotalQuestions() >= 1
   const canStart = isHost && allReady && hasValidQuiz && !countdown
 
@@ -589,15 +589,10 @@ const LobbyView = () => {
                 </div>
               </div>
             )}
-            {!canStart && !rateLimitInfo && players.length >= 2 && (
+            {!canStart && !rateLimitInfo && players.length >= 1 && (
               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/90 text-white text-xs px-3 py-2 rounded font-orbitron whitespace-nowrap pointer-events-none z-50">
                 {!allReady && 'All players must be ready'}
                 {allReady && !hasValidQuiz && 'Add questions first'}
-              </div>
-            )}
-            {!canStart && !rateLimitInfo && players.length < 2 && (
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/90 text-white text-xs px-3 py-2 rounded font-orbitron whitespace-nowrap pointer-events-none z-50">
-                Need at least 2 players
               </div>
             )}
           </div>
@@ -677,9 +672,9 @@ const LobbyView = () => {
                 ))}
               </AnimatePresence>
               
-              {players.length < 2 && (
+              {players.length === 0 && (
                 <p className="text-center text-text-muted text-sm py-4 font-orbitron">
-                  Waiting for more players...
+                  Waiting for players...
                 </p>
               )}
             </div>

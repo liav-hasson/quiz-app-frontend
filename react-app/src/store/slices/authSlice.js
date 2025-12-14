@@ -42,17 +42,27 @@ const authSlice = createSlice({
     isAuthenticated: !!loadUserFromStorage(),
   },
   reducers: {
+    // Actions (like 'loginSuccess') describe WHAT happened.
+    // Reducers describe HOW the state changes in response.
     loginSuccess: (state, action) => {
-      console.log('🔐 Redux loginSuccess called with:', action.payload)
+      if (import.meta.env.DEV) console.log('🔐 Redux loginSuccess called with:', action.payload)
+      
+      // Update the state with the new user data
       state.user = action.payload
       state.isAuthenticated = true
+      
+      // Persist to localStorage so they stay logged in on refresh
       localStorage.setItem('quiz_user', JSON.stringify(action.payload))
-      console.log('💾 User saved to localStorage and state updated')
+      if (import.meta.env.DEV) console.log('💾 User saved to localStorage and state updated')
     },
     logout: (state) => {
-      console.log('🚪 Redux logout called')
+      if (import.meta.env.DEV) console.log('🚪 Redux logout called')
+      
+      // Clear the state
       state.user = null
       state.isAuthenticated = false
+      
+      // Clear localStorage
       localStorage.removeItem('quiz_user')
       // Clear lobby state on logout
       localStorage.removeItem('lobby_state')

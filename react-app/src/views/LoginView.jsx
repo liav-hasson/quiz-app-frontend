@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { loginSuccess } from '../store/slices/authSlice'
-import { loginUser } from '../api/quizAPI'
+import { loginUser, guestLoginUser } from '../api/quizAPI'
 import { GOOGLE_CLIENT_ID } from '../config.js'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { selectAnimatedBackground } from '../store/slices/uiSlice'
@@ -15,7 +15,14 @@ const LoginView = () => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false)
+  const [guestUsername, setGuestUsername] = useState('')
   const animatedBackground = useSelector(selectAnimatedBackground)
+
+  const isLocalEnv = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('.local')
+  )
 
   const handleGoogleResponse = async (response) => {
     const logs = []
@@ -69,6 +76,11 @@ const LoginView = () => {
   }
 
   useEffect(() => {
+    if (isLocalEnv) {
+      // In local environments we disable Google login and rely on guest flow only.
+      return undefined
+    }
+
     const initializeGoogle = () => {
       if (window.google?.accounts?.id) {
         if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('your-google-client-id')) {
@@ -119,21 +131,68 @@ const LoginView = () => {
       }, 100)
       return () => clearInterval(interval)
     }
-  }, [])
+  }, [isLocalEnv])
 
-  const handleDevLogin = () => {
+  // Guest login handler for "Continue as Guest" option
+  const handleGuestLogin = async () => {
+    if (!isLocalEnv) {
+      setError('Guest login disabled in deployed environments. Please use Google Sign-In.')
+      return
+    }
+
+    if (!guestUsername.trim()) return
+    
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const data = await guestLoginUser({ username: guestUsername.trim() })
+
+      // Check if API key exists; if not, send the user to Settings to add it
+      let settings = null
+      try {
+        settings = JSON.parse(localStorage.getItem('quiz_ai_settings'))
+      } catch (e) {
+        settings = null
+      }
+      const needsApiKey = !settings || !settings.customApiKey
+      
+      // Save to localStorage first
+      localStorage.setItem('quiz_user', JSON.stringify(data))
+      
+      // Then dispatch to Redux
+      dispatch(loginSuccess(data))
+
+      // Navigate home - if API key missing, banner will show there
+      navigate('/')
+    } catch (err) {
+      setError(err.message || 'Guest login failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Dev bypass now uses guest login with auto-generated username
+  const handleDevLogin = async () => {
     // Only allow dev login in dev mode
     if (import.meta.env.VITE_DEV_MODE !== 'true') return
 
-    const devUser = {
-      id: 'dev-user-001',
-      name: 'Dev Player',
-      email: 'dev@example.com',
-      picture: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Dev',
-      token: 'mock-jwt-token'
+    const devUsername = `dev_${Date.now().toString(36)}`
+    setGuestUsername(devUsername)
+    
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const data = await guestLoginUser({ username: devUsername })
+      localStorage.setItem('quiz_user', JSON.stringify(data))
+      dispatch(loginSuccess(data))
+      navigate('/')
+    } catch (err) {
+      setError(err.message || 'Dev login failed')
+    } finally {
+      setIsLoading(false)
     }
-    dispatch(loginSuccess(devUser))
-    navigate('/')
   }
 
   return (
@@ -191,42 +250,85 @@ const LoginView = () => {
         )}
 
         <div className="space-y-4">
-          {/* Google Login Container */}
-          <div className="h-[40px] w-full relative">
-            {isLoading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg">
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
+          {/* Google Login Container (disabled in local environments) */}
+          {!isLocalEnv && (
+            <>
+              <div className="h-[40px] w-full relative">
+                {isLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg">
+                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                  </div>
+                ) : (
+                  <div id="google-signin-btn" className="w-full flex justify-center"></div>
+                )}
               </div>
-            ) : (
-              <div id="google-signin-btn" className="w-full flex justify-center"></div>
+
+              {!isGoogleLoaded && !isLoading && (
+                 <p className="text-xs text-red-400">Google Sign-In unavailable (Script not loaded)</p>
+              )}
+              {GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE' && (
+                 <p className="text-xs text-yellow-400 mt-2">⚠️ Please set VITE_GOOGLE_CLIENT_ID in .env.local</p>
+              )}
+            </>
+          )}
+
+          {isLocalEnv && (
+            <p className="text-xs text-text-secondary">Google login is disabled for local setups. Use guest login below.</p>
+          )}
+
+          {/* Guest Login Section */}
+          <div className="mt-6 space-y-3">
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-bg-card px-2 text-text-muted">Or continue as guest</span>
+              </div>
+            </div>
+            
+            <input
+              type="text"
+              value={guestUsername}
+              onChange={(e) => setGuestUsername(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGuestLogin()}
+              placeholder="Enter a username"
+              maxLength={30}
+              disabled={isLoading}
+              className="w-full p-3 bg-bg-card-light border border-white/10 rounded-lg text-white placeholder:text-text-muted focus:border-accent-primary outline-none transition-colors disabled:opacity-50"
+            />
+            
+            <button
+              onClick={handleGuestLogin}
+              disabled={!guestUsername.trim() || isLoading || !isLocalEnv}
+              className="w-full py-3 bg-accent-primary/20 border border-accent-primary/50 text-accent-primary rounded-lg font-orbitron text-sm hover:bg-accent-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Logging in...' : 'Continue as Guest'}
+            </button>
+            {!isLocalEnv && (
+              <p className="text-xs text-text-secondary">Guest login is only available in local environments.</p>
             )}
           </div>
 
-          {/* Fallback if Google script fails or ID missing */}
-          {!isGoogleLoaded && !isLoading && (
-             <p className="text-xs text-red-400">Google Sign-In unavailable (Script not loaded)</p>
-          )}
-          {GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE' && (
-             <p className="text-xs text-yellow-400 mt-2">⚠️ Please set VITE_GOOGLE_CLIENT_ID in .env.local</p>
-          )}
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-bg-card px-2 text-text-muted">Developers Only</span>
-            </div>
-          </div>
-
-          {/* Dev Bypass */}
+          {/* Dev Bypass - only visible in dev mode */}
           {import.meta.env.VITE_DEV_MODE === 'true' && (
-            <button 
-              onClick={handleDevLogin}
-              className="w-full py-3 bg-accent-secondary/10 border border-accent-secondary/30 text-accent-secondary rounded-lg font-orbitron text-sm hover:bg-accent-secondary/20 transition-all"
-            >
-              &lt; DEV_ACCESS_BYPASS /&gt;
-            </button>
+            <div className="mt-4">
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-bg-card px-2 text-text-muted">Developers Only</span>
+                </div>
+              </div>
+              <button 
+                onClick={handleDevLogin}
+                disabled={isLoading}
+                className="w-full py-3 bg-accent-secondary/10 border border-accent-secondary/30 text-accent-secondary rounded-lg font-orbitron text-sm hover:bg-accent-secondary/20 transition-all disabled:opacity-50"
+              >
+                &lt; DEV_ACCESS_BYPASS /&gt;
+              </button>
+            </div>
           )}
         </div>
       </motion.div>

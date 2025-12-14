@@ -144,12 +144,18 @@ const LeaderboardPanel = () => {
   const [showRankChanges, setShowRankChanges] = useState(false)
   const [userRank, setUserRank] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
   const userProfile = useSelector(selectUserProfile)
   const bonusXP = useSelector(selectBonusXP)
   const fetchedRef = useRef(false)
   const pollIntervalRef = useRef(null)
   const isFirstLoad = useRef(true)
   const leaderboardRef = useRef([]) // Use ref to avoid stale closure
+  const isLocalEnv = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('.local')
+  )
 
   // Calculate total XP to match profile display
   const totalUserXP = (userProfile?.XP || 0) + (bonusXP || 0)
@@ -189,6 +195,11 @@ const LeaderboardPanel = () => {
       isFirstLoad.current = false
     } catch (error) {
       console.error('Failed to fetch leaderboard:', error)
+      if (isLocalEnv) {
+        setErrorMessage('Leaderboard not available in local environment')
+      } else {
+        setErrorMessage('Leaderboard is temporarily unavailable')
+      }
     } finally {
       setLoading(false)
     }
@@ -224,6 +235,14 @@ const LeaderboardPanel = () => {
     return <div className="text-center text-text-muted font-orbitron text-xs animate-pulse">LOADING RANKINGS...</div>
   }
 
+  if (errorMessage) {
+    return (
+      <div className="text-center text-text-muted font-orbitron text-xs">
+        {errorMessage}
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col">
       {/* Leaderboard entries - fixed height with scroll like chat */}
@@ -239,7 +258,7 @@ const LeaderboardPanel = () => {
               showRankChangeIndicator={showRankChanges}
             />
           ))}
-        </AnimatePresence>e>
+        </AnimatePresence>
 
         {userRank && userRank > 100 && (
           <>

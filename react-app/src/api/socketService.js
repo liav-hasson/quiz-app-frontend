@@ -28,7 +28,7 @@ function getToken() {
  */
 export function initSocket() {
   if (USE_MOCK_API) {
-    console.log('🎭 Mock mode - Socket.IO disabled')
+    if (import.meta.env.DEV) console.log('🎭 Mock mode - Socket.IO disabled')
     return Promise.resolve(createMockSocket())
   }
 
@@ -46,11 +46,11 @@ export function initSocket() {
     const token = getToken()
     
     if (!token) {
-      console.warn('⚠️ No auth token - Socket.IO connection may fail')
+      if (import.meta.env.DEV) console.warn('⚠️ No auth token - Socket.IO connection may fail')
     }
 
     // Empty string = same origin (nginx proxies /socket.io/ to multiplayer backend)
-    console.log('🔌 Connecting to WebSocket server:', MULTIPLAYER_URL || '(same origin)')
+    if (import.meta.env.DEV) console.log('🔌 Connecting to WebSocket server:', MULTIPLAYER_URL || '(same origin)')
 
     socket = io(MULTIPLAYER_URL || undefined, {
       auth: { token },
@@ -63,34 +63,34 @@ export function initSocket() {
     })
 
     socket.on('connect', () => {
-      console.log('✅ Socket.IO connected:', socket.id)
+      if (import.meta.env.DEV) console.log('✅ Socket.IO connected:', socket.id)
       connectionPromise = null
       
       // Debug listener for answer_recorded - always logs when event is received
       socket.onAny((event, ...args) => {
-        console.log(`[SOCKET EVENT] ${event}:`, args)
+        if (import.meta.env.DEV) console.log(`[SOCKET EVENT] ${event}:`, args)
       })
       
       resolve(socket)
     })
 
     socket.on('connect_error', (error) => {
-      console.error('❌ Socket.IO connection error:', error.message)
+      if (import.meta.env.DEV) console.error('❌ Socket.IO connection error:', error.message)
       connectionPromise = null
       reject(error)
     })
 
     socket.on('disconnect', (reason) => {
-      console.log('🔌 Socket.IO disconnected:', reason)
+      if (import.meta.env.DEV) console.log('🔌 Socket.IO disconnected:', reason)
     })
 
     socket.on('error', (error) => {
-      console.error('❌ Socket.IO error:', error)
+      if (import.meta.env.DEV) console.error('❌ Socket.IO error:', error)
     })
 
     // Handle reconnection
     socket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Socket.IO reconnected after', attemptNumber, 'attempts')
+      if (import.meta.env.DEV) console.log('🔄 Socket.IO reconnected after', attemptNumber, 'attempts')
     })
 
     // Timeout for initial connection

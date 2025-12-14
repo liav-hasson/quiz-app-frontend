@@ -2,9 +2,10 @@ import React, { useState, useEffect, memo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Trophy, Flame, Star, History, ArrowLeft } from 'lucide-react'
+import { Trophy, Flame, Star, History, ArrowLeft, Key } from 'lucide-react'
 import { selectUser } from '../store/slices/authSlice'
 import { selectSelectedHistoryItem, setSelectedHistoryItem, setActiveTab } from '../store/slices/uiSlice'
+import { selectHasCustomApiKey, reloadSettings } from '../store/slices/settingsSlice'
 import { 
   selectUserProfile, 
   selectHistory, 
@@ -126,6 +127,7 @@ const HomeView = () => {
   const selectedHistoryItem = useSelector(selectSelectedHistoryItem)
   const bonusXP = useSelector(selectBonusXP)
   const categories = useSelector(selectCategories)
+  const hasApiKey = useSelector(selectHasCustomApiKey)
   
   const [isHovering, setIsHovering] = useState(false)
   const [flickerState, setFlickerState] = useState({})
@@ -138,6 +140,9 @@ const HomeView = () => {
   const colors = ['#d946ef', '#06b6d4', '#8b5cf6', '#ec4899', '#10b981', '#facc15', '#f97316']
 
   useEffect(() => {
+    // Reload settings from localStorage on mount (important after login/localStorage changes)
+    dispatch(reloadSettings())
+    
     // Delay fetching to ensure token is in localStorage
     const timer = setTimeout(() => {
       dispatch(fetchUserProfile())
@@ -238,6 +243,26 @@ const HomeView = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {/* API Key Setup Banner */}
+      {!hasApiKey && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={() => {
+            dispatch(setActiveTab('settings'))
+            navigate('/settings', { state: { showApiKeyPrompt: true } })
+          }}
+          className="p-4 rounded-xl bg-accent-primary/20 border border-accent-primary/50 flex items-center gap-3 cursor-pointer hover:bg-accent-primary/30 transition-all group"
+        >
+          <Key className="w-6 h-6 text-accent-primary flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-orbitron text-sm text-white">Click to set OpenAI API Key</p>
+            <p className="text-xs text-text-secondary">Required to generate questions and play</p>
+          </div>
+          <span className="text-accent-primary text-xs font-orbitron group-hover:translate-x-1 transition-transform">→</span>
+        </motion.div>
+      )}
+
       {/* User Header */}
       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 bg-gradient-to-r from-bg-card-light to-transparent backdrop-blur-md rounded-2xl border border-white/5">
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-accent-primary to-accent-secondary p-1 shadow-[0_0_20px_rgba(217,70,239,0.3)]">
