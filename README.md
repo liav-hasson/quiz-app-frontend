@@ -12,54 +12,16 @@ A modern, responsive React frontend for the DevOps learning platform. Built with
 
 ---
 
-## Quick Start
-
-```bash
-cd react-app
-npm install
-npm run dev      # Start dev server (http://localhost:5173)
-npm run build    # Production build
-npm run preview  # Preview production build
-```
+## How to run
+For local usage, follow the instructions in the separate mini-version repository: https://github.com/liav-hasson/quiz-app-mini (see `mini-version/bootstrap/README.md`). That repo starts frontend, backend, and multiplayer together via Docker Compose.
 
 ---
 
-## Project Structure
-
-```
-react-app/
-├── src/
-│   ├── index.css              ← Single source of truth (colors + all CSS)
-│   ├── main.jsx               ← App entry point
-│   ├── App.jsx                ← Main router & layout
-│   ├── components/
-│   │   ├── Header.jsx         ← Navigation & user info
-│   │   ├── AnimatedBackground.jsx
-│   │   ├── AnimatedBorder.jsx
-│   │   ├── profile/           ← Profile page components
-│   │   │   ├── HistoryCard.jsx
-│   │   │   └── PerformanceChart.jsx
-│   │   └── ui/                ← Radix UI primitives (button, card, input, etc.)
-│   ├── pages/
-│   │   ├── Login.jsx          ← Google OAuth login
-│   │   ├── Quiz.jsx           ← Main quiz interface
-│   │   ├── Profile.jsx        ← User profile & stats
-│   │   └── Leaderboard.jsx    ← Global leaderboard
-│   ├── store/
-│   │   ├── index.js           ← Redux store configuration
-│   │   └── slices/            ← Redux Toolkit slices (auth, quiz, theme)
-│   └── lib/
-│       ├── colors.js          ← Deprecated (reference only)
-│       ├── toastConfig.js     ← Toast notifications setup
-│       └── utils.js           ← Helper functions
-├── public/                    ← Static assets (logo, favicon)
-├── index.html
-├── vite.config.js
-├── tailwind.config.js         ← Tailwind CSS config
-├── postcss.config.js
-├── nginx.conf                 ← Production Nginx config
-└── package.json
-```
+## Project Structure (brief)
+- `src/` — components, pages, store, styles
+- `public/` — static assets
+- `vite.config.js` — Vite config
+- `nginx.conf` — production nginx config
 
 ---
 
@@ -70,39 +32,6 @@ react-app/
 All colors, styles, and animations are defined in one file for consistency and maintenance.
 
 Edit the palette once; changes propagate across the app.
-
-```css
-@theme {
-  /* Palette - primary hex colors */
-  --color-neon-pink: #f72585;
-  --color-turquoise-bright: #1ee3cf;
-  --color-soft-cyan: #92f2e8;
-  /* ... */
-  
-  /* Semantic variables - for usage context */
-  --accent-primary: #3a0ca3;
-  --accent-secondary: #92f2e8;
-  --accent-tertiary: #7209b7;
-  --accent-quaternary: #f72585;
-}
-```
-
-Available color variants:
-- Light, Medium, Strong opacity versions of each accent color
-- Gradients: `var(--gradient-primary)`, `var(--gradient-neon-purple)`, etc.
-- Background colors: `--bg-dark`, `--bg-card` with opacity variants
-
-Usage in JSX:
-
-```jsx
-// Tailwind classes automatically reference the palette
-<div className="bg-neon-pink text-soft-cyan border-turquoise-bright/30">
-
-// CSS variables in styled components
-<motion.div style={{ background: 'var(--gradient-primary)' }}>
-```
-
----
 
 ## Key Features
 
@@ -132,16 +61,9 @@ Usage in JSX:
 ### UI/UX
 - Framer Motion for animations and transitions
 - Animated background component
-- Glass-morphism cards with backdrop blur
+- Glass cards with backdrop blur
 - Dark theme with neon accents
-- Responsive design (mobile-first)
-- Toast notifications for user feedback
 - Loading states and error handling
-
-### Accessibility
-- Radix UI components (semantic, accessible)
-- Keyboard navigation support
-- Theme toggle (dark/light mode)
 
 ---
 

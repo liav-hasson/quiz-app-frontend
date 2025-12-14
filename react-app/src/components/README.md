@@ -25,3 +25,8 @@ We organize components by their purpose to make them easy to find.
 ## Component Philosophy
 
 We try to make components "dumb" or "presentational" whenever possible. This means they just take data (props) and display it, without knowing too much about the app's complex logic or state. The logic is usually handled in the "Views" (pages) or the Redux store.
+
+Conventions
+- Name files in `PascalCase` per component (e.g., `QuestionCard.jsx`).
+- Co-locate small component-specific tests/stories when applicable (`QuestionCard.test.jsx`, `QuestionCard.stories.jsx`).
+- Keep side effects out of UI components; trigger API work via hooks or thunks.

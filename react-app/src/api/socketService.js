@@ -8,7 +8,7 @@
  */
 
 import { io } from 'socket.io-client'
-import { USE_MOCK_API, MULTIPLAYER_URL } from '../config.js'
+import { MULTIPLAYER_URL } from '../config.js'
 
 let socket = null
 let connectionPromise = null
@@ -27,11 +27,6 @@ function getToken() {
  * @returns {Promise<Socket>} Connected socket instance
  */
 export function initSocket() {
-  if (USE_MOCK_API) {
-    if (import.meta.env.DEV) console.log('🎭 Mock mode - Socket.IO disabled')
-    return Promise.resolve(createMockSocket())
-  }
-
   // Return existing connection if available
   if (socket?.connected) {
     return Promise.resolve(socket)
@@ -249,54 +244,6 @@ export function subscribeLobbyEvents(handlers) {
       }
     })
   }
-}
-
-/**
- * Create a mock socket for frontend-only development
- */
-function createMockSocket() {
-  const mockSocket = {
-    connected: true,
-    id: 'mock-socket-id',
-    emit: (event, data) => {
-      console.log('🎭 Mock socket emit:', event, data)
-      
-      // Simulate responses
-      if (event === 'join_room') {
-        setTimeout(() => {
-          mockSocket._trigger('room_joined', { lobby_code: data.lobby_code })
-        }, 100)
-      }
-    },
-    on: (event, handler) => {
-      mockSocket._handlers = mockSocket._handlers || {}
-      mockSocket._handlers[event] = mockSocket._handlers[event] || []
-      mockSocket._handlers[event].push(handler)
-    },
-    off: (event, handler) => {
-      if (mockSocket._handlers?.[event]) {
-        mockSocket._handlers[event] = mockSocket._handlers[event].filter(h => h !== handler)
-      }
-    },
-    once: (event, handler) => {
-      const wrappedHandler = (...args) => {
-        handler(...args)
-        mockSocket.off(event, wrappedHandler)
-      }
-      mockSocket.on(event, wrappedHandler)
-    },
-    disconnect: () => {
-      mockSocket.connected = false
-      console.log('🎭 Mock socket disconnected')
-    },
-    _trigger: (event, data) => {
-      const handlers = mockSocket._handlers?.[event] || []
-      handlers.forEach(h => h(data))
-    },
-    _handlers: {}
-  }
-  
-  return mockSocket
 }
 
 export default {
