@@ -8,9 +8,6 @@
  * Local development can override with VITE_* env vars in .env.local
  */
 
-// Check if we should use mock API (for frontend-only development)
-export const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
-
 /**
  * API Base URL
  * - Empty string in production (nginx proxies /api/ to backend)
@@ -40,7 +37,6 @@ export const DEFAULT_TIMEOUT = 30000 // 30 seconds
  */
 export function logConfig() {
   console.log('📋 App Configuration:', {
-    USE_MOCK_API,
     API_BASE_URL: API_BASE_URL || '(nginx proxy)',
     MULTIPLAYER_URL: MULTIPLAYER_URL || '(nginx proxy)',
     GOOGLE_CLIENT_ID: GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : '(not set)',
@@ -53,7 +49,6 @@ if (import.meta.env.DEV) {
 }
 
 export default {
-  USE_MOCK_API,
   API_BASE_URL,
   MULTIPLAYER_URL,
   GOOGLE_CLIENT_ID,

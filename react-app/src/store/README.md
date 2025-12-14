@@ -15,6 +15,15 @@ We divide the store into "Slices", each managing a specific piece of data:
 - **`multiplayerSlice.js`**: Manages the state for multiplayer games (lobby players, socket connection status).
 - **`uiSlice.js`**: Handles global UI state like "Dark Mode" or showing/hiding global modals.
 
+Persistence & middleware
+- Auth and some UI state persist to `localStorage` via Redux Toolkit middleware.
+- Async calls use thunks (see slices) rather than putting fetch logic in components.
+
+Adding a new slice
+1. Create `yourSlice.js` with `createSlice` and optional thunks.
+2. Export actions/selectors.
+3. Register the reducer in `store/index.js`.
+
 ## How to use it
 
 1. **Reading Data**: Components use `useSelector` to read data from the store.
