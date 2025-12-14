@@ -96,11 +96,13 @@ async function fetchAPI(url, options = {}) {
 
       // Handle authentication errors - BUT don't redirect on 401 during initial page load
       // Only redirect if we had a token that was rejected (token expired/invalid)
+      // Skip auth redirect if explicitly requested (e.g., for AI config testing)
       if (
-        response.status === 401 ||
+        !options.skipAuthRedirect &&
+        (response.status === 401 ||
         (response.status === 400 && errorData.error?.includes('Authentication required')) ||
         errorData.error?.toLowerCase().includes('token expired') ||
-        errorData.error?.toLowerCase().includes('invalid token')
+        errorData.error?.toLowerCase().includes('invalid token'))
       ) {
         console.error(`❌ ${url} returned 401`, { 
           status: response.status, 
@@ -191,6 +193,47 @@ export async function loginUser(userData) {
   })
   console.log('📨 Raw backend response:', response)
   return response
+}
+
+/**
+ * Login as a guest user with just a username (no OAuth required)
+ * @param {Object} params - Login parameters
+ * @param {string} params.username - The desired username (2-30 chars, alphanumeric with _ and -)
+ * @returns {Promise<Object>} User data including JWT token
+ * @throws {Error} If guest login fails
+ */
+export async function guestLoginUser({ username }) {
+  if (USE_MOCK_API) {
+    console.log('🎭 Using Mock API for guest login')
+    // Simulate guest login for mock API
+    return {
+      id: `guest-${Date.now()}`,
+      email: `${username}@guest.quizlabs.local`,
+      name: username,
+      username: username,
+      picture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
+      token: 'mock-guest-jwt-token',
+      streak: 0,
+      auth_type: 'guest',
+    }
+  }
+  
+  console.log('👤 Guest login request:', { username })
+  
+  const response = await fetch(`${API_BASE_URL}/api/auth/guest-login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username }),
+  })
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Guest login failed' }))
+    throw new Error(error.error || 'Guest login failed')
+  }
+  
+  const data = await response.json()
+  console.log('📨 Guest login response:', data)
+  return data
 }
 
 /**
@@ -287,9 +330,11 @@ export async function testAIConfiguration(apiKey, model) {
     headers['X-OpenAI-Model'] = testModel
   }
   
+  // Use skipAuthRedirect to prevent logout on API key validation errors
   const response = await fetchAPI('/api/ai/test', {
     method: 'POST',
     headers,
+    skipAuthRedirect: true,
   })
   
   return response

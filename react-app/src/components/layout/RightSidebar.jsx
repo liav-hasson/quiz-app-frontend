@@ -201,9 +201,13 @@ const GameInitPanel = () => {
 const SettingsPanel = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const animatedBackground = useSelector(selectAnimatedBackground)
   const customApiKey = useSelector(selectCustomApiKey)
   const selectedModel = useSelector(selectSelectedModel)
+  
+  // Check if user was redirected here to set API key
+  const showApiKeyPrompt = location.state?.showApiKeyPrompt
   
   // AI configuration test state
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
@@ -242,6 +246,31 @@ const SettingsPanel = () => {
 
   return (
     <div className="space-y-6">
+      {/* API Key Prompt Banner for new guests */}
+      {showApiKeyPrompt && !customApiKey && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-accent-primary/20 border border-accent-primary/50 flex items-start gap-3"
+        >
+          <Key className="w-5 h-5 text-accent-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-orbitron text-sm text-white mb-1">Set Your OpenAI API Key</p>
+            <p className="text-xs text-text-secondary">
+              Add your API key below to start playing. You can get one from{' '}
+              <a 
+                href="https://platform.openai.com/api-keys" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-accent-primary hover:underline"
+              >
+                OpenAI
+              </a>.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       <div className="space-y-4">
         <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase flex items-center gap-2">
           <Settings className="w-4 h-4" /> Display

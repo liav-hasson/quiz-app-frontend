@@ -51,6 +51,14 @@ const settingsSlice = createSlice({
       state.customApiKey = ''
       saveSettingsToStorage(state)
     },
+    /**
+     * Reload settings from localStorage - call this after login or localStorage changes
+     */
+    reloadSettings: (state) => {
+      const loaded = loadSettingsFromStorage()
+      state.customApiKey = loaded.customApiKey
+      state.selectedModel = loaded.selectedModel
+    },
     resetSettings: (state) => {
       state.customApiKey = ''
       state.selectedModel = DEFAULT_MODEL
@@ -63,7 +71,8 @@ export const {
   setCustomApiKey, 
   setSelectedModel, 
   clearCustomApiKey, 
-  resetSettings 
+  resetSettings,
+  reloadSettings
 } = settingsSlice.actions
 
 // Selectors
