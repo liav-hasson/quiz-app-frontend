@@ -209,7 +209,7 @@ export async function getUserPerformance(params = {}) {
 }
 
 export async function getUserProfile() {
-  const response = await fetchAPI('/api/user/profile')
+  const response = await fetchAPI('/api/user/profile', { skipAuthRedirect: true })
   if (!response || response.ok === false) {
     return { XP: 0, bestCategory: null, totalAnswers: 0, averageScore: null, lastActivity: null }
   }
