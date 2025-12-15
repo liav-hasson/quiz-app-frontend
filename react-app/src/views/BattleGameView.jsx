@@ -19,6 +19,7 @@ import { fetchUserProfile, selectUserProfile } from '../store/slices/quizSlice'
 import { leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
 import socketService from '../api/socketService'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
+import MarkdownRenderer from '../components/common/MarkdownRenderer'
 
 // Game States
 const GAME_STATE = {
@@ -809,10 +810,10 @@ const BattleGameView = () => {
                   </span>
                 </div>
 
-                {/* Question Text */}
-                <h2 className="text-xl md:text-2xl text-white leading-relaxed font-sans mb-8">
-                  {currentQuestion.text || currentQuestion.question}
-                </h2>
+                {/* Question Text with Markdown Support */}
+                <div className="text-xl md:text-2xl text-white leading-relaxed font-sans mb-8">
+                  <MarkdownRenderer content={currentQuestion.text || currentQuestion.question} />
+                </div>
 
                 {/* Difficulty Indicator Bar */}
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5">

@@ -1,5 +1,6 @@
 import React, { memo } from 'react'
 import { motion } from 'framer-motion'
+import MarkdownRenderer from '../common/MarkdownRenderer'
 
 const QuestionCard = memo(function QuestionCard({ question, category, difficulty, currentQuestionIndex, totalQuestions }) {
   return (
@@ -18,10 +19,10 @@ const QuestionCard = memo(function QuestionCard({ question, category, difficulty
         </span>
       </div>
 
-      {/* Question Text */}
-      <h2 className="text-base sm:text-lg md:text-xl text-white leading-relaxed font-sans">
-        {question}
-      </h2>
+      {/* Question Text with Markdown Support */}
+      <div className="text-base sm:text-lg md:text-xl text-white leading-relaxed font-sans">
+        <MarkdownRenderer content={question} />
+      </div>
 
       {/* Difficulty Indicator */}
       <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5">
