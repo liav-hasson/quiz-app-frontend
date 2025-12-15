@@ -1,9 +1,3 @@
-# Ignore local environment files - these contain development settings
-.env
-.env.local
-.env.development
-.env.development.local
-
 # Node modules - installed fresh in Docker
 node_modules
 

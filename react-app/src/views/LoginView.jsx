@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { loginSuccess } from '../store/slices/authSlice'
 import { loginUser, guestLoginUser } from '../api/quizAPI'
-import { GOOGLE_CLIENT_ID } from '../config.js'
+import { GOOGLE_CLIENT_ID, ALLOW_GUEST_LOGIN } from '../config.js'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { selectAnimatedBackground } from '../store/slices/uiSlice'
 import PsychedelicSpiral from '../components/ui/PsychedelicSpiral'
@@ -18,11 +18,8 @@ const LoginView = () => {
   const [guestUsername, setGuestUsername] = useState('')
   const animatedBackground = useSelector(selectAnimatedBackground)
 
-  const isLocalEnv = typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname.endsWith('.local')
-  )
+  // Use centralized config for guest login permission
+  const isLocalEnv = ALLOW_GUEST_LOGIN
 
   const handleGoogleResponse = async (response) => {
     const logs = []
@@ -172,29 +169,6 @@ const LoginView = () => {
     }
   }
 
-  // Dev bypass now uses guest login with auto-generated username
-  const handleDevLogin = async () => {
-    // Only allow dev login in dev mode
-    if (import.meta.env.VITE_DEV_MODE !== 'true') return
-
-    const devUsername = `dev_${Date.now().toString(36)}`
-    setGuestUsername(devUsername)
-    
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const data = await guestLoginUser({ username: devUsername })
-      localStorage.setItem('quiz_user', JSON.stringify(data))
-      dispatch(loginSuccess(data))
-      navigate('/')
-    } catch (err) {
-      setError(err.message || 'Dev login failed')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-bg-dark flex items-center justify-center relative overflow-hidden">
       {/* Animated Background */}
@@ -309,27 +283,6 @@ const LoginView = () => {
               <p className="text-xs text-text-secondary">Guest login is only available in local environments.</p>
             )}
           </div>
-
-          {/* Dev Bypass - only visible in dev mode */}
-          {import.meta.env.VITE_DEV_MODE === 'true' && (
-            <div className="mt-4">
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-bg-card px-2 text-text-muted">Developers Only</span>
-                </div>
-              </div>
-              <button 
-                onClick={handleDevLogin}
-                disabled={isLoading}
-                className="w-full py-3 bg-accent-secondary/10 border border-accent-secondary/30 text-accent-secondary rounded-lg font-orbitron text-sm hover:bg-accent-secondary/20 transition-all disabled:opacity-50"
-              >
-                &lt; DEV_ACCESS_BYPASS /&gt;
-              </button>
-            </div>
-          )}
         </div>
       </motion.div>
     </div>

@@ -28,6 +28,14 @@ export const MULTIPLAYER_URL = import.meta.env.VITE_MULTIPLAYER_URL || ''
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
 /**
+ * Allow Guest Login
+ * - Controls whether the "Continue as Guest" option is shown on the login screen
+ * - 'true': Enable guest login (local dev, demo deployments)
+ * - 'false': Require Google Sign-In (production)
+ */
+export const ALLOW_GUEST_LOGIN = import.meta.env.VITE_ALLOW_GUEST_LOGIN === 'true'
+
+/**
  * Request timeout settings
  */
 export const DEFAULT_TIMEOUT = 30000 // 30 seconds
@@ -40,6 +48,7 @@ export function logConfig() {
     API_BASE_URL: API_BASE_URL || '(nginx proxy)',
     MULTIPLAYER_URL: MULTIPLAYER_URL || '(nginx proxy)',
     GOOGLE_CLIENT_ID: GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : '(not set)',
+    ALLOW_GUEST_LOGIN,
   })
 }
 
@@ -52,6 +61,7 @@ export default {
   API_BASE_URL,
   MULTIPLAYER_URL,
   GOOGLE_CLIENT_ID,
+  ALLOW_GUEST_LOGIN,
   DEFAULT_TIMEOUT,
   logConfig,
 }

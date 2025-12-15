@@ -18,16 +18,6 @@ const loadUserFromStorage = () => {
       return null
     }
     
-    // Allow dev users when in development mode
-    const isDevMode = import.meta.env.VITE_DEV_MODE === 'true'
-    if (!isDevMode) {
-      // In production, clear obvious mock data
-      if (user.email === 'dev@localhost' || user.id === 'local-dev-user' || user.id?.startsWith('dev-user-')) {
-        localStorage.removeItem('quiz_user')
-        return null
-      }
-    }
-    
     return user
   } catch (error) {
     localStorage.removeItem('quiz_user')

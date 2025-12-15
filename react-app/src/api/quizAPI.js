@@ -280,6 +280,7 @@ export async function toggleReady(lobbyCode, ready) {
 export async function startGame(lobbyCode) {
   const response = await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/start`, {
     method: 'POST',
+    headers: getAIHeaders(),
   })
   if (!response.ok) {
     if (response.isRateLimited) throw new Error(response.error || 'Rate limit exceeded')
