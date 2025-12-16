@@ -67,7 +67,7 @@ git config user.email "$GIT_USER_EMAIL"
 
 # Update Helm chart values
 echo "--------- Updating Helm chart ---------"
-cd quiz-frontend
+cd charts/workloads/quiz-frontend
 
 # Update image repository and tag in the appropriate values file
 sed -i "s|repository: .*|repository: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}|g" "$VALUES_FILE"
