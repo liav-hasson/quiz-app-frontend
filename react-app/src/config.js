@@ -36,6 +36,17 @@ export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 export const ALLOW_GUEST_LOGIN = import.meta.env.VITE_ALLOW_GUEST_LOGIN === 'true'
 
 /**
+ * Requires User API Key
+ * - Controls whether users must provide their own OpenAI API key
+ * - 'true': Users must provide their own API key (local dev, demo deployments)
+ * - 'false': Server provides API key (production)
+ * 
+ * Note: In environments where guest login is allowed, users typically need to
+ * provide their own API key since there's no server-managed key infrastructure.
+ */
+export const REQUIRES_USER_API_KEY = ALLOW_GUEST_LOGIN
+
+/**
  * Request timeout settings
  */
 export const DEFAULT_TIMEOUT = 30000 // 30 seconds
@@ -49,6 +60,7 @@ export function logConfig() {
     MULTIPLAYER_URL: MULTIPLAYER_URL || '(nginx proxy)',
     GOOGLE_CLIENT_ID: GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : '(not set)',
     ALLOW_GUEST_LOGIN,
+    REQUIRES_USER_API_KEY,
   })
 }
 
@@ -62,6 +74,7 @@ export default {
   MULTIPLAYER_URL,
   GOOGLE_CLIENT_ID,
   ALLOW_GUEST_LOGIN,
+  REQUIRES_USER_API_KEY,
   DEFAULT_TIMEOUT,
   logConfig,
 }
