@@ -1,6 +1,12 @@
 # Build stage
 FROM node:20-alpine AS build
 
+# Accept build argument for Google Client ID
+ARG VITE_GOOGLE_CLIENT_ID
+
+# Set as environment variable for Vite build
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+
 WORKDIR /app
 
 # Copy package files
@@ -9,7 +15,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy source files (includes .env with VITE_* variables)
+# Copy source files
 COPY . .
 
 # Build the app (Vite embeds VITE_* env vars at build time)

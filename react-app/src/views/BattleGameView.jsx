@@ -350,7 +350,7 @@ const BattleGameView = () => {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <p className="font-orbitron text-text-secondary text-xl mb-4">GAME STARTING IN</p>
+          <p className="font-orbitron text-text-secondary text-xl mb-4">GENERATING QUESTIONS</p>
           <span className="font-arcade text-9xl text-accent-primary drop-shadow-[0_0_30px_rgba(217,70,239,0.5)]">
             {countdown}
           </span>
