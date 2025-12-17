@@ -6,7 +6,7 @@ import { Trophy, Flame, Star, History, ArrowLeft, Key } from 'lucide-react'
 import { selectUser } from '../store/slices/authSlice'
 import { selectSelectedHistoryItem, setSelectedHistoryItem, setActiveTab } from '../store/slices/uiSlice'
 import { selectHasCustomApiKey, reloadSettings } from '../store/slices/settingsSlice'
-import { ALLOW_GUEST_LOGIN } from '../config.js'
+import { REQUIRES_USER_API_KEY } from '../config.js'
 import { 
   selectUserProfile, 
   selectHistory, 
@@ -244,8 +244,8 @@ const HomeView = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* API Key Setup Banner - Only show on local deployment where key is required */}
-      {!hasApiKey && ALLOW_GUEST_LOGIN && (
+      {/* API Key Setup Banner - Only show when user must provide their own API key */}
+      {!hasApiKey && REQUIRES_USER_API_KEY && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}

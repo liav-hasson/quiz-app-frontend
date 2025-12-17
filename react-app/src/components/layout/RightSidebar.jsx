@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
-import { ALLOW_GUEST_LOGIN } from '../../config.js'
+import { REQUIRES_USER_API_KEY } from '../../config.js'
 import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { logout } from '../../store/slices/authSlice'
@@ -247,8 +247,8 @@ const SettingsPanel = () => {
 
   return (
     <div className="space-y-6">
-      {/* API Key Prompt Banner for local deployment (where key is required) */}
-      {showApiKeyPrompt && !customApiKey && ALLOW_GUEST_LOGIN && (
+      {/* API Key Prompt Banner - show when user must provide their own API key */}
+      {showApiKeyPrompt && !customApiKey && REQUIRES_USER_API_KEY && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -306,21 +306,21 @@ const SettingsPanel = () => {
         <div className={`p-3 rounded-xl flex items-center gap-3 ${
           customApiKey 
             ? 'bg-accent-secondary/10 border border-accent-secondary/30' 
-            : ALLOW_GUEST_LOGIN 
+            : REQUIRES_USER_API_KEY 
               ? 'bg-amber-500/10 border border-amber-500/30'
               : 'bg-green-500/10 border border-green-500/30'
         }`}>
           <div className={`w-2 h-2 rounded-full ${
             customApiKey 
               ? 'bg-accent-secondary' 
-              : ALLOW_GUEST_LOGIN 
+              : REQUIRES_USER_API_KEY 
                 ? 'bg-amber-500'
                 : 'bg-green-500'
           }`} />
           <span className="text-xs font-orbitron">
             {customApiKey 
               ? 'Using your API key' 
-              : ALLOW_GUEST_LOGIN 
+              : REQUIRES_USER_API_KEY 
                 ? 'No API key set'
                 : 'Using server API key (gpt-4o-mini)'}
           </span>
@@ -350,7 +350,7 @@ const SettingsPanel = () => {
             showVisibilityToggle={true}
           />
           <p className="text-xs text-text-muted">
-            {ALLOW_GUEST_LOGIN 
+            {REQUIRES_USER_API_KEY 
               ? 'Required: Enter your OpenAI API key to play. Get one at platform.openai.com'
               : 'Optional: Use your own key for custom models. Leave empty to use server default.'}
           </p>
