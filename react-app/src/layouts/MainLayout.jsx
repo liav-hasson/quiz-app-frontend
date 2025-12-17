@@ -8,7 +8,7 @@ import RightSidebar from '../components/layout/RightSidebar'
 import { toggleMobileMenu, selectIsMobileMenuOpen, selectAnimatedBackground, selectActiveTab, selectSelectedHistoryItem } from '../store/slices/uiSlice'
 import { selectIsInLobby, selectCurrentLobbyCode, leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
 import { leaveLobby } from '../api/quizAPI'
-import { socketService } from '../services/socketService'
+import { socketService } from '../api/socketService'
 import PsychedelicSpiral from '../components/ui/PsychedelicSpiral'
 import { LobbyChatProvider, useLobbyChatContext } from '../contexts/LobbyChatContext'
 
