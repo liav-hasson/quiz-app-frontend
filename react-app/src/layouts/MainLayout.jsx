@@ -6,7 +6,9 @@ import { Menu, X, Users } from 'lucide-react'
 import LeftSidebar from '../components/layout/LeftSidebar'
 import RightSidebar from '../components/layout/RightSidebar'
 import { toggleMobileMenu, selectIsMobileMenuOpen, selectAnimatedBackground, selectActiveTab, selectSelectedHistoryItem } from '../store/slices/uiSlice'
-import { selectIsInLobby, selectCurrentLobbyCode } from '../store/slices/lobbySlice'
+import { selectIsInLobby, selectCurrentLobbyCode, leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
+import { leaveLobby } from '../api/quizAPI'
+import { socketService } from '../services/socketService'
 import PsychedelicSpiral from '../components/ui/PsychedelicSpiral'
 import { LobbyChatProvider, useLobbyChatContext } from '../contexts/LobbyChatContext'
 
@@ -68,15 +70,33 @@ const MainLayoutContent = ({ children }) => {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
-            className="fixed top-0 left-0 right-0 h-12 bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 backdrop-blur-md border-b border-accent-primary/30 z-50 flex items-center justify-center cursor-pointer hover:from-accent-primary/30 hover:to-accent-secondary/30 transition-all"
-            onClick={() => navigate(`/lobby/${currentLobbyCode}`)}
+            className="fixed top-0 left-0 right-0 h-12 bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 backdrop-blur-md border-b border-accent-primary/30 z-50 flex items-center justify-between px-4"
           >
-            <div className="flex items-center gap-2 text-sm font-orbitron">
+            <div 
+              className="flex-1 flex items-center justify-center gap-2 text-sm font-orbitron cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => navigate(`/lobby/${currentLobbyCode}`)}
+            >
               <Users className="w-4 h-4 text-accent-primary" />
               <span className="text-text-primary">You're in lobby</span>
               <span className="font-arcade text-accent-primary">{currentLobbyCode}</span>
               <span className="text-text-muted">• Click to return</span>
             </div>
+            <button
+              onClick={async (e) => {
+                e.stopPropagation()
+                try {
+                  await leaveLobby(currentLobbyCode)
+                  socketService.leaveRoom(currentLobbyCode)
+                } catch (err) {
+                  console.error('Failed to leave lobby:', err)
+                }
+                dispatch(leaveLobbyAction())
+              }}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-text-muted hover:text-red-400 transition-all"
+              title="Leave lobby"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

@@ -6,6 +6,7 @@ import { Trophy, Flame, Star, History, ArrowLeft, Key } from 'lucide-react'
 import { selectUser } from '../store/slices/authSlice'
 import { selectSelectedHistoryItem, setSelectedHistoryItem, setActiveTab } from '../store/slices/uiSlice'
 import { selectHasCustomApiKey, reloadSettings } from '../store/slices/settingsSlice'
+import { ALLOW_GUEST_LOGIN } from '../config.js'
 import { 
   selectUserProfile, 
   selectHistory, 
@@ -243,8 +244,8 @@ const HomeView = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* API Key Setup Banner */}
-      {!hasApiKey && (
+      {/* API Key Setup Banner - Only show on local deployment where key is required */}
+      {!hasApiKey && ALLOW_GUEST_LOGIN && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -252,14 +253,14 @@ const HomeView = () => {
             dispatch(setActiveTab('settings'))
             navigate('/settings', { state: { showApiKeyPrompt: true } })
           }}
-          className="p-4 rounded-xl bg-accent-primary/20 border border-accent-primary/50 flex items-center gap-3 cursor-pointer hover:bg-accent-primary/30 transition-all group"
+          className="p-4 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center gap-3 cursor-pointer hover:bg-amber-500/30 transition-all group"
         >
-          <Key className="w-6 h-6 text-accent-primary flex-shrink-0" />
+          <Key className="w-6 h-6 text-amber-400 flex-shrink-0" />
           <div className="flex-1">
-            <p className="font-orbitron text-sm text-white">Click to set OpenAI API Key</p>
+            <p className="font-orbitron text-sm text-white">Set Your OpenAI API Key</p>
             <p className="text-xs text-text-secondary">Required to generate questions and play</p>
           </div>
-          <span className="text-accent-primary text-xs font-orbitron group-hover:translate-x-1 transition-transform">→</span>
+          <span className="text-amber-400 text-xs font-orbitron group-hover:translate-x-1 transition-transform">→</span>
         </motion.div>
       )}
 

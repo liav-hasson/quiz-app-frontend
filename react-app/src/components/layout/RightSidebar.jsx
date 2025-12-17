@@ -4,7 +4,8 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
-import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel } from '../../store/slices/settingsSlice'
+import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
+import { ALLOW_GUEST_LOGIN } from '../../config.js'
 import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { logout } from '../../store/slices/authSlice'
@@ -246,14 +247,14 @@ const SettingsPanel = () => {
 
   return (
     <div className="space-y-6">
-      {/* API Key Prompt Banner for new guests */}
-      {showApiKeyPrompt && !customApiKey && (
+      {/* API Key Prompt Banner for local deployment (where key is required) */}
+      {showApiKeyPrompt && !customApiKey && ALLOW_GUEST_LOGIN && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-xl bg-accent-primary/20 border border-accent-primary/50 flex items-start gap-3"
+          className="p-4 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-start gap-3"
         >
-          <Key className="w-5 h-5 text-accent-primary flex-shrink-0 mt-0.5" />
+          <Key className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-orbitron text-sm text-white mb-1">Set Your OpenAI API Key</p>
             <p className="text-xs text-text-secondary">
@@ -262,7 +263,7 @@ const SettingsPanel = () => {
                 href="https://platform.openai.com/api-keys" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-accent-primary hover:underline"
+                className="text-amber-400 hover:underline"
               >
                 OpenAI
               </a>.
@@ -301,11 +302,45 @@ const SettingsPanel = () => {
           <Bot className="w-4 h-4" /> AI Configuration
         </h3>
         
+        {/* Status indicator */}
+        <div className={`p-3 rounded-xl flex items-center gap-3 ${
+          customApiKey 
+            ? 'bg-accent-secondary/10 border border-accent-secondary/30' 
+            : ALLOW_GUEST_LOGIN 
+              ? 'bg-amber-500/10 border border-amber-500/30'
+              : 'bg-green-500/10 border border-green-500/30'
+        }`}>
+          <div className={`w-2 h-2 rounded-full ${
+            customApiKey 
+              ? 'bg-accent-secondary' 
+              : ALLOW_GUEST_LOGIN 
+                ? 'bg-amber-500'
+                : 'bg-green-500'
+          }`} />
+          <span className="text-xs font-orbitron">
+            {customApiKey 
+              ? 'Using your API key' 
+              : ALLOW_GUEST_LOGIN 
+                ? 'No API key set'
+                : 'Using server API key (gpt-4o-mini)'}
+          </span>
+        </div>
+        
         {/* Custom API Key */}
         <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-          <div className="flex items-center gap-2">
-            <Key className="w-4 h-4 text-accent-secondary" />
-            <span className="font-orbitron text-sm">OpenAI API Key</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Key className="w-4 h-4 text-accent-secondary" />
+              <span className="font-orbitron text-sm">OpenAI API Key</span>
+            </div>
+            {customApiKey && (
+              <button
+                onClick={() => dispatch(clearCustomApiKey())}
+                className="text-xs text-red-400 hover:text-red-300 font-orbitron transition-colors"
+              >
+                Clear
+              </button>
+            )}
           </div>
           <RetroInput
             type="password"
@@ -315,7 +350,9 @@ const SettingsPanel = () => {
             showVisibilityToggle={true}
           />
           <p className="text-xs text-text-muted">
-            Optional: Use your own API key for unlimited questions
+            {ALLOW_GUEST_LOGIN 
+              ? 'Required: Enter your OpenAI API key to play. Get one at platform.openai.com'
+              : 'Optional: Use your own key for custom models. Leave empty to use server default.'}
           </p>
         </div>
 
