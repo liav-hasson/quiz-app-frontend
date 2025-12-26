@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
+import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { REQUIRES_USER_API_KEY } from '../../config.js'
@@ -12,6 +12,7 @@ import { logout } from '../../store/slices/authSlice'
 import LeaderboardPanel from './LeaderboardPanel'
 import RetroSelect from '../ui/RetroSelect'
 import RetroInput from '../ui/RetroInput'
+import CategorySectionGrid from '../ui/CategorySectionGrid'
 import { useLobbyChatContext } from '../../contexts/LobbyChatContext'
 
 // Rate limit countdown timer component
@@ -90,6 +91,33 @@ const GameInitPanel = () => {
     navigate('/play')
   }
 
+  const handleFeelingLucky = () => {
+    // Get all available categories
+    const availableCategories = Object.keys(categories)
+    if (availableCategories.length === 0) return
+
+    // Pick random category
+    const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)]
+    
+    // Pick random subject from that category
+    const categorySubjects = categories[randomCategory] || []
+    if (categorySubjects.length === 0) return
+    const randomSubject = categorySubjects[Math.floor(Math.random() * categorySubjects.length)]
+    
+    // Pick random difficulty
+    const difficulties = ['Easy', 'Medium', 'Hard']
+    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)]
+
+    // Start game with random settings
+    dispatch(setGameSettings({
+      category: randomCategory,
+      subject: randomSubject,
+      difficulty: randomDifficulty === 'Easy' ? 1 : randomDifficulty === 'Medium' ? 2 : 3
+    }))
+    dispatch(setActiveTab('play'))
+    navigate('/play')
+  }
+
   const handleRateLimitExpire = () => {
     dispatch(clearRateLimitInfo())
   }
@@ -98,23 +126,19 @@ const GameInitPanel = () => {
   const isRateLimited = rateLimitInfo && rateLimitInfo.resetTime > Math.floor(Date.now() / 1000)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Category Section Grid */}
       <div className="space-y-2">
         <h3 className="text-accent-secondary font-arcade text-xs tracking-wider uppercase flex items-center gap-2">
           <Target className="w-4 h-4" /> Category
         </h3>
-        <RetroSelect
-          value={selectedCategory}
-          onChange={(value) => {
-            setSelectedCategory(value)
+        <CategorySectionGrid
+          availableCategories={categories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={(category) => {
+            setSelectedCategory(category)
             setSelectedSubject('')
           }}
-          options={[
-            { value: '', label: 'Select Category...' },
-            ...Object.keys(categories).map(cat => ({ value: cat, label: cat }))
-          ]}
-          placeholder="Select Category..."
-          glowColor="accent-secondary"
         />
       </div>
 
@@ -178,13 +202,30 @@ const GameInitPanel = () => {
         whileTap={{ scale: 0.98 }}
         onClick={handleStartGame}
         disabled={!selectedCategory || !selectedSubject}
-        className={`w-full py-4 rounded-xl font-arcade text-white transition-all mt-8 ${
+        className={`w-full py-4 rounded-xl font-arcade text-white transition-all mt-6 ${
           !selectedCategory || !selectedSubject
             ? 'bg-white/5 text-text-muted cursor-not-allowed'
             : 'bg-gradient-to-r from-accent-quinary to-accent-secondary shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)]'
         }`}
       >
         START GAME
+      </motion.button>
+
+      {/* I'm Feeling Lucky Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={handleFeelingLucky}
+        disabled={Object.keys(categories).length === 0}
+        className="w-full py-3 rounded-xl font-arcade text-xs text-white transition-all mt-2
+          border border-accent-tertiary/50 bg-accent-tertiary/10
+          hover:bg-accent-tertiary/20 hover:border-accent-tertiary
+          hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]
+          disabled:opacity-50 disabled:cursor-not-allowed
+          flex items-center justify-center gap-2"
+      >
+        <Shuffle className="w-4 h-4" />
+        I'M FEELING LUCKY
       </motion.button>
       
       <AnimatePresence>

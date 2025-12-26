@@ -11,7 +11,7 @@ import {
   selectUserProfileLoading,
   selectHistoryLoading
 } from '../store/slices/quizSlice'
-import { getCategoriesWithSubjects } from '../api/quizAPI'
+import { CATEGORY_SECTIONS } from '../constants/categoryGroups'
 
 const StatsView = () => {
   const dispatch = useDispatch()
@@ -21,38 +21,23 @@ const StatsView = () => {
   const historyLoading = useSelector(selectHistoryLoading)
   
   const [statsData, setStatsData] = useState([])
-  const [allCategories, setAllCategories] = useState([])
 
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await getCategoriesWithSubjects()
-        if (data && Object.keys(data).length > 0) {
-          setAllCategories(Object.keys(data))
-        }
-      } catch (err) {
-        console.error("Failed to load categories", err)
-      }
-    }
-    loadCategories()
-    
     dispatch(fetchUserHistory({ limit: 100 }))
     dispatch(fetchUserProfile())
   }, [dispatch])
 
   useEffect(() => {
-    if (allCategories.length === 0) return
-
-    // Initialize scores for all categories
-    const categoryScores = {}
-    const categoryCounts = {}
+    // Initialize scores for all sections
+    const sectionScores = {}
+    const sectionCounts = {}
     
-    allCategories.forEach(cat => {
-      categoryScores[cat] = 0
-      categoryCounts[cat] = 0
+    CATEGORY_SECTIONS.forEach(section => {
+      sectionScores[section.id] = 0
+      sectionCounts[section.id] = 0
     })
 
-    // Calculate average scores from user history
+    // Calculate average scores from user history, grouped by section
     if (history && history.length > 0) {
       history.forEach(entry => {
         const category = entry.summary?.category
@@ -72,29 +57,31 @@ const StatsView = () => {
           }
         }
         
-        // Match category to our list
-        const matchedCat = allCategories.find(c => c.toLowerCase() === category.toLowerCase())
+        // Find which section this category belongs to
+        const matchedSection = CATEGORY_SECTIONS.find(section => 
+          section.categories.some(cat => cat.toLowerCase() === category.toLowerCase())
+        )
         
-        if (matchedCat && !isNaN(numericScore)) {
-          categoryScores[matchedCat] += numericScore
-          categoryCounts[matchedCat] += 1
+        if (matchedSection && !isNaN(numericScore)) {
+          sectionScores[matchedSection.id] += numericScore
+          sectionCounts[matchedSection.id] += 1
         }
       })
     }
 
     // Build radar data with average scores (0-100 scale)
-    const radarData = allCategories.map(cat => {
-      const count = categoryCounts[cat]
-      const avgScore = count > 0 ? (categoryScores[cat] / count) : 0
+    const radarData = CATEGORY_SECTIONS.map(section => {
+      const count = sectionCounts[section.id]
+      const avgScore = count > 0 ? (sectionScores[section.id] / count) : 0
       return {
-        subject: cat,
+        subject: section.name,
         score: Math.round(avgScore * 10), // Convert 0-10 to 0-100 scale
         fullMark: 100,
       }
     })
 
     setStatsData(radarData)
-  }, [history, allCategories])
+  }, [history])
 
   const loading = profileLoading || historyLoading
 
@@ -135,7 +122,7 @@ const StatsView = () => {
                 </filter>
               </defs>
               <PolarGrid stroke="#444" strokeWidth={0.5} />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: '#ffffff', fontSize: 8, fontFamily: 'Press Start 2P' }} />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: '#ffffff', fontSize: 10, fontFamily: 'Press Start 2P' }} />
               <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
               <Radar
                 name="My Skills"
