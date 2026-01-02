@@ -551,8 +551,8 @@ const BattleGameView = () => {
                     <Star className="w-7 h-7 text-amber-600 fill-amber-600" />
                   </div>
                 </motion.div>
-                <div className="text-center bg-bg-card/80 backdrop-blur-md border-2 border-amber-600 rounded-xl p-4 min-w-[180px]">
-                  <div className="font-orbitron text-white text-lg truncate">{thirdPlace.username}</div>
+                <div className="text-center bg-bg-card/80 backdrop-blur-md border-2 border-amber-600 rounded-xl p-4 min-w-[180px] max-w-[220px]">
+                  <div className="font-orbitron text-white text-lg truncate px-2">{thirdPlace.username}</div>
                   <div className="font-arcade text-2xl text-amber-600 mt-1">{thirdPlace.score || 0}</div>
                   <div className="text-text-muted text-sm mt-1">{thirdPlace.correct_answers || 0}/{totalQuestions} correct</div>
                   <div className="flex items-center justify-center gap-1 mt-2 text-accent-primary">
@@ -595,8 +595,8 @@ const BattleGameView = () => {
                     <span className="font-arcade text-xl text-text-secondary w-8">
                       #{index + 4}
                     </span>
-                    <div>
-                      <div className="font-orbitron text-white">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-orbitron text-white truncate">
                         {player.username}
                         {player.user_id === currentUser?.id && ' (YOU)'}
                       </div>
@@ -738,21 +738,21 @@ const BattleGameView = () => {
                 <ArrowLeft className="w-6 h-6 text-text-secondary" />
               </button>
               
-              <div className="flex items-center gap-8">
+              <div className="flex items-center gap-4 sm:gap-8">
                 {/* Question Counter */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-accent-primary/20 border border-accent-primary/50 flex items-center justify-center">
-                    <span className="font-arcade text-xl text-accent-primary">{questionNumber}</span>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-accent-primary/20 border border-accent-primary/50 flex items-center justify-center">
+                    <span className="font-arcade text-lg sm:text-xl text-accent-primary">{questionNumber}</span>
                   </div>
-                  <div className="font-orbitron text-sm">
-                    <div className="text-text-muted">QUESTION</div>
+                  <div className="font-orbitron text-xs sm:text-sm">
+                    <div className="text-text-muted hidden sm:block">QUESTION</div>
                     <div className="text-white">{questionNumber} / {totalQuestions}</div>
                   </div>
                 </div>
                 
                 {/* Timer */}
                 <motion.div 
-                  className={`flex items-center gap-3 px-4 py-2 rounded-xl border-2 ${
+                  className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 rounded-xl border-2 ${
                     timeLeft <= 5 ? 'border-red-500 bg-red-500/10' :
                     timeLeft <= 10 ? 'border-yellow-500 bg-yellow-500/10' :
                     'border-green-500 bg-green-500/10'
@@ -760,8 +760,8 @@ const BattleGameView = () => {
                   animate={timeLeft <= 5 ? { scale: [1, 1.05, 1] } : {}}
                   transition={{ repeat: Infinity, duration: 0.5 }}
                 >
-                  <Clock className={`w-6 h-6 ${getTimerColor()}`} />
-                  <span className={`font-arcade text-3xl ${getTimerColor()}`}>
+                  <Clock className={`w-5 h-5 sm:w-6 sm:h-6 ${getTimerColor()}`} />
+                  <span className={`font-arcade text-2xl sm:text-3xl ${getTimerColor()}`}>
                     {timeLeft}s
                   </span>
                 </motion.div>
@@ -1004,7 +1004,7 @@ const BattleGameView = () => {
                 )}
               </div>
               {answerFeedback.feedback && (
-                <p className="text-text-secondary text-sm relative z-10">{answerFeedback.feedback}</p>
+                <p className="text-text-secondary text-sm relative z-10 break-words">{answerFeedback.feedback}</p>
               )}
             </motion.div>
           )}
@@ -1056,8 +1056,8 @@ const BattleGameView = () => {
                           }`}>
                             {index === 0 ? <Crown className="w-6 h-6" /> : index + 1}
                           </div>
-                          <div>
-                            <div className="font-orbitron text-lg text-white">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-orbitron text-base sm:text-lg text-white truncate">
                               {player.username}
                               {isCurrentUser && <span className="text-accent-primary ml-2 text-sm">(YOU)</span>}
                             </div>

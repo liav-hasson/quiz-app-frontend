@@ -17,6 +17,7 @@ import {
 } from '../store/slices/quizSlice'
 import { initializeTasks, selectBonusXP } from '../store/slices/tasksSlice'
 import DailyTasks from '../components/layout/DailyTasks'
+import { CATEGORY_SECTIONS } from '../constants/categoryGroups'
 
 // Color class mappings for Tailwind JIT - these must be static strings for the build process
 const colorClasses = {
@@ -147,12 +148,73 @@ const HomeView = () => {
     // Delay fetching to ensure token is in localStorage
     const timer = setTimeout(() => {
       dispatch(fetchUserProfile())
-      dispatch(fetchUserHistory({ limit: 5 }))
+      dispatch(fetchUserHistory({ limit: 100 })) // Fetch more history for better best category calculation
       dispatch(fetchCategoriesWithSubjects())
     }, 200)
     
     return () => clearTimeout(timer)
   }, [dispatch])
+
+  // Calculate best high-level category from user history
+  const bestHighLevelCategory = React.useMemo(() => {
+    if (!history || history.length === 0) return '-'
+    
+    // Initialize scores for all sections
+    const sectionScores = {}
+    const sectionCounts = {}
+    
+    CATEGORY_SECTIONS.forEach(section => {
+      sectionScores[section.id] = 0
+      sectionCounts[section.id] = 0
+    })
+    
+    // Calculate total scores from user history, grouped by section
+    history.forEach(entry => {
+      const category = entry.summary?.category
+      const score = entry.summary?.score
+      
+      if (!category || score === undefined) return
+      
+      // Parse score (handle both "8/10" and 8 formats)
+      let numericScore = 0
+      if (typeof score === 'number') {
+        numericScore = score
+      } else if (typeof score === 'string') {
+        if (score.includes('/')) {
+          numericScore = parseFloat(score.split('/')[0])
+        } else {
+          numericScore = parseFloat(score)
+        }
+      }
+      
+      // Find which section this category belongs to
+      const matchedSection = CATEGORY_SECTIONS.find(section => 
+        section.categories.some(cat => cat.toLowerCase() === category.toLowerCase())
+      )
+      
+      if (matchedSection && !isNaN(numericScore)) {
+        sectionScores[matchedSection.id] += numericScore
+        sectionCounts[matchedSection.id] += 1
+      }
+    })
+    
+    // Find section with highest average score
+    let bestSection = null
+    let bestAvg = -1
+    
+    CATEGORY_SECTIONS.forEach(section => {
+      const count = sectionCounts[section.id]
+      if (count > 0) {
+        const avg = sectionScores[section.id] / count
+        if (avg > bestAvg) {
+          bestAvg = avg
+          bestSection = section
+        }
+      }
+    })
+    
+    return bestSection ? bestSection.name : '-'
+  }, [history])
 
   useEffect(() => {
     if (categories && categories.length > 0) {
@@ -385,7 +447,7 @@ const HomeView = () => {
         <StatCard 
           icon={Star} 
           label="Best Category" 
-          value={userProfile?.bestCategory || '-'} 
+          value={bestHighLevelCategory} 
           color="accent-tertiary" 
         />
       </div>

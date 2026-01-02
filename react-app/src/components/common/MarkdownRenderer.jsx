@@ -23,6 +23,11 @@ const MarkdownRenderer = memo(function MarkdownRenderer({ content, className = '
         code({ node, inline, className: codeClassName, children, ...props }) {
           const match = /language-(\w+)/.exec(codeClassName || '')
           const language = match ? match[1] : ''
+          const codeString = String(children).replace(/\n$/, '')
+          
+          // Detect if this should be rendered as inline code despite being a code block
+          // If it's short (single line, < 60 chars) and doesn't have language specified, treat as inline
+          const isShortCode = !language && codeString.length < 60 && !codeString.includes('\n')
           
           if (!inline && language) {
             return (
@@ -38,13 +43,13 @@ const MarkdownRenderer = memo(function MarkdownRenderer({ content, className = '
                 }}
                 {...props}
               >
-                {String(children).replace(/\n$/, '')}
+                {codeString}
               </SyntaxHighlighter>
             )
           }
           
           // Inline code or code blocks without language
-          if (!inline) {
+          if (!inline && !isShortCode) {
             return (
               <SyntaxHighlighter
                 style={oneDark}
@@ -58,12 +63,12 @@ const MarkdownRenderer = memo(function MarkdownRenderer({ content, className = '
                 }}
                 {...props}
               >
-                {String(children).replace(/\n$/, '')}
+                {codeString}
               </SyntaxHighlighter>
             )
           }
           
-          // Inline code
+          // Inline code (or short code blocks treated as inline)
           return (
             <code 
               className="bg-white/10 px-1.5 py-0.5 rounded text-accent-secondary font-mono text-sm"

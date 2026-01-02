@@ -164,10 +164,10 @@ const MainLayoutContent = ({ children }) => {
               const isPlayRoute = location.pathname === '/play'
               const isHistorySelected = !!selectedHistoryItem
               const isSidebarTab = ['play', 'multiplayer', 'history', 'settings'].includes(activeTab)
-              const isInLobby = location.pathname.startsWith('/lobby')
+              const isInLobby = location.pathname.startsWith('/lobby') || location.pathname.startsWith('/battle')
               
               // On mobile, we show the sidebar if a sidebar tab is active AND we are not in a "main" view (play/history detail)
-              // EXCEPT when in lobby - show lobby content, not chat
+              // EXCEPT when in lobby or battle - show game content, not chat
               const showMobileSidebar = isSidebarTab && !isPlayRoute && !isHistorySelected && !isInLobby
 
               if (showMobileSidebar) {

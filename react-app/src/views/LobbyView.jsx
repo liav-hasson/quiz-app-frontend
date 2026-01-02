@@ -532,14 +532,14 @@ const LobbyView = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto w-full space-y-6">
+    <div className="max-w-5xl mx-auto w-full space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
         {/* Left: Leave Button */}
         <button
           onClick={handleLeave}
           disabled={countdown}
-          className={`px-4 py-2 rounded-xl font-arcade text-white transition-all flex items-center gap-2 bg-red-500/20 border-2 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500 ${
+          className={`px-3 sm:px-4 py-2 rounded-xl font-arcade text-sm sm:text-base text-white transition-all flex items-center justify-center gap-2 bg-red-500/20 border-2 border-red-500/50 text-red-400 hover:bg-red-500/30 hover:border-red-500 ${
             countdown ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
@@ -552,14 +552,14 @@ const LobbyView = () => {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="px-6 py-2 bg-accent-primary/20 border border-accent-primary rounded-xl"
+            className="px-4 sm:px-6 py-2 bg-accent-primary/20 border border-accent-primary rounded-xl text-center"
           >
-            <span className="font-arcade text-2xl text-accent-primary">
-              Starting in {countdown}...
+            <span className="font-arcade text-xl sm:text-2xl text-accent-primary">
+              Loading game...
             </span>
           </motion.div>
         ) : (
-          <h1 className="font-arcade text-3xl text-white">BATTLE LOBBY</h1>
+          <h1 className="font-arcade text-2xl sm:text-3xl text-white text-center">BATTLE LOBBY</h1>
         )}
 
         {/* Right: Start Game Button (Host Only) */}
@@ -568,13 +568,13 @@ const LobbyView = () => {
             <button 
               onClick={handleStartGame}
               disabled={!canStart || rateLimitInfo}
-              className={`px-6 py-3 rounded-xl font-arcade text-white transition-all flex items-center gap-2 ${
+              className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-arcade text-sm sm:text-base text-white transition-all flex items-center justify-center gap-2 ${
                 canStart && !rateLimitInfo
                   ? 'bg-gradient-to-r from-accent-primary to-accent-secondary shadow-[0_0_20px_rgba(217,70,239,0.4)] hover:shadow-[0_0_30px_rgba(217,70,239,0.6)]' 
                   : 'bg-white/10 text-text-muted cursor-not-allowed'
               }`}
             >
-              <Play className="w-5 h-5" /> 
+              <Play className="w-4 sm:w-5 h-4 sm:h-5" /> 
               START GAME
             </button>
             
@@ -597,7 +597,7 @@ const LobbyView = () => {
             )}
           </div>
         ) : (
-          <div className="w-[180px]" />
+          <div className="hidden sm:block sm:w-[180px]" />
         )}
       </div>
 
@@ -631,10 +631,10 @@ const LobbyView = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-bg-card/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col h-[190px]"
+            className="bg-bg-card/50 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6 flex flex-col h-[160px] sm:h-[190px]"
           >
-            <h3 className="font-orbitron text-white mb-4 flex items-center gap-2">
-              <Users className="w-5 h-5 text-accent-secondary" />
+            <h3 className="font-orbitron text-sm sm:text-base text-white mb-3 sm:mb-4 flex items-center gap-2">
+              <Users className="w-4 sm:w-5 h-4 sm:h-5 text-accent-secondary" />
               PLAYERS ({players.length}/{lobby?.max_players || 8})
             </h3>
             <div className="space-y-2 flex-1 overflow-y-auto pr-2">
@@ -648,11 +648,11 @@ const LobbyView = () => {
                     transition={{ delay: index * 0.05 }}
                     className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       {player.user_id === lobby?.creator_id && (
-                        <Crown className="w-4 h-4 text-yellow-400" />
+                        <Crown className="w-4 h-4 text-yellow-400 flex-shrink-0" />
                       )}
-                      <span className="font-orbitron text-sm text-white">
+                      <span className="font-orbitron text-xs sm:text-sm text-white truncate">
                         {player.username}
                         {player.user_id === currentUser?.id && ' (YOU)'}
                       </span>
@@ -660,7 +660,7 @@ const LobbyView = () => {
                     <button
                       onClick={player.user_id === currentUser?.id ? handleToggleReady : undefined}
                       disabled={player.user_id !== currentUser?.id || countdown}
-                      className={`text-xs px-4 py-1.5 rounded-full font-orbitron transition-all ${
+                      className={`text-xs px-3 sm:px-4 py-1.5 rounded-full font-orbitron transition-all whitespace-nowrap flex-shrink-0 ${
                         player.ready 
                           ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
                           : 'bg-white/10 text-white border border-white/20'
@@ -680,8 +680,8 @@ const LobbyView = () => {
             </div>
           </motion.div>
 
-          {/* Game Settings and Quiz Contents - Side by Side */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Game Settings and Quiz Contents - Side by Side on Desktop, Stacked on Mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Game Settings */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -689,8 +689,8 @@ const LobbyView = () => {
               transition={{ delay: 0.2 }}
               className="bg-bg-card/50 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col h-[460px]"
             >
-              <h3 className="font-orbitron text-white flex items-center gap-2 mb-4">
-                <SettingsIcon className="w-5 h-5 text-accent-secondary" />
+              <h3 className="font-orbitron text-sm sm:text-base text-white flex items-center gap-2 mb-4">
+                <SettingsIcon className="w-4 sm:w-5 h-4 sm:h-5 text-accent-secondary" />
                 GAME SETTINGS
               </h3>
 
@@ -801,13 +801,16 @@ const LobbyView = () => {
               transition={{ delay: 0.3 }}
               className="bg-bg-card/50 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col h-[460px]"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-orbitron text-white flex items-center gap-2">
-                  <SettingsIcon className="w-5 h-5 text-accent-secondary" />
-                  QUIZ CONTENTS
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <h3 className="font-orbitron text-sm sm:text-base text-white flex items-center gap-2 flex-shrink-0">
+                  <SettingsIcon className="w-4 sm:w-5 h-4 sm:h-5 text-accent-secondary" />
+                  <span className="hidden sm:inline">QUIZ CONTENTS</span>
+                  <span className="sm:hidden">QUIZ</span>
                 </h3>
-                <div className="text-xs font-orbitron text-text-muted">
-                  <span className="text-accent-primary font-arcade">{getTotalQuestions()}</span> TOTAL QUESTIONS
+                <div className="text-xs font-orbitron text-text-muted flex items-center gap-1 min-w-0">
+                  <span className="text-accent-primary font-arcade flex-shrink-0">{getTotalQuestions()}</span>
+                  <span className="hidden xs:inline truncate">TOTAL QUESTIONS</span>
+                  <span className="xs:hidden">QS</span>
                 </div>
               </div>
 

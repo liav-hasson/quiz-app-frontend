@@ -181,6 +181,7 @@ const GameView = () => {
             onNext={handleNext}
             isLoading={false}
             difficulty={difficulty}
+            question={questionData?.question}
           />
         )}
       </AnimatePresence>

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle } from 'lucide-react'
+import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
-import { REQUIRES_USER_API_KEY } from '../../config.js'
+import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN } from '../../config.js'
 import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { logout } from '../../store/slices/authSlice'
@@ -13,6 +13,7 @@ import LeaderboardPanel from './LeaderboardPanel'
 import RetroSelect from '../ui/RetroSelect'
 import RetroInput from '../ui/RetroInput'
 import CategorySectionGrid from '../ui/CategorySectionGrid'
+import { CATEGORY_SECTIONS } from '../../constants/categoryGroups'
 import { useLobbyChatContext } from '../../contexts/LobbyChatContext'
 
 // Rate limit countdown timer component
@@ -71,6 +72,7 @@ const GameInitPanel = () => {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
   const [difficulty, setDifficulty] = useState('Medium')
+  const [expandedSection, setExpandedSection] = useState(null)
   const rateLimitInfo = useSelector(selectRateLimitInfo)
 
   useEffect(() => {
@@ -96,23 +98,41 @@ const GameInitPanel = () => {
     const availableCategories = Object.keys(categories)
     if (availableCategories.length === 0) return
 
-    // Pick random category
-    const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)]
+    let finalCategory = selectedCategory
     
-    // Pick random subject from that category
-    const categorySubjects = categories[randomCategory] || []
+    // If no category selected but a section is expanded, randomize from that section
+    if (!finalCategory && expandedSection) {
+      const section = CATEGORY_SECTIONS.find(s => s.id === expandedSection)
+      if (section) {
+        const sectionCategories = section.categories.filter(cat => 
+          availableCategories.includes(cat)
+        )
+        if (sectionCategories.length > 0) {
+          finalCategory = sectionCategories[Math.floor(Math.random() * sectionCategories.length)]
+        }
+      }
+    }
+    
+    // If still no category, randomize from all available
+    if (!finalCategory) {
+      finalCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)]
+    }
+    
+    // Get subjects for the category
+    const categorySubjects = categories[finalCategory] || []
     if (categorySubjects.length === 0) return
-    const randomSubject = categorySubjects[Math.floor(Math.random() * categorySubjects.length)]
     
-    // Pick random difficulty
-    const difficulties = ['Easy', 'Medium', 'Hard']
-    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)]
+    // Randomize subject if not selected
+    const finalSubject = selectedSubject || categorySubjects[Math.floor(Math.random() * categorySubjects.length)]
+    
+    // Randomize difficulty if not selected (use current selection if set)
+    const finalDifficulty = difficulty ? (difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 2 : 3) : Math.floor(Math.random() * 3) + 1
 
-    // Start game with random settings
+    // Start game with final settings
     dispatch(setGameSettings({
-      category: randomCategory,
-      subject: randomSubject,
-      difficulty: randomDifficulty === 'Easy' ? 1 : randomDifficulty === 'Medium' ? 2 : 3
+      category: finalCategory,
+      subject: finalSubject,
+      difficulty: finalDifficulty
     }))
     dispatch(setActiveTab('play'))
     navigate('/play')
@@ -139,6 +159,7 @@ const GameInitPanel = () => {
             setSelectedCategory(category)
             setSelectedSubject('')
           }}
+          onSectionChange={setExpandedSection}
         />
       </div>
 
@@ -247,6 +268,7 @@ const SettingsPanel = () => {
   const animatedBackground = useSelector(selectAnimatedBackground)
   const customApiKey = useSelector(selectCustomApiKey)
   const selectedModel = useSelector(selectSelectedModel)
+  const rateLimitInfo = useSelector(selectRateLimitInfo)
   
   // Check if user was redirected here to set API key
   const showApiKeyPrompt = location.state?.showApiKeyPrompt
@@ -254,6 +276,22 @@ const SettingsPanel = () => {
   // AI configuration test state
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
   const [testMessage, setTestMessage] = useState('')
+  
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    display: true,
+    ai: true,
+    rateLimit: true,
+    account: false,
+    community: false
+  })
+  
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
 
   const handleLogout = () => {
     dispatch(logout())
@@ -287,7 +325,7 @@ const SettingsPanel = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
       {/* API Key Prompt Banner - show when user must provide their own API key */}
       {showApiKeyPrompt && !customApiKey && REQUIRES_USER_API_KEY && (
         <motion.div
@@ -313,202 +351,374 @@ const SettingsPanel = () => {
         </motion.div>
       )}
 
-      <div className="space-y-4">
-        <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase flex items-center gap-2">
-          <Settings className="w-4 h-4" /> Display
-        </h3>
-        <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
-          <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5" />
-            <span className="font-orbitron text-sm">Animated Background</span>
-          </div>
-          <button
-            onClick={() => dispatch(toggleAnimatedBackground())}
-            className={`relative w-12 h-6 rounded-full transition-colors ${
-              animatedBackground ? 'bg-accent-primary' : 'bg-white/20'
-            }`}
-          >
-            <span
-              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                animatedBackground ? 'translate-x-6' : 'translate-x-0'
-              }`}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* AI Configuration Section */}
-      <div className="space-y-4">
-        <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase flex items-center gap-2">
-          <Bot className="w-4 h-4" /> AI Configuration
-        </h3>
-        
-        {/* Status indicator */}
-        <div className={`p-3 rounded-xl flex items-center gap-3 ${
-          customApiKey 
-            ? 'bg-accent-secondary/10 border border-accent-secondary/30' 
-            : REQUIRES_USER_API_KEY 
-              ? 'bg-amber-500/10 border border-amber-500/30'
-              : 'bg-green-500/10 border border-green-500/30'
-        }`}>
-          <div className={`w-2 h-2 rounded-full ${
-            customApiKey 
-              ? 'bg-accent-secondary' 
-              : REQUIRES_USER_API_KEY 
-                ? 'bg-amber-500'
-                : 'bg-green-500'
-          }`} />
-          <span className="text-xs font-orbitron">
-            {customApiKey 
-              ? 'Using your API key' 
-              : REQUIRES_USER_API_KEY 
-                ? 'No API key set'
-                : 'Using server API key (gpt-4o-mini)'}
-          </span>
-        </div>
-        
-        {/* Custom API Key */}
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Key className="w-4 h-4 text-accent-secondary" />
-              <span className="font-orbitron text-sm">OpenAI API Key</span>
-            </div>
-            {customApiKey && (
-              <button
-                onClick={() => dispatch(clearCustomApiKey())}
-                className="text-xs text-red-400 hover:text-red-300 font-orbitron transition-colors"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-          <RetroInput
-            type="password"
-            value={customApiKey}
-            onChange={(value) => dispatch(setCustomApiKey(value))}
-            placeholder="sk-..."
-            showVisibilityToggle={true}
-          />
-          <p className="text-xs text-text-muted">
-            {REQUIRES_USER_API_KEY 
-              ? 'Required: Enter your OpenAI API key to play. Get one at platform.openai.com'
-              : 'Optional: Use your own key for custom models. Leave empty to use server default.'}
-          </p>
-        </div>
-
-        {/* Model Selection */}
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-          <div className="flex items-center gap-2">
-            <Bot className="w-4 h-4 text-accent-primary" />
-            <span className="font-orbitron text-sm">AI Model</span>
-          </div>
-          <RetroInput
-            type="text"
-            value={selectedModel}
-            onChange={(value) => dispatch(setSelectedModel(value))}
-            placeholder="gpt-4o-mini"
-          />
-          <a 
-            href="https://platform.openai.com/docs/models" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs text-accent-secondary hover:text-accent-primary transition-colors"
-          >
-            <ExternalLink className="w-3 h-3" />
-            View available models
-          </a>
-        </div>
-        
-        {/* Test Configuration Button */}
+      {/* Display Settings Section */}
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
         <button
-          onClick={handleTestConfiguration}
-          disabled={testStatus === 'loading'}
-          className={`w-full flex items-center justify-center gap-2 p-3 rounded-xl font-orbitron text-sm transition-all ${
-            testStatus === 'success'
-              ? 'bg-green-500/20 border border-green-500/50 text-green-400'
-              : testStatus === 'error'
-              ? 'bg-red-500/20 border border-red-500/50 text-red-400'
-              : 'bg-accent-secondary/20 border border-accent-secondary/50 text-accent-secondary hover:bg-accent-secondary/30'
-          } ${testStatus === 'loading' ? 'opacity-60 cursor-wait' : ''}`}
+          onClick={() => toggleSection('display')}
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
-          {testStatus === 'loading' ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Testing...
-            </>
-          ) : testStatus === 'success' ? (
-            <>
-              <CheckCircle className="w-4 h-4" />
-              Success!
-            </>
-          ) : testStatus === 'error' ? (
-            <>
-              <AlertCircle className="w-4 h-4" />
-              Failed
-            </>
-          ) : (
-            <>
-              <Zap className="w-4 h-4" />
-              Test Configuration
-            </>
-          )}
+          <div className="flex items-center gap-2">
+            <Settings className="w-4 h-4 text-slate-400" />
+            <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase">Display</h3>
+          </div>
+          {expandedSections.display ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         
-        {/* Test result message */}
         <AnimatePresence>
-          {testMessage && (
-            <motion.p
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className={`text-xs px-2 ${
-                testStatus === 'success' ? 'text-green-400' : 'text-red-400'
-              }`}
+          {expandedSections.display && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
             >
-              {testMessage}
-            </motion.p>
+              <div className="p-4 pt-0 space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-3">
+                    <Zap className="w-4 h-4" />
+                    <span className="font-orbitron text-sm">Animated Background</span>
+                  </div>
+                  <button
+                    onClick={() => dispatch(toggleAnimatedBackground())}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${
+                      animatedBackground ? 'bg-accent-primary' : 'bg-white/20'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                        animatedBackground ? 'translate-x-6' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase flex items-center gap-2">
-          <Settings className="w-4 h-4" /> Account
-        </h3>
-        <button 
-          onClick={handleLogout}
-          className="w-full flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-all group"
+      {/* AI Configuration Section */}
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+        <button
+          onClick={() => toggleSection('ai')}
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
-          <span className="font-orbitron text-sm">Logout</span>
-          <LogOut className="w-4 h-4 opacity-50 group-hover:opacity-100" />
+          <div className="flex items-center gap-2">
+            <Bot className="w-4 h-4 text-slate-400" />
+            <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase">AI Configuration</h3>
+          </div>
+          {expandedSections.ai ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
+        
+        <AnimatePresence>
+          {expandedSections.ai && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 pt-0 space-y-3">
+                {/* Status indicator */}
+                <div className={`p-3 rounded-lg flex items-center gap-3 ${
+                  customApiKey 
+                    ? 'bg-accent-secondary/10 border border-accent-secondary/30' 
+                    : REQUIRES_USER_API_KEY 
+                      ? 'bg-amber-500/10 border border-amber-500/30'
+                      : 'bg-green-500/10 border border-green-500/30'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    customApiKey 
+                      ? 'bg-accent-secondary' 
+                      : REQUIRES_USER_API_KEY 
+                        ? 'bg-amber-500'
+                        : 'bg-green-500'
+                  }`} />
+                  <span className="text-xs font-orbitron">
+                    {customApiKey 
+                      ? 'Using your API key' 
+                      : REQUIRES_USER_API_KEY 
+                        ? 'No API key set'
+                        : 'Using server API key (gpt-4o-mini)'}
+                  </span>
+                </div>
+                
+                {/* Custom API Key */}
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Key className="w-4 h-4 text-accent-secondary" />
+                      <span className="font-orbitron text-xs">OpenAI API Key</span>
+                    </div>
+                    {customApiKey && (
+                      <button
+                        onClick={() => dispatch(clearCustomApiKey())}
+                        className="text-xs text-red-400 hover:text-red-300 font-orbitron transition-colors"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <RetroInput
+                    type="password"
+                    value={customApiKey}
+                    onChange={(value) => dispatch(setCustomApiKey(value))}
+                    placeholder="sk-..."
+                    showVisibilityToggle={true}
+                  />
+                  <p className="text-xs text-text-muted">
+                    {REQUIRES_USER_API_KEY 
+                      ? 'Required: Enter your OpenAI API key'
+                      : 'Optional: Use your own key for custom models'}
+                  </p>
+                </div>
+
+                {/* Model Selection */}
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Bot className="w-4 h-4 text-accent-primary" />
+                    <span className="font-orbitron text-xs">AI Model</span>
+                  </div>
+                  <RetroInput
+                    type="text"
+                    value={selectedModel}
+                    onChange={(value) => dispatch(setSelectedModel(value))}
+                    placeholder="gpt-4o-mini"
+                  />
+                  <a 
+                    href="https://platform.openai.com/docs/models" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-accent-secondary hover:text-accent-primary transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View available models
+                  </a>
+                </div>
+                
+                {/* Test Configuration Button */}
+                <button
+                  onClick={handleTestConfiguration}
+                  disabled={testStatus === 'loading'}
+                  className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-lg font-orbitron text-xs transition-all ${
+                    testStatus === 'success'
+                      ? 'bg-green-500/20 border border-green-500/50 text-green-400'
+                      : testStatus === 'error'
+                      ? 'bg-red-500/20 border border-red-500/50 text-red-400'
+                      : 'bg-accent-secondary/20 border border-accent-secondary/50 text-accent-secondary hover:bg-accent-secondary/30'
+                  } ${testStatus === 'loading' ? 'opacity-60 cursor-wait' : ''}`}
+                >
+                  {testStatus === 'loading' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Testing...
+                    </>
+                  ) : testStatus === 'success' ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Success!
+                    </>
+                  ) : testStatus === 'error' ? (
+                    <>
+                      <AlertCircle className="w-4 h-4" />
+                      Failed
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4" />
+                      Test Configuration
+                    </>
+                  )}
+                </button>
+                
+                {/* Test result message */}
+                <AnimatePresence>
+                  {testMessage && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className={`text-xs px-2 ${
+                        testStatus === 'success' ? 'text-green-400' : 'text-red-400'
+                      }`}
+                    >
+                      {testMessage}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase flex items-center gap-2">
-          <Users className="w-4 h-4" /> Community
-        </h3>
-        <a 
-          href="https://github.com/liav-hasson" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all group"
-        >
-          <div className="flex items-center gap-3">
-            <Github className="w-5 h-5" />
-            <span className="font-orbitron text-sm">GitHub</span>
-          </div>
-          <span className="text-xs text-text-secondary group-hover:text-white">View Repo</span>
-        </a>
-        
-        <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all group cursor-pointer">
-          <div className="flex items-center gap-3">
-            <Mail className="w-5 h-5" />
-            <span className="font-orbitron text-sm">Contact</span>
-          </div>
-          <span className="text-xs text-text-secondary group-hover:text-white">Report Issue</span>
+      {/* Rate Limiting Section - Only show in local mode */}
+      {ALLOW_GUEST_LOGIN && (
+        <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+          <button
+            onClick={() => toggleSection('rateLimit')}
+            className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-slate-400" />
+              <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase">Rate Limiting</h3>
+            </div>
+            {expandedSections.rateLimit ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          <AnimatePresence>
+            {expandedSections.rateLimit && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="p-4 pt-0 space-y-3">
+                  <p className="text-xs text-text-muted mb-3">
+                    Rate limits prevent excessive API usage. Configure in .env file.
+                  </p>
+                  
+                  {/* Singleplayer Rate Limit */}
+                  <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-accent-primary" />
+                        <span className="font-orbitron text-xs">Singleplayer</span>
+                      </div>
+                      {rateLimitInfo && (
+                        <span className="text-xs text-red-400 font-arcade">LIMITED</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted">Questions:</span>
+                      <span className="font-arcade text-white">10 per hour</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted">Evaluations:</span>
+                      <span className="font-arcade text-white">10 per hour</span>
+                    </div>
+                    {rateLimitInfo && (
+                      <div className="pt-2 mt-2 border-t border-white/10">
+                        <p className="text-xs text-amber-400">
+                          Reset in {Math.ceil((rateLimitInfo.resetTime * 1000 - Date.now()) / 60000)} minutes
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Multiplayer Rate Limit */}
+                  <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-accent-secondary" />
+                        <span className="font-orbitron text-xs">Multiplayer</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted">Games:</span>
+                      <span className="font-arcade text-white">10 per hour</span>
+                    </div>
+                  </div>
+
+                  {/* Configuration Link */}
+                  <a 
+                    href="https://github.com/liav-hasson/quiz-app-mini/blob/main/RATE_LIMITING.md" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-accent-secondary hover:text-accent-primary transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Configuration Guide
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+      )}
+
+      {/* Account Section */}
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+        <button
+          onClick={() => toggleSection('account')}
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="w-4 h-4 text-slate-400" />
+            <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase">Account</h3>
+          </div>
+          {expandedSections.account ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+        
+        <AnimatePresence>
+          {expandedSections.account && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 pt-0">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-all group"
+                >
+                  <span className="font-orbitron text-sm">Logout</span>
+                  <LogOut className="w-4 h-4 opacity-50 group-hover:opacity-100" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Community Section */}
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+        <button
+          onClick={() => toggleSection('community')}
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-slate-400" />
+            <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase">Community</h3>
+          </div>
+          {expandedSections.community ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+        
+        <AnimatePresence>
+          {expandedSections.community && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 pt-0 space-y-2">
+                <a 
+                  href="https://github.com/liav-hasson" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Github className="w-4 h-4" />
+                    <span className="font-orbitron text-sm">GitHub</span>
+                  </div>
+                  <span className="text-xs text-text-secondary group-hover:text-white">View Repo</span>
+                </a>
+                
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all group cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-4 h-4" />
+                    <span className="font-orbitron text-sm">Contact</span>
+                  </div>
+                  <span className="text-xs text-text-secondary group-hover:text-white">Report Issue</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -637,12 +847,12 @@ const MultiplayerPanel = () => {
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             placeholder="ENTER CODE" 
-            className="flex-1 bg-bg-card-light border border-white/10 rounded-lg p-3 text-text-primary focus:border-accent-secondary outline-none font-arcade text-sm tracking-widest uppercase placeholder:text-white/20"
+            className="flex-1 min-w-0 bg-bg-card-light border border-white/10 rounded-lg p-3 text-text-primary focus:border-accent-secondary outline-none font-arcade text-sm tracking-widest uppercase placeholder:text-white/20"
           />
           <button 
             onClick={handleJoinLobby}
             disabled={!joinCode || isJoining}
-            className="px-4 bg-accent-secondary/20 hover:bg-accent-secondary/30 border border-accent-secondary/50 rounded-lg text-accent-secondary transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 sm:px-4 flex-shrink-0 min-w-[60px] bg-accent-secondary/20 hover:bg-accent-secondary/30 border border-accent-secondary/50 rounded-lg text-accent-secondary text-sm font-arcade transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)] hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isJoining ? '...' : 'JOIN'}
           </button>
