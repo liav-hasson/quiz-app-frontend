@@ -14,7 +14,9 @@ export const CATEGORY_SECTIONS = [
     icon: Cloud,
     color: 'accent-secondary', // Cyan
     categories: [
-      'Cloud - Fundamentals & Providers',
+      'Cloud Fundamentals',
+      'AWS Core Services',
+      'AWS Platforms & Security',
       'Cloud Design & Architecture',
       'AI/ML for DevOps',
     ],
@@ -25,7 +27,8 @@ export const CATEGORY_SECTIONS = [
     icon: Server,
     color: 'accent-tertiary', // Violet
     categories: [
-      'Infrastructure as Code & Provisioning',
+      'Terraform',
+      'IaC & Config Management',
     ],
   },
   {
@@ -34,9 +37,12 @@ export const CATEGORY_SECTIONS = [
     icon: Ship,
     color: 'accent-primary', // Fuchsia
     categories: [
-      'Kubernetes - Core Concepts & Runtime',
-      'Kubernetes - Scaling & Scheduling',
-      'Service Mesh & Traffic Management',
+      'Kubernetes Core',
+      'Kubernetes Networking',
+      'Kubernetes Storage',
+      'Kubernetes Scheduling & Scaling',
+      'Kubernetes Security',
+      'Service Mesh',
     ],
   },
   {
@@ -45,7 +51,8 @@ export const CATEGORY_SECTIONS = [
     icon: Box,
     color: 'accent-quaternary', // Pink
     categories: [
-      'Containers - Concepts & Tooling',
+      'Containers',
+      'Docker',
     ],
   },
   {
@@ -54,8 +61,10 @@ export const CATEGORY_SECTIONS = [
     icon: Rocket,
     color: 'accent-quinary', // Emerald
     categories: [
-      'DevOps & CI/CD Systems',
-      'Delivery, GitOps & Release Management',
+      'CI/CD Foundations',
+      'CI/CD Platforms',
+      'Helm & Kustomize',
+      'ArgoCD & Flux',
       'Platform Engineering',
     ],
   },
@@ -65,9 +74,12 @@ export const CATEGORY_SECTIONS = [
     icon: Network,
     color: 'accent-secondary', // Cyan
     categories: [
-      'Networking - Fundamentals & Theory',
-      'Networking - Operations & Debugging',
-      'Security & DevSecOps',
+      'Networking Fundamentals',
+      'Network Tools & Troubleshooting',
+      'Network Infrastructure',
+      'Security Foundations',
+      'Secrets & Policy',
+      'AppSec & Supply Chain',
     ],
   },
   {
@@ -76,7 +88,10 @@ export const CATEGORY_SECTIONS = [
     icon: Eye,
     color: 'accent-tertiary', // Violet
     categories: [
-      'Observability & Reliability Engineering',
+      'Metrics & Visualization',
+      'Logging',
+      'Tracing & Telemetry',
+      'Reliability & On-Call',
     ],
   },
   {
@@ -85,8 +100,9 @@ export const CATEGORY_SECTIONS = [
     icon: Database,
     color: 'accent-primary', // Fuchsia
     categories: [
-      'Messaging & Eventing Systems',
-      'Databases & Storage Systems',
+      'Messaging & Streaming',
+      "Relational DB's and Scaling",
+      'NoSQL & Caching',
     ],
   },
   {
@@ -95,7 +111,9 @@ export const CATEGORY_SECTIONS = [
     icon: Terminal,
     color: 'accent-quaternary', // Pink
     categories: [
-      'Linux & Runtime Foundations',
+      'Linux Fundamentals',
+      'CLI & Text Tools',
+      'Scripting & Automation',
       'Git & Version Control',
     ],
   },

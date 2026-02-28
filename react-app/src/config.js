@@ -38,13 +38,10 @@ export const ALLOW_GUEST_LOGIN = import.meta.env.VITE_ALLOW_GUEST_LOGIN === 'tru
 /**
  * Requires User API Key
  * - Controls whether users must provide their own OpenAI API key
- * - 'true': Users must provide their own API key (local dev, demo deployments)
- * - 'false': Server provides API key (production)
- * 
- * Note: In environments where guest login is allowed, users typically need to
- * provide their own API key since there's no server-managed key infrastructure.
+ * - Defaults to true — users must bring their own key
+ * - Set VITE_REQUIRES_USER_API_KEY=false only if the server provides a shared key
  */
-export const REQUIRES_USER_API_KEY = ALLOW_GUEST_LOGIN
+export const REQUIRES_USER_API_KEY = import.meta.env.VITE_REQUIRES_USER_API_KEY !== 'false'
 
 /**
  * Request timeout settings
