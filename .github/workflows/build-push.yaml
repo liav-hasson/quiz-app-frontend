@@ -70,3 +70,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** \`${{ env.DOCKER_IMAGE }}:${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Update Helm chart tag to:** \`${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+# end
