@@ -27,13 +27,9 @@ FROM nginx:alpine
 # Copy built files to nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration with backend proxy
-COPY nginx.conf /etc/nginx/templates/default.conf.template
-
-# Set default backend URL (can be overridden by environment variable)
-ENV BACKEND_URL=backend:5000
+# Copy nginx configuration (static serving only; API routing handled by gateway)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-# nginx will automatically substitute ${BACKEND_URL} in template files
 CMD ["nginx", "-g", "daemon off;"]
