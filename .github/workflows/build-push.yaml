@@ -12,6 +12,9 @@ on:
 env:
   DOCKER_IMAGE: liavvv/quiz-app-front
 
+permissions:
+  contents: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
