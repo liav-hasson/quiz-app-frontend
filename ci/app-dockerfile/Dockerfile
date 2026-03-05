@@ -1,11 +1,13 @@
 # Build stage
 FROM node:20-alpine AS build
 
-# Accept build argument for Google Client ID
+# Accept build arguments
 ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_APP_VERSION=dev
 
-# Set as environment variable for Vite build
+# Set as environment variables for Vite build
 ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
 
 WORKDIR /app
 

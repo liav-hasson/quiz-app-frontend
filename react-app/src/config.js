@@ -44,6 +44,11 @@ export const ALLOW_GUEST_LOGIN = import.meta.env.VITE_ALLOW_GUEST_LOGIN === 'tru
 export const REQUIRES_USER_API_KEY = import.meta.env.VITE_REQUIRES_USER_API_KEY !== 'false'
 
 /**
+ * App version (injected at build time via VITE_APP_VERSION build arg)
+ */
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || 'dev'
+
+/**
  * Request timeout settings
  */
 export const DEFAULT_TIMEOUT = 30000 // 30 seconds
@@ -58,6 +63,7 @@ export function logConfig() {
     GOOGLE_CLIENT_ID: GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 20)}...` : '(not set)',
     ALLOW_GUEST_LOGIN,
     REQUIRES_USER_API_KEY,
+    APP_VERSION,
   })
 }
 
@@ -72,6 +78,7 @@ export default {
   GOOGLE_CLIENT_ID,
   ALLOW_GUEST_LOGIN,
   REQUIRES_USER_API_KEY,
+  APP_VERSION,
   DEFAULT_TIMEOUT,
   logConfig,
 }

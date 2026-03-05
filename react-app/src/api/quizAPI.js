@@ -299,3 +299,14 @@ export async function claimBonusXP(xp, source = 'daily_mission') {
     body: JSON.stringify({ xp, source }),
   })
 }
+
+export async function getBackendVersion() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/health`)
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.version || null
+  } catch {
+    return null
+  }
+}

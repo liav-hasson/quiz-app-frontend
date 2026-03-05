@@ -611,7 +611,7 @@ const LobbyView = () => {
                 </div>
               </div>
             )}
-            {!canStart && !rateLimitInfo && players.length >= 1 && (
+            {!canStart && !rateLimitInfo && !countdown && players.length >= 1 && (
               <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/90 text-white text-xs px-3 py-2 rounded font-orbitron whitespace-nowrap pointer-events-none z-50">
                 {!allReady && 'All players must be ready'}
                 {allReady && !hasValidQuiz && 'Add questions first'}

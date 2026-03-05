@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
-import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN } from '../../config.js'
-import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration } from '../../api/quizAPI'
+import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
+import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { logout } from '../../store/slices/authSlice'
 import LeaderboardPanel from './LeaderboardPanel'
@@ -731,6 +731,11 @@ const SettingsPanel = () => {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Version footer */}
+      <div className="text-[10px] text-white/15 font-mono text-center pt-2 select-none">
+        {APP_VERSION}
       </div>
     </div>
   )

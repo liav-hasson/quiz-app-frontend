@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { loginSuccess } from '../store/slices/authSlice'
 import { loginUser, guestLoginUser } from '../api/quizAPI'
-import { GOOGLE_CLIENT_ID, ALLOW_GUEST_LOGIN } from '../config.js'
+import { GOOGLE_CLIENT_ID, ALLOW_GUEST_LOGIN, APP_VERSION } from '../config.js'
+import { getBackendVersion } from '../api/quizAPI'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { selectAnimatedBackground } from '../store/slices/uiSlice'
 import PsychedelicSpiral from '../components/ui/PsychedelicSpiral'
@@ -17,9 +18,14 @@ const LoginView = () => {
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false)
   const [guestUsername, setGuestUsername] = useState('')
   const animatedBackground = useSelector(selectAnimatedBackground)
+  const [backendVersion, setBackendVersion] = useState(null)
 
   // Use centralized config for guest login permission
   const isLocalEnv = ALLOW_GUEST_LOGIN
+
+  useEffect(() => {
+    getBackendVersion().then(v => setBackendVersion(v)).catch(() => {})
+  }, [])
 
   const handleGoogleResponse = async (response) => {
     const logs = []
@@ -284,6 +290,11 @@ const LoginView = () => {
           )}
         </div>
       </motion.div>
+
+      {/* Version info */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/20 font-mono select-none">
+        Frontend {APP_VERSION}{backendVersion ? ` · API ${backendVersion}` : ''}
+      </div>
     </div>
   )
 }
