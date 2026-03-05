@@ -250,39 +250,38 @@ const LoginView = () => {
             <p className="text-xs text-text-secondary">Google login is disabled for local setups. Use guest login below.</p>
           )}
 
-          {/* Guest Login Section */}
-          <div className="mt-6 space-y-3">
-            <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
+          {/* Guest Login Section - only shown when guest login is allowed */}
+          {isLocalEnv && (
+            <div className="mt-6 space-y-3">
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-bg-card px-2 text-text-muted">Or continue as guest</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-bg-card px-2 text-text-muted">Or continue as guest</span>
-              </div>
+              
+              <input
+                type="text"
+                value={guestUsername}
+                onChange={(e) => setGuestUsername(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleGuestLogin()}
+                placeholder="Enter a username"
+                maxLength={30}
+                disabled={isLoading}
+                className="w-full p-3 bg-bg-card-light border border-white/10 rounded-lg text-white placeholder:text-text-muted focus:border-accent-primary outline-none transition-colors disabled:opacity-50"
+              />
+              
+              <button
+                onClick={handleGuestLogin}
+                disabled={!guestUsername.trim() || isLoading}
+                className="w-full py-3 bg-accent-primary/20 border border-accent-primary/50 text-accent-primary rounded-lg font-orbitron text-sm hover:bg-accent-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Logging in...' : 'Continue as Guest'}
+              </button>
             </div>
-            
-            <input
-              type="text"
-              value={guestUsername}
-              onChange={(e) => setGuestUsername(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleGuestLogin()}
-              placeholder="Enter a username"
-              maxLength={30}
-              disabled={isLoading}
-              className="w-full p-3 bg-bg-card-light border border-white/10 rounded-lg text-white placeholder:text-text-muted focus:border-accent-primary outline-none transition-colors disabled:opacity-50"
-            />
-            
-            <button
-              onClick={handleGuestLogin}
-              disabled={!guestUsername.trim() || isLoading || !isLocalEnv}
-              className="w-full py-3 bg-accent-primary/20 border border-accent-primary/50 text-accent-primary rounded-lg font-orbitron text-sm hover:bg-accent-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Logging in...' : 'Continue as Guest'}
-            </button>
-            {!isLocalEnv && (
-              <p className="text-xs text-text-secondary">Guest login is only available in local environments.</p>
-            )}
-          </div>
+          )}
         </div>
       </motion.div>
     </div>

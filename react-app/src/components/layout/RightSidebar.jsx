@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, Mail, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield } from 'lucide-react'
+import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN } from '../../config.js'
@@ -122,8 +122,9 @@ const GameInitPanel = () => {
     const categorySubjects = categories[finalCategory] || []
     if (categorySubjects.length === 0) return
     
-    // Randomize subject if not selected
-    const finalSubject = selectedSubject || categorySubjects[Math.floor(Math.random() * categorySubjects.length)]
+    // Randomize subject if not selected or if the current subject doesn't belong to the chosen category
+    const subjectBelongsToCategory = selectedSubject && categorySubjects.includes(selectedSubject)
+    const finalSubject = subjectBelongsToCategory ? selectedSubject : categorySubjects[Math.floor(Math.random() * categorySubjects.length)]
     
     // Randomize difficulty if not selected (use current selection if set)
     const finalDifficulty = difficulty ? (difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 2 : 3) : Math.floor(Math.random() * 3) + 1
@@ -277,20 +278,39 @@ const SettingsPanel = () => {
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
   const [testMessage, setTestMessage] = useState('')
   
-  // Collapsible sections state
+  // Collapsible sections state — accordion behavior on hover
   const [expandedSections, setExpandedSections] = useState({
-    display: true,
-    ai: true,
-    rateLimit: true,
+    display: false,
+    ai: false,
+    rateLimit: false,
     account: false,
     community: false
   })
+  const hoverTimerRef = useRef(null)
   
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }))
+  }
+
+  const handleSectionMouseEnter = (section) => {
+    clearTimeout(hoverTimerRef.current)
+    hoverTimerRef.current = setTimeout(() => {
+      setExpandedSections({
+        display: false,
+        ai: false,
+        rateLimit: false,
+        account: false,
+        community: false,
+        [section]: true
+      })
+    }, 150)
+  }
+
+  const handleSectionMouseLeave = () => {
+    clearTimeout(hoverTimerRef.current)
   }
 
   const handleLogout = () => {
@@ -352,7 +372,7 @@ const SettingsPanel = () => {
       )}
 
       {/* Display Settings Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('display')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('display')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -398,7 +418,7 @@ const SettingsPanel = () => {
       </div>
 
       {/* AI Configuration Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('ai')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('ai')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -554,7 +574,7 @@ const SettingsPanel = () => {
 
       {/* Rate Limiting Section - Only show in local mode */}
       {ALLOW_GUEST_LOGIN && (
-        <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+        <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('rateLimit')} onMouseLeave={handleSectionMouseLeave}>
           <button
             onClick={() => toggleSection('rateLimit')}
             className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -639,7 +659,7 @@ const SettingsPanel = () => {
       )}
 
       {/* Account Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('account')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('account')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -674,7 +694,7 @@ const SettingsPanel = () => {
       </div>
 
       {/* Community Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('community')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('community')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -707,14 +727,6 @@ const SettingsPanel = () => {
                   </div>
                   <span className="text-xs text-text-secondary group-hover:text-white">View Repo</span>
                 </a>
-                
-                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-4 h-4" />
-                    <span className="font-orbitron text-sm">Contact</span>
-                  </div>
-                  <span className="text-xs text-text-secondary group-hover:text-white">Report Issue</span>
-                </div>
               </div>
             </motion.div>
           )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { Users, Copy, Play, ArrowLeft, Check, Loader2, Crown, Settings as SettingsIcon, AlertCircle, CircleAlert } from 'lucide-react'
@@ -72,7 +72,29 @@ const LobbyView = () => {
   // Quiz Contents - list of question sets added by host
   const [quizContents, setQuizContents] = useState([])
 
+  // Debounced save of timer settings when host changes them
+  const timerSaveRef = useRef(null)
+  const initialTimerLoadRef = useRef(true)
+  useEffect(() => {
+    // Skip the initial load (when timer is set from fetched lobby data)
+    if (initialTimerLoadRef.current) {
+      initialTimerLoadRef.current = false
+      return
+    }
+    if (!isHost) return
 
+    clearTimeout(timerSaveRef.current)
+    timerSaveRef.current = setTimeout(async () => {
+      try {
+        await updateLobbySettings(lobbyId, { question_timer: questionTimer })
+        console.log('⏱️ Timer setting saved:', questionTimer)
+      } catch (err) {
+        console.warn('⚠️ Failed to save timer setting:', err)
+      }
+    }, 500)
+
+    return () => clearTimeout(timerSaveRef.current)
+  }, [questionTimer, isHost, lobbyId])
 
   // Fetch available categories
   useEffect(() => {
