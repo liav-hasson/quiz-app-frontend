@@ -277,6 +277,11 @@ const SettingsPanel = () => {
   // AI configuration test state
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
   const [testMessage, setTestMessage] = useState('')
+  const [backendVersions, setBackendVersions] = useState({ api: null, multiplayer: null })
+  
+  useEffect(() => {
+    getBackendVersion().then(v => setBackendVersions(v)).catch(() => {})
+  }, [])
   
   // Collapsible sections state — accordion behavior on hover
   const [expandedSections, setExpandedSections] = useState({
@@ -734,8 +739,9 @@ const SettingsPanel = () => {
       </div>
 
       {/* Version footer */}
-      <div className="text-[10px] text-white/15 font-mono text-center pt-2 select-none">
-        {APP_VERSION}
+      <div className="text-[15px] text-white/15 font-mono text-center pt-2 select-none leading-relaxed">
+        Frontend {APP_VERSION}<br />
+        {backendVersions.api ? `API ${backendVersions.api}` : ''}{backendVersions.multiplayer ? ` · MP ${backendVersions.multiplayer}` : ''}
       </div>
     </div>
   )

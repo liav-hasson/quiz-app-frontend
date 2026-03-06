@@ -18,13 +18,13 @@ const LoginView = () => {
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false)
   const [guestUsername, setGuestUsername] = useState('')
   const animatedBackground = useSelector(selectAnimatedBackground)
-  const [backendVersion, setBackendVersion] = useState(null)
+  const [backendVersions, setBackendVersions] = useState({ api: null, multiplayer: null })
 
   // Use centralized config for guest login permission
   const isLocalEnv = ALLOW_GUEST_LOGIN
 
   useEffect(() => {
-    getBackendVersion().then(v => setBackendVersion(v)).catch(() => {})
+    getBackendVersion().then(v => setBackendVersions(v)).catch(() => {})
   }, [])
 
   const handleGoogleResponse = async (response) => {
@@ -292,8 +292,8 @@ const LoginView = () => {
       </motion.div>
 
       {/* Version info */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-white/20 font-mono select-none">
-        Frontend {APP_VERSION}{backendVersion ? ` · API ${backendVersion}` : ''}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[15px] text-white/20 font-mono select-none">
+        Frontend {APP_VERSION}{backendVersions.api ? ` · API ${backendVersions.api}` : ''}{backendVersions.multiplayer ? ` · MP ${backendVersions.multiplayer}` : ''}
       </div>
     </div>
   )

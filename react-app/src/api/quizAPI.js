@@ -303,10 +303,13 @@ export async function claimBonusXP(xp, source = 'daily_mission') {
 export async function getBackendVersion() {
   try {
     const res = await fetch(`${API_BASE_URL}/api/health`)
-    if (!res.ok) return null
+    if (!res.ok) return { api: null, multiplayer: null }
     const data = await res.json()
-    return data.version || null
+    return {
+      api: data.version || null,
+      multiplayer: data.multiplayer_version || null,
+    }
   } catch {
-    return null
+    return { api: null, multiplayer: null }
   }
 }
