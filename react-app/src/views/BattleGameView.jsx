@@ -18,6 +18,7 @@ import { selectUser } from '../store/slices/authSlice'
 import { fetchUserProfile, selectUserProfile } from '../store/slices/quizSlice'
 import { leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
 import socketService from '../api/socketService'
+import { getLobbyDetails, resetLobby } from '../api/quizAPI'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
 import MarkdownRenderer from '../components/common/MarkdownRenderer'
 
@@ -60,6 +61,7 @@ const BattleGameView = () => {
   // Standings
   const [standings, setStandings] = useState([])
   const [finalResults, setFinalResults] = useState(null)
+  const [staleGame, setStaleGame] = useState(false)
   
   // Timer ref
   const timerRef = useRef(null)
@@ -82,6 +84,23 @@ const BattleGameView = () => {
   useEffect(() => {
     if (lobbyId) setLobbyId(lobbyId)
   }, [lobbyId, setLobbyId])
+
+  // Guard: if stuck in LOADING for too long, check if the game still exists
+  useEffect(() => {
+    if (gameState !== GAME_STATE.LOADING) return
+    const timeout = setTimeout(async () => {
+      try {
+        const data = await getLobbyDetails(lobbyId)
+        const status = data.lobby?.status
+        if (status === 'completed' || status === 'waiting') {
+          setStaleGame(true)
+        }
+      } catch {
+        setStaleGame(true)
+      }
+    }, 5000)
+    return () => clearTimeout(timeout)
+  }, [gameState, lobbyId])
 
   // XP animation when game ends
   useEffect(() => {
@@ -317,7 +336,12 @@ const BattleGameView = () => {
     navigate('/')
   }
 
-  const handlePlayAgain = () => {
+  const handlePlayAgain = async () => {
+    try {
+      await resetLobby(lobbyId)
+    } catch (err) {
+      console.warn('Failed to reset lobby:', err)
+    }
     navigate(`/lobby/${lobbyId}`)
   }
 
@@ -330,6 +354,20 @@ const BattleGameView = () => {
 
   // Render loading state
   if (gameState === GAME_STATE.LOADING) {
+    if (staleGame) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+          <h2 className="font-arcade text-xl text-white mb-2">GAME NOT FOUND</h2>
+          <p className="text-text-secondary mb-6">This game has ended or could not be found.</p>
+          <button 
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-accent-primary hover:bg-accent-primary/80 rounded-xl text-white font-orbitron"
+          >
+            BACK TO HOME
+          </button>
+        </div>
+      )
+    }
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
         <Loader2 className="w-16 h-16 text-accent-primary animate-spin mb-4" />
@@ -366,7 +404,8 @@ const BattleGameView = () => {
     const secondPlace = standings[1]
     const thirdPlace = standings[2]
     const myResult = standings.find(p => p.user_id === currentUser?.id)
-    const myPosition = standings.findIndex(p => p.user_id === currentUser?.id) + 1
+    const myPositionIdx = standings.findIndex(p => p.user_id === currentUser?.id)
+    const myPosition = myPositionIdx >= 0 ? myPositionIdx + 1 : standings.length + 1
     const myXP = myResult?.xp_earned || finalResults.xp_awarded?.[currentUser?.id] || 0
 
     return (
@@ -441,7 +480,8 @@ const BattleGameView = () => {
             className="font-orbitron text-text-secondary text-xl mt-2"
           >
             {myPosition === 1 ? 'You are the champion!' : 
-             myPosition <= 3 ? `You placed ${myPosition}${myPosition === 2 ? 'nd' : 'rd'}!` :
+             myPosition <= 3 ? `You placed ${myPosition}${myPosition === 1 ? 'st' : myPosition === 2 ? 'nd' : 'rd'}!` :
+             myPosition <= 20 ? `You placed ${myPosition}th!` :
              `${winner?.username} wins!`}
           </motion.p>
         </div>
@@ -1089,7 +1129,7 @@ const BattleGameView = () => {
                   transition={{ repeat: Infinity, duration: 1.5 }}
                   className="font-orbitron text-text-secondary text-center mt-6"
                 >
-                  Next question starting...
+                  {questionNumber < totalQuestions ? 'Next question starting...' : 'Calculating results...'}
                 </motion.p>
               </div>
             </motion.div>

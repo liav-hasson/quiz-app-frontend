@@ -270,6 +270,12 @@ export async function leaveLobby(lobbyCode) {
   })
 }
 
+export async function resetLobby(lobbyCode) {
+  return await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/reset`, {
+    method: 'POST',
+  })
+}
+
 export async function toggleReady(lobbyCode, ready) {
   return await fetchAPI(`/api/multiplayer/lobby/${lobbyCode}/ready`, {
     method: 'POST',

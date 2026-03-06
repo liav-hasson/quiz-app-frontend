@@ -380,7 +380,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('display')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('display')}
-          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Settings className="w-4 h-4 text-slate-400" />
@@ -426,7 +426,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('ai')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('ai')}
-          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Bot className="w-4 h-4 text-slate-400" />
@@ -582,7 +582,7 @@ const SettingsPanel = () => {
         <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('rateLimit')} onMouseLeave={handleSectionMouseLeave}>
           <button
             onClick={() => toggleSection('rateLimit')}
-            className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-slate-400" />
@@ -667,7 +667,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('account')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('account')}
-          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Settings className="w-4 h-4 text-slate-400" />
@@ -702,7 +702,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('community')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('community')}
-          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />

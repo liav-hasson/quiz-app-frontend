@@ -9,6 +9,7 @@ import { getLobbyDetails, leaveLobby, toggleReady, startGame, getCategoriesWithS
 import socketService from '../api/socketService'
 import RetroSelect from '../components/ui/RetroSelect'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
+import { CATEGORY_SECTIONS } from '../constants/categoryGroups'
 
 // Calculate time until next UTC midnight
 const getTimeUntilMidnightUTC = () => {
@@ -64,8 +65,8 @@ const LobbyView = () => {
   const [maxPlayers, setMaxPlayers] = useState(8)
   
   // Game configuration (like singleplayer)
+  const [selectedSection, setSelectedSection] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedSubject, setSelectedSubject] = useState('')
   const [selectedDifficulty, setSelectedDifficulty] = useState(2)
   const [questionCount, setQuestionCount] = useState(1)
   
@@ -117,6 +118,20 @@ const LobbyView = () => {
       try {
         setLoading(true)
         const data = await getLobbyDetails(lobbyId)
+
+        // Check lobby status — block entry to completed or in-progress lobbies
+        const lobbyStatus = data.lobby.status
+        if (lobbyStatus === 'completed') {
+          setError('This game has ended. The lobby is no longer active.')
+          setLoading(false)
+          return
+        }
+        if (lobbyStatus === 'in_progress') {
+          setError('A game is currently in progress in this lobby.')
+          setLoading(false)
+          return
+        }
+
         setLobby(data.lobby)
         setPlayers(data.lobby.players || [])
         
@@ -468,15 +483,14 @@ const LobbyView = () => {
   }
 
   const handleAddQuestions = async () => {
-    if (!selectedCategory || !selectedSubject) {
+    if (!selectedCategory) {
       return // Silently prevent adding without showing alert
     }
 
-    // Create a new question set entry
+    // Create a new question set entry (no subject — backend picks a random one)
     const newQuestionSet = {
       id: Date.now(), // Unique ID for this set
       category: selectedCategory,
-      subject: selectedSubject,
       difficulty: selectedDifficulty,
       count: questionCount
     }
@@ -726,38 +740,35 @@ const LobbyView = () => {
                     </div>
                   </div>
                 )}
-                {/* Category Selection */}
+                {/* Section Selection (top-level group) */}
+                <div>
+                  <label className="block text-text-muted text-xs mb-2 font-orbitron">SECTION</label>
+                  <RetroSelect
+                    value={selectedSection}
+                    onChange={(val) => {
+                      setSelectedSection(val)
+                      setSelectedCategory('') // Reset category when section changes
+                    }}
+                    options={CATEGORY_SECTIONS.map(s => ({ value: s.id, label: s.name }))}
+                    placeholder="Select section..."
+                    disabled={!isHost}
+                  />
+                </div>
+
+                {/* Category Selection (subcategory within section) */}
                 <div>
                   <label className="block text-text-muted text-xs mb-2 font-orbitron">CATEGORY</label>
                   <RetroSelect
                     value={selectedCategory}
                     onChange={(val) => {
-                      console.log('📂 Category selected:', val)
-                      console.log('📂 Subjects available:', categories[val])
                       setSelectedCategory(val)
-                      setSelectedSubject('') // Reset subject when category changes
-                    }}
-                    options={Object.keys(categories).map(cat => ({ value: cat, label: cat }))}
-                    placeholder="Select category..."
-                    disabled={!isHost}
-                  />
-                </div>
-
-                {/* Subject Selection */}
-                <div>
-                  <label className="block text-text-muted text-xs mb-2 font-orbitron">SUBJECT</label>
-                  <RetroSelect
-                    value={selectedSubject}
-                    onChange={(val) => {
-                      console.log('📖 Subject selected:', val)
-                      setSelectedSubject(val)
                     }}
                     options={
-                      selectedCategory && categories[selectedCategory]
-                        ? categories[selectedCategory].map(subj => ({ value: subj, label: subj }))
+                      selectedSection
+                        ? (CATEGORY_SECTIONS.find(s => s.id === selectedSection)?.categories || []).map(cat => ({ value: cat, label: cat }))
                         : []
                     }
-                    placeholder={selectedCategory ? 'Select subject...' : 'Choose category first'}
+                    placeholder={selectedSection ? 'Select category...' : 'Choose section first'}
                     disabled={!isHost}
                   />
                 </div>
@@ -807,7 +818,7 @@ const LobbyView = () => {
                 {isHost && !countdown && (
                   <button
                     onClick={handleAddQuestions}
-                    disabled={!selectedCategory || !selectedSubject}
+                    disabled={!selectedCategory}
                     className="w-full py-3 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg font-arcade text-white text-sm hover:shadow-[0_0_20px_rgba(217,70,239,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ADD QUESTIONS
@@ -890,7 +901,7 @@ const LobbyView = () => {
                           </div>
                           <div className="flex-1">
                             <div className="font-orbitron text-sm text-white">
-                              {set.category} → {set.subject}
+                              {set.category}
                             </div>
                             <div className="flex items-center gap-3 text-xs text-text-muted mt-1">
                               <span className="font-orbitron">
