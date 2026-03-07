@@ -18,7 +18,7 @@ import { selectUser } from '../store/slices/authSlice'
 import { fetchUserProfile, selectUserProfile } from '../store/slices/quizSlice'
 import { leaveLobby as leaveLobbyAction, clearLobbyState, setGameInProgress } from '../store/slices/lobbySlice'
 import socketService from '../api/socketService'
-import { resetLobby } from '../api/quizAPI'
+import { resetLobby, leaveLobby } from '../api/quizAPI'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
 import MarkdownRenderer from '../components/common/MarkdownRenderer'
 
@@ -378,13 +378,16 @@ const BattleGameView = () => {
     }
   }, [gameState, timeLeft, hasAnswered, handleTimeout])
 
-  const handleLeaveGame = () => {
-    // Leave the socket room
+  const handleLeaveGame = async () => {
+    // Remove player from lobby in MongoDB (triggers host reassignment if needed)
+    try {
+      await leaveLobby(lobbyId)
+    } catch (err) {
+      console.warn('Failed to leave lobby:', err)
+    }
     socketService.leaveRoom(lobbyId)
-    // Clear lobby state from Redux (user is leaving the game completely)
     dispatch(setGameInProgress(false))
     dispatch(leaveLobbyAction())
-    // Navigate home
     navigate('/')
   }
 
