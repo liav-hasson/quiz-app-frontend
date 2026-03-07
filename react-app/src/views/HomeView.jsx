@@ -7,6 +7,7 @@ import { selectUser } from '../store/slices/authSlice'
 import { selectSelectedHistoryItem, setSelectedHistoryItem, setActiveTab } from '../store/slices/uiSlice'
 import { selectHasCustomApiKey, reloadSettings } from '../store/slices/settingsSlice'
 import { REQUIRES_USER_API_KEY } from '../config.js'
+import { getDailyStreak } from '../api/quizAPI'
 import { 
   selectUserProfile, 
   selectHistory, 
@@ -137,6 +138,7 @@ const HomeView = () => {
   const [prevLevel, setPrevLevel] = useState(1)
   const [isLevelingUp, setIsLevelingUp] = useState(false)
   const [xpProgress, setXpProgress] = useState(0)
+  const [streak, setStreak] = useState({ current_streak: 0, active: false })
   
   const name = user?.name || "PLAYER ONE"
   const colors = ['#d946ef', '#06b6d4', '#8b5cf6', '#ec4899', '#10b981', '#facc15', '#f97316']
@@ -150,10 +152,23 @@ const HomeView = () => {
       dispatch(fetchUserProfile())
       dispatch(fetchUserHistory({ limit: 100 })) // Fetch more history for better best category calculation
       dispatch(fetchCategoriesWithSubjects())
+      getDailyStreak()
+        .then(data => {
+          if (data?.current_streak !== undefined) setStreak(data)
+        })
+        .catch(() => {})
     }, 200)
     
     return () => clearTimeout(timer)
   }, [dispatch])
+
+  useEffect(() => {
+    const handleStreakUpdate = (e) => {
+      if (e.detail) setStreak(e.detail)
+    }
+    window.addEventListener('daily-streak-updated', handleStreakUpdate)
+    return () => window.removeEventListener('daily-streak-updated', handleStreakUpdate)
+  }, [])
 
   // Calculate best high-level category from user history
   const bestHighLevelCategory = React.useMemo(() => {
@@ -427,9 +442,32 @@ const HomeView = () => {
             </motion.div>
           </div>
         </div>
-      </div>
 
-      {/* Quick Stats */}
+        {/* Daily Streak */}
+        <div className={`hidden sm:flex flex-col items-center justify-center px-5 py-3 rounded-xl border self-stretch transition-all ${
+          streak.active
+            ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+            : 'bg-white/5 border-white/10'
+        }`}>
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className={`w-7 h-7 mb-1 ${
+              streak.active
+                ? 'text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.9)] animate-[flicker_1.5s_ease-in-out_infinite]'
+                : 'text-gray-600'
+            }`}
+          >
+            <path d="M12 23c-4.97 0-9-3.58-9-8 0-3.07 2.13-5.93 4-7.5.69-.58 1.65-.04 1.53.82C8.28 10.2 9.4 12 12 12c1.5 0 2.5-.84 3-2 .36-.84.64-2.05.5-3.5-.11-1.12 1.2-1.72 1.87-.87C19.57 8.73 21 11.47 21 15c0 4.42-4.03 8-9 8z" />
+          </svg>
+          <span className={`font-arcade text-lg ${streak.active ? 'text-amber-400' : 'text-gray-600'}`}>
+            {streak.current_streak}
+          </span>
+          <span className={`font-orbitron text-[9px] uppercase tracking-wider ${streak.active ? 'text-amber-500/70' : 'text-gray-600'}`}>
+            streak
+          </span>
+        </div>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <StatCard 
           icon={Trophy} 

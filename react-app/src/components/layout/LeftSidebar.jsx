@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { 
@@ -15,15 +15,14 @@ import {
 import { motion } from 'framer-motion'
 import { logout } from '../../store/slices/authSlice'
 import { setActiveTab, selectActiveTab, toggleMobileMenu, closeMobileMenu } from '../../store/slices/uiSlice'
-import { getDailyStreak } from '../../api/quizAPI'
 
-const MenuItem = ({ icon: Icon, label, id, isActive, onClick, colorClass, hoverClass, shadowClass, bgClass, badge }) => {
+const MenuItem = ({ icon: Icon, label, id, isActive, onClick, colorClass, hoverClass, shadowClass, bgClass }) => {
   return (
     <motion.button
       whileHover={{ scale: 1.05, x: 5 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3.5 sm:py-3 rounded-xl transition-all duration-200 group relative min-h-[48px]
+      className={`w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3.5 sm:py-3 rounded-xl transition-all duration-200 group relative overflow-hidden min-h-[48px]
         ${isActive 
           ? `bg-white/5 ${colorClass} ${shadowClass} border border-white/10` 
           : `text-text-secondary hover:bg-white/5 ${hoverClass}`
@@ -39,33 +38,7 @@ const MenuItem = ({ icon: Icon, label, id, isActive, onClick, colorClass, hoverC
       <span className={`font-orbitron font-medium tracking-wide text-sm sm:text-base ${isActive ? 'text-shadow-neon' : ''}`}>
         {label}
       </span>
-      {badge}
     </motion.button>
-  )
-}
-
-const StreakBadge = ({ streak, active }) => {
-  if (!streak || streak <= 0) return null
-
-  return (
-    <div className={`ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-arcade transition-all ${
-      active
-        ? 'bg-amber-500/20 text-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.4)]'
-        : 'bg-white/5 text-gray-500'
-    }`}>
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className={`w-3.5 h-3.5 ${
-          active
-            ? 'text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.9)] animate-[flicker_1.5s_ease-in-out_infinite]'
-            : 'text-gray-500'
-        }`}
-      >
-        <path d="M12 23c-4.97 0-9-3.58-9-8 0-3.07 2.13-5.93 4-7.5.69-.58 1.65-.04 1.53.82C8.28 10.2 9.4 12 12 12c1.5 0 2.5-.84 3-2 .36-.84.64-2.05.5-3.5-.11-1.12 1.2-1.72 1.87-.87C19.57 8.73 21 11.47 21 15c0 4.42-4.03 8-9 8z" />
-      </svg>
-      {streak}
-    </div>
   )
 }
 
@@ -73,26 +46,6 @@ const LeftSidebar = ({ className = '' }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const activeTab = useSelector(selectActiveTab)
-  const [streak, setStreak] = useState({ current_streak: 0, active: false })
-
-  useEffect(() => {
-    // Fetch streak on mount and when switching tabs
-    getDailyStreak()
-      .then(data => {
-        if (data?.current_streak !== undefined) {
-          setStreak(data)
-        }
-      })
-      .catch(() => {})
-  }, [activeTab])
-
-  useEffect(() => {
-    const handleStreakUpdate = (e) => {
-      if (e.detail) setStreak(e.detail)
-    }
-    window.addEventListener('daily-streak-updated', handleStreakUpdate)
-    return () => window.removeEventListener('daily-streak-updated', handleStreakUpdate)
-  }, [])
 
   const handleNavigation = (tab) => {
     dispatch(setActiveTab(tab))
@@ -115,7 +68,7 @@ const LeftSidebar = ({ className = '' }) => {
   const menuItems = [
     { id: 'home', label: 'Home', icon: Home, colorClass: 'text-cyan-400', bgClass: 'bg-cyan-400', hoverClass: 'hover:text-cyan-400', shadowClass: 'shadow-[0_0_15px_rgba(6,182,212,0.3)]' },
     { id: 'play', label: 'Play', icon: Play, colorClass: 'text-emerald-400', bgClass: 'bg-emerald-400', hoverClass: 'hover:text-emerald-400', shadowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]' },
-    { id: 'daily', label: 'Daily', icon: Flame, colorClass: 'text-amber-400', bgClass: 'bg-amber-400', hoverClass: 'hover:text-amber-400', shadowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]', badge: <StreakBadge streak={streak.current_streak} active={streak.active} /> },
+    { id: 'daily', label: 'Daily', icon: Flame, colorClass: 'text-amber-400', bgClass: 'bg-amber-400', hoverClass: 'hover:text-amber-400', shadowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]' },
     { id: 'multiplayer', label: 'Multiplayer', icon: Users, colorClass: 'text-fuchsia-400', bgClass: 'bg-fuchsia-400', hoverClass: 'hover:text-fuchsia-400', shadowClass: 'shadow-[0_0_15px_rgba(217,70,239,0.3)]' },
     { id: 'stats', label: 'Stats', icon: BarChart2, colorClass: 'text-yellow-400', bgClass: 'bg-yellow-400', hoverClass: 'hover:text-yellow-400', shadowClass: 'shadow-[0_0_15px_rgba(250,204,21,0.3)]' },
     { id: 'history', label: 'History', icon: History, colorClass: 'text-orange-400', bgClass: 'bg-orange-400', hoverClass: 'hover:text-orange-400', shadowClass: 'shadow-[0_0_15px_rgba(251,146,60,0.3)]' },
