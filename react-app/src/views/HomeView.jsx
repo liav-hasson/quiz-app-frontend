@@ -444,7 +444,9 @@ const HomeView = () => {
         </div>
 
         {/* Daily Streak */}
-        <div className={`hidden sm:flex flex-col items-center justify-center px-5 py-3 rounded-xl border self-stretch transition-all ${
+        <div
+          onClick={() => { dispatch(setActiveTab('daily')); navigate('/daily'); }}
+          className={`hidden sm:flex flex-col items-center justify-center px-5 py-3 rounded-xl border self-stretch transition-all cursor-pointer ${
           streak.active
             ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
             : 'bg-white/5 border-white/10'

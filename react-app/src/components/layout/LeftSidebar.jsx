@@ -70,7 +70,7 @@ const LeftSidebar = ({ className = '' }) => {
     { id: 'play', label: 'Play', icon: Play, colorClass: 'text-emerald-400', bgClass: 'bg-emerald-400', hoverClass: 'hover:text-emerald-400', shadowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]' },
     { id: 'daily', label: 'Daily', icon: Flame, colorClass: 'text-amber-400', bgClass: 'bg-amber-400', hoverClass: 'hover:text-amber-400', shadowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]' },
     { id: 'multiplayer', label: 'Multiplayer', icon: Users, colorClass: 'text-fuchsia-400', bgClass: 'bg-fuchsia-400', hoverClass: 'hover:text-fuchsia-400', shadowClass: 'shadow-[0_0_15px_rgba(217,70,239,0.3)]' },
-    { id: 'stats', label: 'Stats', icon: BarChart2, colorClass: 'text-yellow-400', bgClass: 'bg-yellow-400', hoverClass: 'hover:text-yellow-400', shadowClass: 'shadow-[0_0_15px_rgba(250,204,21,0.3)]' },
+    { id: 'stats', label: 'Stats', icon: BarChart2, colorClass: 'text-sky-400', bgClass: 'bg-sky-400', hoverClass: 'hover:text-sky-400', shadowClass: 'shadow-[0_0_15px_rgba(56,189,248,0.3)]' },
     { id: 'history', label: 'History', icon: History, colorClass: 'text-orange-400', bgClass: 'bg-orange-400', hoverClass: 'hover:text-orange-400', shadowClass: 'shadow-[0_0_15px_rgba(251,146,60,0.3)]' },
     { id: 'settings', label: 'Settings', icon: Settings, colorClass: 'text-slate-400', bgClass: 'bg-slate-400', hoverClass: 'hover:text-slate-400', shadowClass: 'shadow-[0_0_15px_rgba(148,163,184,0.3)]' },
   ]
