@@ -380,7 +380,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('display')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('display')}
-          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Settings className="w-4 h-4 text-slate-400" />
@@ -397,7 +397,7 @@ const SettingsPanel = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 pt-0 space-y-3">
+              <div className="p-4 pt-2 space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
                   <div className="flex items-center gap-3">
                     <Zap className="w-4 h-4" />
@@ -426,7 +426,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('ai')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('ai')}
-          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Bot className="w-4 h-4 text-slate-400" />
@@ -443,7 +443,7 @@ const SettingsPanel = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 pt-0 space-y-3">
+              <div className="p-4 pt-2 space-y-3">
                 {/* Status indicator */}
                 <div className={`p-3 rounded-lg flex items-center gap-3 ${
                   customApiKey 
@@ -582,7 +582,7 @@ const SettingsPanel = () => {
         <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('rateLimit')} onMouseLeave={handleSectionMouseLeave}>
           <button
             onClick={() => toggleSection('rateLimit')}
-            className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-slate-400" />
@@ -599,7 +599,7 @@ const SettingsPanel = () => {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden"
               >
-                <div className="p-4 pt-0 space-y-3">
+                <div className="p-4 pt-2 space-y-3">
                   <p className="text-xs text-text-muted mb-3">
                     Rate limits prevent excessive API usage. Configure in .env file.
                   </p>
@@ -667,7 +667,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('account')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('account')}
-          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Settings className="w-4 h-4 text-slate-400" />
@@ -684,7 +684,7 @@ const SettingsPanel = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 pt-0">
+              <div className="p-4 pt-2">
                 <button 
                   onClick={handleLogout}
                   className="w-full flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-all group"
@@ -702,7 +702,7 @@ const SettingsPanel = () => {
       <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('community')} onMouseLeave={handleSectionMouseLeave}>
         <button
           onClick={() => toggleSection('community')}
-          className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-slate-400" />
@@ -719,7 +719,7 @@ const SettingsPanel = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 pt-0 space-y-2">
+              <div className="p-4 pt-2 space-y-2">
                 <a 
                   href="https://github.com/liav-hasson" 
                   target="_blank" 

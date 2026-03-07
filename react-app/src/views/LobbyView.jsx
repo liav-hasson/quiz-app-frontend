@@ -119,6 +119,13 @@ const LobbyView = () => {
         setLoading(true)
         const data = await getLobbyDetails(lobbyId)
 
+        if (!data.lobby) {
+          setError(`No lobby found with code ${lobbyId}`)
+          dispatch(clearLobbyState())
+          setLoading(false)
+          return
+        }
+
         // Check lobby status — block entry to completed or in-progress lobbies
         const lobbyStatus = data.lobby.status
         if (lobbyStatus === 'completed') {
@@ -255,8 +262,6 @@ const LobbyView = () => {
             // Update ALL settings from settings_updated event (this is the authoritative source)
             setQuestionTimer(data.lobby.question_timer)
             setMaxPlayers(data.lobby.max_players)
-            setSelectedCategory(data.lobby.categories?.[0] || '')
-            setSelectedDifficulty(data.lobby.difficulty || 2)
             
             // Update quiz contents - check for undefined, not falsy (to allow empty array)
             if (data.lobby.question_list !== undefined) {
