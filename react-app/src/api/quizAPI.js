@@ -347,3 +347,7 @@ export async function submitDailyAnswer(answer) {
 export async function getDailyLeaderboard() {
   return await fetchAPI('/api/daily-challenge/leaderboard')
 }
+
+export async function getDailyStreak() {
+  return await fetchAPI('/api/daily-challenge/streak')
+}

@@ -43,11 +43,11 @@ body {
   background: var(--bg-dark);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-card-light);
+  background: #2a2a2a;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-primary);
+  background: #3a3a3a;
 }
 
 /* Neon Text Cycle Animation */

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, AlertCircle, Send, Trophy, Star, Zap, Flame, CheckCircle } from 'lucide-react'
-import { getDailyChallenge, submitDailyAnswer, getDailyLeaderboard, claimBonusXP } from '../api/quizAPI'
+import { getDailyChallenge, submitDailyAnswer, getDailyLeaderboard } from '../api/quizAPI'
 
 const DailyChallengeView = () => {
   const [challenge, setChallenge] = useState(null)
@@ -13,7 +13,7 @@ const DailyChallengeView = () => {
   const [result, setResult] = useState(null) // { score, feedback, xp_reward }
 
   const [leaderboard, setLeaderboard] = useState([])
-  const [xpClaimed, setXpClaimed] = useState(false)
+  const [streak, setStreak] = useState(null)
 
   const textareaRef = useRef(null)
 
@@ -26,6 +26,7 @@ const DailyChallengeView = () => {
         if (!data.ok) throw new Error(data.error || 'Failed to load daily challenge')
 
         setChallenge(data)
+        if (data.streak) setStreak(data.streak)
         if (data.already_answered && data.user_answer) {
           setResult({
             score: data.user_answer.score,
@@ -55,6 +56,7 @@ const DailyChallengeView = () => {
       if (!res.ok) throw new Error(res.error || 'Failed to submit answer')
 
       setResult({ score: res.score, feedback: res.feedback, xp_reward: res.xp_reward })
+      if (res.streak) setStreak({ current_streak: res.streak, active: true })
 
       // Refresh leaderboard
       const lb = await getDailyLeaderboard()
@@ -63,17 +65,6 @@ const DailyChallengeView = () => {
       setError(err.message)
     } finally {
       setSubmitting(false)
-    }
-  }
-
-  const handleClaimXP = async () => {
-    if (xpClaimed) return
-    try {
-      await claimBonusXP(result.xp_reward || 50, 'daily_challenge')
-      setXpClaimed(true)
-    } catch {
-      // Silently fail — XP may have been auto-awarded
-      setXpClaimed(true)
     }
   }
 
@@ -202,7 +193,7 @@ const DailyChallengeView = () => {
             <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
               <div className={`w-24 h-24 rounded-full flex flex-col items-center justify-center border-4 ${scoreBorder} ${scoreBg} shadow-[0_0_20px_rgba(0,0,0,0.3)] shrink-0`}>
                 <span className="text-xs font-orbitron text-text-secondary uppercase">Score</span>
-                <span className={`text-xl font-arcade ${scoreColor}`}>
+                <span className={`text-lg font-arcade ${scoreColor}`}>
                   {String(result.score).includes('/') ? result.score : `${result.score}/10`}
                 </span>
               </div>
@@ -217,19 +208,9 @@ const DailyChallengeView = () => {
                     <Zap className="w-4 h-4 text-amber-400" />
                     <span className="font-arcade text-sm text-amber-400">+{result.xp_reward || 50} XP</span>
                   </motion.div>
-                  {!xpClaimed && (
-                    <button
-                      onClick={handleClaimXP}
-                      className="text-xs font-orbitron text-accent-secondary hover:text-accent-primary transition-colors"
-                    >
-                      Claim XP
-                    </button>
-                  )}
-                  {xpClaimed && (
-                    <span className="text-xs font-orbitron text-green-400 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3" /> Claimed
-                    </span>
-                  )}
+                  <span className="text-xs font-orbitron text-green-400 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Awarded
+                  </span>
                 </div>
                 <h3 className="font-arcade text-lg text-white mb-2 flex items-center gap-2">
                   AI FEEDBACK <Star className={`w-4 h-4 ${scoreColor}`} />
