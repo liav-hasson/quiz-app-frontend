@@ -16,9 +16,9 @@ import {
 } from 'lucide-react'
 import { selectUser } from '../store/slices/authSlice'
 import { fetchUserProfile, selectUserProfile } from '../store/slices/quizSlice'
-import { leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
+import { leaveLobby as leaveLobbyAction, clearLobbyState, setGameInProgress } from '../store/slices/lobbySlice'
 import socketService from '../api/socketService'
-import { getLobbyDetails, resetLobby } from '../api/quizAPI'
+import { resetLobby } from '../api/quizAPI'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
 import MarkdownRenderer from '../components/common/MarkdownRenderer'
 
@@ -88,19 +88,55 @@ const BattleGameView = () => {
   // Guard: if stuck in LOADING for too long, check if the game still exists
   useEffect(() => {
     if (gameState !== GAME_STATE.LOADING) return
-    const timeout = setTimeout(async () => {
+
+    // Attempt rejoin immediately — if game is live, hydrate state
+    let cancelled = false
+    const attemptRejoin = async () => {
       try {
-        const data = await getLobbyDetails(lobbyId)
-        const status = data.lobby?.status
-        if (status === 'completed' || status === 'waiting') {
-          setStaleGame(true)
+        const result = await socketService.rejoinGame(lobbyId)
+        if (cancelled) return
+
+        if (result.status === 'active' && result.question) {
+          // Game is live — hydrate all state
+          setCurrentQuestion(result.question)
+          setQuestionNumber(result.question.question_number)
+          setTotalQuestions(result.total_questions || result.question.total_questions || 10)
+          setTimeLeft(result.time_remaining)
+          setQuestionStartTime(Date.now() - ((result.question.time_limit - result.time_remaining) * 1000))
+          setStandings(result.standings || [])
+          setHasAnswered(result.has_answered || false)
+          if (result.has_answered) {
+            setUserAnswer('_rejoined')
+          }
+          setGameState(GAME_STATE.QUESTION)
+          dispatch(setGameInProgress(true))
+          return
         }
-      } catch {
+        // Game ended or not found
         setStaleGame(true)
+        dispatch(setGameInProgress(false))
+        dispatch(clearLobbyState())
+      } catch {
+        // Rejoin failed — fall back to stale game after timeout
       }
-    }, 5000)
-    return () => clearTimeout(timeout)
-  }, [gameState, lobbyId])
+    }
+
+    attemptRejoin()
+
+    // Fallback: if rejoin didn't resolve in 8s, mark stale
+    const timeout = setTimeout(() => {
+      if (!cancelled && gameState === GAME_STATE.LOADING) {
+        setStaleGame(true)
+        dispatch(setGameInProgress(false))
+        dispatch(clearLobbyState())
+      }
+    }, 8000)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [gameState, lobbyId, dispatch])
 
   // XP animation when game ends
   useEffect(() => {
@@ -173,6 +209,7 @@ const BattleGameView = () => {
             console.log('Game started:', data)
             setGameState(GAME_STATE.QUESTION)
             setTotalQuestions(data.total_questions || 10)
+            dispatch(setGameInProgress(true))
             // Initialize standings from players list if provided by server
             if (data.players && data.players.length > 0) {
               const initialStandings = data.players.map(p => ({
@@ -219,6 +256,7 @@ const BattleGameView = () => {
             setGameState(GAME_STATE.GAME_OVER)
             setFinalResults(data)
             setStandings(data.final_standings || [])
+            dispatch(setGameInProgress(false))
             // Refresh profile to get updated XP
             dispatch(fetchUserProfile())
           },
@@ -331,6 +369,7 @@ const BattleGameView = () => {
     // Leave the socket room
     socketService.leaveRoom(lobbyId)
     // Clear lobby state from Redux (user is leaving the game completely)
+    dispatch(setGameInProgress(false))
     dispatch(leaveLobbyAction())
     // Navigate home
     navigate('/')
@@ -338,6 +377,7 @@ const BattleGameView = () => {
 
   const handlePlayAgain = async () => {
     try {
+      dispatch(setGameInProgress(false))
       await resetLobby(lobbyId)
     } catch (err) {
       console.warn('Failed to reset lobby:', err)

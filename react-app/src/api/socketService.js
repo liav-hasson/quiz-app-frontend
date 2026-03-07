@@ -201,6 +201,32 @@ export async function submitGameAnswer(lobbyCode, answer, timeTaken) {
 }
 
 /**
+ * Request to rejoin an active game after refresh/disconnect
+ * @param {string} lobbyCode - The lobby code to rejoin
+ * @returns {Promise<Object>} Game state for hydration or { status: 'ended' }
+ */
+export async function rejoinGame(lobbyCode) {
+  const s = await initSocket()
+  return new Promise((resolve, reject) => {
+    s.emit('rejoin_game', { lobby_code: lobbyCode })
+    
+    const timeout = setTimeout(() => {
+      reject(new Error('Rejoin game timeout'))
+    }, 10000)
+    
+    s.once('rejoin_game_response', (data) => {
+      clearTimeout(timeout)
+      resolve(data)
+    })
+    
+    s.once('error', (error) => {
+      clearTimeout(timeout)
+      reject(new Error(error.message))
+    })
+  })
+}
+
+/**
  * Subscribe to lobby events
  * @param {Object} handlers - Event handler functions
  */
@@ -254,5 +280,6 @@ export default {
   leaveRoom,
   sendMessage,
   submitGameAnswer,
+  rejoinGame,
   subscribeLobbyEvents,
 }

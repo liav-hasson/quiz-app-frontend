@@ -17,6 +17,9 @@ const lobbySlice = createSlice({
     
     // Join timestamp to help with reconnection logic
     joinedAt: null,
+
+    // Whether a multiplayer game is currently in progress
+    gameInProgress: false,
   },
   reducers: {
     // Join a lobby
@@ -35,6 +38,7 @@ const lobbySlice = createSlice({
       state.isInLobby = false
       state.lobbyData = null
       state.joinedAt = null
+      state.gameInProgress = false
     },
     
     // Update cached lobby data
@@ -50,6 +54,12 @@ const lobbySlice = createSlice({
       state.isInLobby = false
       state.lobbyData = null
       state.joinedAt = null
+      state.gameInProgress = false
+    },
+
+    // Set game in progress flag
+    setGameInProgress: (state, action) => {
+      state.gameInProgress = action.payload
     },
   },
 })
@@ -59,6 +69,7 @@ export const {
   leaveLobby,
   updateLobbyData,
   clearLobbyState,
+  setGameInProgress,
 } = lobbySlice.actions
 
 // Selectors
@@ -66,5 +77,6 @@ export const selectCurrentLobbyCode = (state) => state.lobby?.currentLobbyCode
 export const selectIsInLobby = (state) => state.lobby?.isInLobby || false
 export const selectLobbyData = (state) => state.lobby?.lobbyData
 export const selectLobbyJoinedAt = (state) => state.lobby?.joinedAt
+export const selectGameInProgress = (state) => state.lobby?.gameInProgress || false
 
 export default lobbySlice.reducer

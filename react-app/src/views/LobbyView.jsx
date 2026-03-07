@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Users, Copy, Play, ArrowLeft, Check, Loader2, Crown, Settings as SettingsIcon, AlertCircle, CircleAlert } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { selectUser } from '../store/slices/authSlice'
-import { joinLobby as joinLobbyAction, leaveLobby as leaveLobbyAction, updateLobbyData } from '../store/slices/lobbySlice'
+import { joinLobby as joinLobbyAction, leaveLobby as leaveLobbyAction, updateLobbyData, clearLobbyState } from '../store/slices/lobbySlice'
 import { getLobbyDetails, leaveLobby, toggleReady, startGame, getCategoriesWithSubjects, updateLobbySettings } from '../api/quizAPI'
 import socketService from '../api/socketService'
 import RetroSelect from '../components/ui/RetroSelect'
@@ -123,11 +123,13 @@ const LobbyView = () => {
         const lobbyStatus = data.lobby.status
         if (lobbyStatus === 'completed') {
           setError('This game has ended. The lobby is no longer active.')
+          dispatch(clearLobbyState())
           setLoading(false)
           return
         }
         if (lobbyStatus === 'in_progress') {
           setError('A game is currently in progress in this lobby.')
+          dispatch(clearLobbyState())
           setLoading(false)
           return
         }

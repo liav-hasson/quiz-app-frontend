@@ -6,7 +6,7 @@ import { Menu, X, Users } from 'lucide-react'
 import LeftSidebar from '../components/layout/LeftSidebar'
 import RightSidebar from '../components/layout/RightSidebar'
 import { toggleMobileMenu, selectIsMobileMenuOpen, selectAnimatedBackground, selectActiveTab, selectSelectedHistoryItem } from '../store/slices/uiSlice'
-import { selectIsInLobby, selectCurrentLobbyCode, leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
+import { selectIsInLobby, selectCurrentLobbyCode, selectGameInProgress, leaveLobby as leaveLobbyAction } from '../store/slices/lobbySlice'
 import { leaveLobby } from '../api/quizAPI'
 import socketService from '../api/socketService'
 import PsychedelicSpiral from '../components/ui/PsychedelicSpiral'
@@ -54,6 +54,7 @@ const MainLayoutContent = ({ children }) => {
   // Lobby state from Redux
   const isInLobby = useSelector(selectIsInLobby)
   const currentLobbyCode = useSelector(selectCurrentLobbyCode)
+  const gameInProgress = useSelector(selectGameInProgress)
   const isOnLobbyPage = location.pathname.startsWith('/lobby')
   const isOnBattlePage = location.pathname.startsWith('/battle')
   const showLobbyBanner = isInLobby && currentLobbyCode && !isOnLobbyPage && !isOnBattlePage
@@ -74,12 +75,22 @@ const MainLayoutContent = ({ children }) => {
           >
             <div 
               className="flex-1 flex items-center justify-center gap-2 text-sm font-orbitron cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate(`/lobby/${currentLobbyCode}`)}
+              onClick={() => navigate(gameInProgress ? `/battle/${currentLobbyCode}` : `/lobby/${currentLobbyCode}`)}
             >
               <Users className="w-4 h-4 text-accent-primary" />
-              <span className="text-text-primary">You're in lobby</span>
-              <span className="font-arcade text-accent-primary">{currentLobbyCode}</span>
-              <span className="text-text-muted">• Click to return</span>
+              {gameInProgress ? (
+                <>
+                  <span className="text-text-primary">Game in progress</span>
+                  <span className="font-arcade text-accent-primary">{currentLobbyCode}</span>
+                  <span className="text-text-muted">• Click to rejoin</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-text-primary">You're in lobby</span>
+                  <span className="font-arcade text-accent-primary">{currentLobbyCode}</span>
+                  <span className="text-text-muted">• Click to return</span>
+                </>
+              )}
             </div>
             <button
               onClick={async (e) => {
