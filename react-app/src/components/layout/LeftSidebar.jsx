@@ -23,7 +23,7 @@ const MenuItem = ({ icon: Icon, label, id, isActive, onClick, colorClass, hoverC
       whileHover={{ scale: 1.05, x: 5 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3.5 sm:py-3 rounded-xl transition-all duration-200 group relative overflow-hidden min-h-[48px]
+      className={`w-full flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3.5 sm:py-3 rounded-xl transition-all duration-200 group relative min-h-[48px]
         ${isActive 
           ? `bg-white/5 ${colorClass} ${shadowClass} border border-white/10` 
           : `text-text-secondary hover:bg-white/5 ${hoverClass}`
