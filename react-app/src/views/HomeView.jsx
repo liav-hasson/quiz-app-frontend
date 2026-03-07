@@ -313,8 +313,7 @@ const HomeView = () => {
           animate={{ opacity: 1, y: 0 }}
           onClick={() => {
             dispatch(setActiveTab('settings'))
-            navigate('/settings', { state: { showApiKeyPrompt: true } })
-          }}
+          }}}
           className="p-4 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center gap-3 cursor-pointer hover:bg-amber-500/30 transition-all group"
         >
           <Key className="w-6 h-6 text-amber-400 flex-shrink-0" />

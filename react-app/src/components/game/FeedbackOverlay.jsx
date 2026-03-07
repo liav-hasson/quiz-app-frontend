@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Star, RefreshCw, ArrowRight, Zap, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
+import { getPerfectAnswer } from '../../api/quizAPI'
 
 const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, question, autoShowPerfectAnswer = false }) => {
   const [perfectAnswer, setPerfectAnswer] = useState(null)
@@ -24,33 +25,13 @@ const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, q
   useEffect(() => {
     if (autoShowPerfectAnswer && !autoTriggered && !perfectAnswer && !isLoadingPerfect) {
       setAutoTriggered(true)
-      // Trigger the fetch directly to avoid stale closure issues
       ;(async () => {
         setIsLoadingPerfect(true)
         setPerfectAnswerError(null)
         try {
-          const getAIHeaders = () => {
-            try {
-              const settingsStr = localStorage.getItem('quiz_ai_settings')
-              if (!settingsStr) return {}
-              const s = JSON.parse(settingsStr)
-              const headers = {}
-              if (s.customApiKey) headers['X-OpenAI-API-Key'] = s.customApiKey
-              if (s.selectedModel) headers['X-OpenAI-Model'] = s.selectedModel
-              return headers
-            } catch { return {} }
-          }
-          const response = await fetch('/api/quiz/perfect-answer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...getAIHeaders() },
-            body: JSON.stringify({ question }),
-          })
-          if (!response.ok) {
-            const err = await response.json()
-            throw new Error(err.error || 'Failed to generate perfect answer')
-          }
-          const data = await response.json()
-          setPerfectAnswer(data.perfect_answer)
+          const result = await getPerfectAnswer(question)
+          if (!result.ok) throw new Error(result.error || 'Failed to generate perfect answer')
+          setPerfectAnswer(result.perfect_answer)
           setShowPerfectAnswer(true)
         } catch (err) {
           setPerfectAnswerError(err.message)
@@ -79,37 +60,9 @@ const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, q
     setPerfectAnswerError(null)
 
     try {
-      // Get custom AI settings from localStorage (same as other quiz API calls)
-      const getAIHeaders = () => {
-        try {
-          const settingsStr = localStorage.getItem('quiz_ai_settings')
-          if (!settingsStr) return {}
-          const settings = JSON.parse(settingsStr)
-          const headers = {}
-          if (settings.customApiKey) headers['X-OpenAI-API-Key'] = settings.customApiKey
-          if (settings.selectedModel) headers['X-OpenAI-Model'] = settings.selectedModel
-          return headers
-        } catch {
-          return {}
-        }
-      }
-
-      const response = await fetch('/api/quiz/perfect-answer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAIHeaders(),
-        },
-        body: JSON.stringify({ question }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to generate perfect answer')
-      }
-
-      const data = await response.json()
-      setPerfectAnswer(data.perfect_answer)
+      const result = await getPerfectAnswer(question)
+      if (!result.ok) throw new Error(result.error || 'Failed to generate perfect answer')
+      setPerfectAnswer(result.perfect_answer)
       setShowPerfectAnswer(true)
     } catch (err) {
       setPerfectAnswerError(err.message)

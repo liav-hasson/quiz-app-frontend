@@ -176,17 +176,6 @@ export async function testAIConfiguration(apiKey, model) {
   })
 }
 
-export async function listAvailableModels() {
-  const { apiKey } = getCustomAISettings()
-  const headers = {}
-  if (apiKey) headers['X-OpenAI-API-Key'] = apiKey
-
-  return await fetchAPI('/api/ai/models', {
-    headers,
-    skipAuthRedirect: true,
-  })
-}
-
 export async function saveAnswerHistory(payload) {
   return await fetchAPI('/api/user/answers', {
     method: 'POST',
@@ -329,4 +318,32 @@ export async function getBackendVersion() {
   } catch {
     return { api: null, multiplayer: null }
   }
+}
+
+export async function getPerfectAnswer(question) {
+  return await fetchAPI('/api/quiz/perfect-answer', {
+    method: 'POST',
+    body: JSON.stringify({ question }),
+    headers: getAIHeaders(),
+  })
+}
+
+// --- Daily Challenge ---
+
+export async function getDailyChallenge() {
+  return await fetchAPI('/api/daily-challenge', {
+    headers: getAIHeaders(),
+  })
+}
+
+export async function submitDailyAnswer(answer) {
+  return await fetchAPI('/api/daily-challenge/answer', {
+    method: 'POST',
+    body: JSON.stringify({ answer }),
+    headers: getAIHeaders(),
+  })
+}
+
+export async function getDailyLeaderboard() {
+  return await fetchAPI('/api/daily-challenge/leaderboard')
 }

@@ -8,6 +8,8 @@ import { joinLobby as joinLobbyAction, leaveLobby as leaveLobbyAction, updateLob
 import { getLobbyDetails, leaveLobby, toggleReady, startGame, getCategoriesWithSubjects, updateLobbySettings } from '../api/quizAPI'
 import socketService from '../api/socketService'
 import RetroSelect from '../components/ui/RetroSelect'
+import { REQUIRES_USER_API_KEY } from '../config.js'
+import { selectCustomApiKey } from '../store/slices/settingsSlice'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
 import { CATEGORY_SECTIONS } from '../constants/categoryGroups'
 
@@ -38,6 +40,7 @@ const LobbyView = () => {
   const currentUser = useSelector(selectUser)
   const token = currentUser?.token
   
+  const customApiKey = useSelector(selectCustomApiKey)
   const [lobby, setLobby] = useState(null)
   const [players, setPlayers] = useState([])
   const [isReady, setIsReady] = useState(false)
@@ -403,6 +406,12 @@ const LobbyView = () => {
     }
   }
   const handleStartGame = async () => {
+    // Pre-flight check: block start if API key is required but missing
+    if (REQUIRES_USER_API_KEY && !customApiKey) {
+      setError('An OpenAI API key is required to start the game. Set it in Settings → AI Configuration.')
+      return
+    }
+
     try {
       setError(null)
       
@@ -499,14 +508,23 @@ const LobbyView = () => {
 
   const MAX_TOTAL_QUESTIONS = 25
 
+  const getRemainingCapacity = () => {
+    const currentTotal = quizContents.reduce((sum, set) => sum + set.count, 0)
+    return Math.max(0, MAX_TOTAL_QUESTIONS - currentTotal)
+  }
+
   const handleAddQuestions = async () => {
-    if (!selectedCategory) {
-      return // Silently prevent adding without showing alert
+    if (!selectedCategory) return
+
+    const remaining = getRemainingCapacity()
+    if (remaining <= 0) {
+      setError(`Maximum ${MAX_TOTAL_QUESTIONS} total questions reached. Remove some to add more.`)
+      return
     }
 
-    const currentTotal = quizContents.reduce((sum, set) => sum + set.count, 0)
-    if (currentTotal + questionCount > MAX_TOTAL_QUESTIONS) {
-      setError(`Maximum ${MAX_TOTAL_QUESTIONS} total questions allowed (currently ${currentTotal})`)
+    const countToAdd = Math.min(questionCount, remaining)
+    if (countToAdd <= 0) {
+      setError(`Maximum ${MAX_TOTAL_QUESTIONS} total questions reached. Remove some to add more.`)
       return
     }
 
@@ -515,7 +533,7 @@ const LobbyView = () => {
       id: Date.now(), // Unique ID for this set
       category: selectedCategory,
       difficulty: selectedDifficulty,
-      count: questionCount
+      count: countToAdd
     }
 
     const updatedQuizContents = [...quizContents, newQuestionSet]
@@ -562,6 +580,16 @@ const LobbyView = () => {
     return quizContents.reduce((sum, set) => sum + set.count, 0)
   }
 
+  // Clamp questionCount when quiz contents change
+  useEffect(() => {
+    const remaining = getRemainingCapacity()
+    if (remaining <= 0) {
+      setQuestionCount(1)
+    } else if (questionCount > remaining) {
+      setQuestionCount(remaining)
+    }
+  }, [quizContents])
+
   const allReady = players.length >= 1 && players.every(p => p.ready)
   const hasValidQuiz = quizContents.length > 0 && getTotalQuestions() >= 1
   const canStart = isHost && allReady && hasValidQuiz && !countdown
@@ -592,6 +620,23 @@ const LobbyView = () => {
 
   return (
     <div className="max-w-5xl mx-auto w-full space-y-4 sm:space-y-6">
+      {/* Error Banner */}
+      <AnimatePresence>
+        {error && lobby && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 flex items-center gap-3 cursor-pointer hover:bg-red-500/30 transition-all"
+            onClick={() => setError(null)}
+          >
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <p className="text-sm text-red-300 font-orbitron flex-1">{error}</p>
+            <span className="text-red-400 text-xs font-orbitron">✕</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
         {/* Left: Leave Button */}
@@ -828,13 +873,18 @@ const LobbyView = () => {
                       <span className="text-text-muted text-xs ml-2 font-orbitron">QUESTIONS</span>
                     </div>
                     <button
-                      onClick={() => setQuestionCount(Math.min(50, questionCount + 1))}
-                      disabled={!isHost || questionCount >= 50}
+                      onClick={() => setQuestionCount(Math.min(getRemainingCapacity(), questionCount + 1))}
+                      disabled={!isHost || questionCount >= getRemainingCapacity()}
                       className="w-10 h-10 bg-[#121212] border border-white/10 rounded-lg text-white font-arcade text-sm hover:border-accent-primary hover:text-accent-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/10 disabled:hover:text-white"
                     >
                       +
                     </button>
                   </div>
+                  {getRemainingCapacity() <= 0 && (
+                    <p className="text-xs text-amber-400 font-orbitron mt-2">
+                      Question limit reached ({MAX_TOTAL_QUESTIONS} max)
+                    </p>
+                  )}
                 </div>
 
                 {/* Add Question Button - Creator Only */}

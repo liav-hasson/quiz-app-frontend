@@ -9,6 +9,7 @@ import GameView from './views/GameView'
 import StatsView from './views/StatsView'
 import LobbyView from './views/LobbyView'
 import BattleGameView from './views/BattleGameView'
+import DailyChallengeView from './views/DailyChallengeView'
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -68,6 +69,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <BattleGameView />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/daily"
+        element={
+          <ProtectedRoute>
+            <DailyChallengeView />
           </ProtectedRoute>
         }
       />

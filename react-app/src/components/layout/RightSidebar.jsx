@@ -6,7 +6,7 @@ import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
-import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, listAvailableModels } from '../../api/quizAPI'
+import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { logout } from '../../store/slices/authSlice'
 import LeaderboardPanel from './LeaderboardPanel'
@@ -265,44 +265,19 @@ const GameInitPanel = () => {
 const SettingsPanel = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const location = useLocation()
   const animatedBackground = useSelector(selectAnimatedBackground)
   const customApiKey = useSelector(selectCustomApiKey)
   const selectedModel = useSelector(selectSelectedModel)
   const rateLimitInfo = useSelector(selectRateLimitInfo)
   
-  // Check if user was redirected here to set API key
-  const showApiKeyPrompt = location.state?.showApiKeyPrompt
-
-  // Auto-expand AI config section when redirected to set API key
-  useEffect(() => {
-    if (showApiKeyPrompt && !customApiKey && REQUIRES_USER_API_KEY) {
-      setExpandedSections(prev => ({ ...prev, ai: true }))
-    }
-  }, [showApiKeyPrompt, customApiKey])
-  
   // AI configuration test state
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
   const [testMessage, setTestMessage] = useState('')
   const [backendVersions, setBackendVersions] = useState({ api: null, multiplayer: null })
-  const [availableModels, setAvailableModels] = useState([])
-  const [modelsLoading, setModelsLoading] = useState(false)
   
   useEffect(() => {
     getBackendVersion().then(v => setBackendVersions(v)).catch(() => {})
   }, [])
-
-  // Fetch available models when API key changes
-  useEffect(() => {
-    if (!customApiKey && !ALLOW_GUEST_LOGIN) return
-    setModelsLoading(true)
-    listAvailableModels()
-      .then(res => {
-        if (res.models) setAvailableModels(res.models)
-      })
-      .catch(() => {})
-      .finally(() => setModelsLoading(false))
-  }, [customApiKey])
   
   // Collapsible sections state — accordion behavior on hover
   const [expandedSections, setExpandedSections] = useState({
@@ -312,6 +287,13 @@ const SettingsPanel = () => {
     account: false,
     community: false
   })
+
+  // Auto-expand AI config section when redirected to set API key
+  useEffect(() => {
+    if (!customApiKey && REQUIRES_USER_API_KEY) {
+      setExpandedSections(prev => ({ ...prev, ai: true }))
+    }
+  }, [customApiKey])
   
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -354,7 +336,7 @@ const SettingsPanel = () => {
   return (
     <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
       {/* API Key Prompt Banner - show when user must provide their own API key */}
-      {showApiKeyPrompt && !customApiKey && REQUIRES_USER_API_KEY && (
+      {!customApiKey && REQUIRES_USER_API_KEY && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -425,7 +407,7 @@ const SettingsPanel = () => {
       </div>
 
       {/* AI Configuration Section */}
-      <div className={`border rounded-xl bg-white/5 overflow-hidden transition-colors ${showApiKeyPrompt && !customApiKey ? 'border-amber-500/50' : 'border-white/10'}`}>
+      <div className={`border rounded-xl bg-white/5 overflow-hidden transition-colors ${!customApiKey && REQUIRES_USER_API_KEY ? 'border-amber-500/50' : 'border-white/10'}`}>
         <button
           onClick={() => toggleSection('ai')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -478,7 +460,7 @@ const SettingsPanel = () => {
                       <span className="font-orbitron text-xs">OpenAI API Key</span>
                       <div className="relative group/info">
                         <Info className="w-3.5 h-3.5 text-text-muted hover:text-accent-secondary cursor-help transition-colors" />
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2 rounded-lg bg-bg-card border border-accent-secondary/30 text-xs text-accent-secondary/80 opacity-0 pointer-events-none group-hover/info:opacity-100 group-hover/info:pointer-events-auto transition-opacity z-50 shadow-lg">
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 p-2 rounded-lg bg-[#1a1a2e] border border-accent-secondary/30 text-xs text-accent-secondary/80 opacity-0 pointer-events-none group-hover/info:opacity-100 group-hover/info:pointer-events-auto transition-opacity z-50 shadow-lg">
                           <Shield className="w-3 h-3 text-accent-secondary inline mr-1" />
                           Your API key is stored locally in your browser and is never sent to QuizLabs servers.
                         </div>
@@ -512,25 +494,13 @@ const SettingsPanel = () => {
                   <div className="flex items-center gap-2">
                     <Bot className="w-4 h-4 text-accent-primary" />
                     <span className="font-orbitron text-xs">AI Model</span>
-                    {modelsLoading && (
-                      <Loader2 className="w-3 h-3 text-accent-secondary animate-spin" />
-                    )}
                   </div>
-                  {availableModels.length > 0 ? (
-                    <RetroSelect
-                      value={selectedModel}
-                      onChange={(value) => dispatch(setSelectedModel(value))}
-                      options={availableModels.map(m => ({ value: m, label: m }))}
-                      placeholder="Select model..."
-                    />
-                  ) : (
-                    <RetroInput
-                      type="text"
-                      value={selectedModel}
-                      onChange={(value) => dispatch(setSelectedModel(value))}
-                      placeholder="gpt-4o-mini"
-                    />
-                  )}
+                  <RetroInput
+                    type="text"
+                    value={selectedModel}
+                    onChange={(value) => dispatch(setSelectedModel(value))}
+                    placeholder="gpt-4o-mini"
+                  />
                   <a 
                     href="https://platform.openai.com/docs/models" 
                     target="_blank" 
