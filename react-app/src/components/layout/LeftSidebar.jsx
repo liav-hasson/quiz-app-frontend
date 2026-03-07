@@ -75,23 +75,23 @@ const LeftSidebar = ({ className = '' }) => {
   const activeTab = useSelector(selectActiveTab)
   const [streak, setStreak] = useState({ current_streak: 0, active: false })
 
-  const fetchStreak = () => {
+  useEffect(() => {
+    // Fetch streak on mount and when switching tabs
     getDailyStreak()
       .then(data => {
-        if (data?.ok !== false && data?.current_streak !== undefined) {
+        if (data?.current_streak !== undefined) {
           setStreak(data)
         }
       })
       .catch(() => {})
-  }
-
-  useEffect(() => {
-    fetchStreak()
   }, [activeTab])
 
   useEffect(() => {
-    window.addEventListener('daily-streak-updated', fetchStreak)
-    return () => window.removeEventListener('daily-streak-updated', fetchStreak)
+    const handleStreakUpdate = (e) => {
+      if (e.detail) setStreak(e.detail)
+    }
+    window.addEventListener('daily-streak-updated', handleStreakUpdate)
+    return () => window.removeEventListener('daily-streak-updated', handleStreakUpdate)
   }, [])
 
   const handleNavigation = (tab) => {

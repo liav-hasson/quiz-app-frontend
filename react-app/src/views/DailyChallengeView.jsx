@@ -26,7 +26,10 @@ const DailyChallengeView = () => {
         if (!data.ok) throw new Error(data.error || 'Failed to load daily challenge')
 
         setChallenge(data)
-        if (data.streak) setStreak(data.streak)
+        if (data.streak) {
+          setStreak(data.streak)
+          window.dispatchEvent(new CustomEvent('daily-streak-updated', { detail: data.streak }))
+        }
         if (data.already_answered && data.user_answer) {
           setResult({
             score: data.user_answer.score,
@@ -56,10 +59,11 @@ const DailyChallengeView = () => {
       if (!res.ok) throw new Error(res.error || 'Failed to submit answer')
 
       setResult({ score: res.score, feedback: res.feedback, xp_reward: res.xp_reward })
-      if (res.streak) setStreak({ current_streak: res.streak, active: true })
-
-      // Notify sidebar to refresh streak
-      window.dispatchEvent(new Event('daily-streak-updated'))
+      if (res.streak) {
+        const streakData = { current_streak: res.streak, active: true }
+        setStreak(streakData)
+        window.dispatchEvent(new CustomEvent('daily-streak-updated', { detail: streakData }))
+      }
 
       // Refresh leaderboard
       const lb = await getDailyLeaderboard()
