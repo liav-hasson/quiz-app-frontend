@@ -18,10 +18,11 @@ import { updateTaskProgress } from '../store/slices/tasksSlice'
 
 const GameView = () => {
   const dispatch = useDispatch()
-  const [gameState, setGameState] = useState('init') // init, loading, playing, evaluating, feedback, error
+  const [gameState, setGameState] = useState('init') // init, loading, playing, evaluating, cooked, feedback, error
   const [userAnswer, setUserAnswer] = useState('')
   const [evaluation, setEvaluation] = useState(null)
   const [error, setError] = useState(null)
+  const [isCooked, setIsCooked] = useState(false)
   
   // Prevent double fetch in React StrictMode (saves AI tokens!)
   const fetchingRef = useRef(false)
@@ -117,7 +118,18 @@ const GameView = () => {
     }
   }
 
+  const handleCooked = () => {
+    setIsCooked(true)
+    setGameState('cooked')
+    setEvaluation({
+      score: '0/10',
+      feedback: "User is cooked. No evaluation needed — better luck next time! 🍳",
+    })
+    setGameState('feedback')
+  }
+
   const handleNext = () => {
+    setIsCooked(false)
     fetchQuestion(false) // false = user-initiated, don't skip
   }
 
@@ -169,8 +181,10 @@ const GameView = () => {
         value={userAnswer}
         onChange={setUserAnswer}
         onSubmit={handleSubmit}
+        onCooked={handleCooked}
         disabled={gameState === 'feedback'}
         isSubmitting={gameState === 'evaluating'}
+        isCooked={gameState === 'cooked'}
       />
 
       <AnimatePresence>
@@ -182,6 +196,7 @@ const GameView = () => {
             isLoading={false}
             difficulty={difficulty}
             question={questionData?.question}
+            autoShowPerfectAnswer={isCooked}
           />
         )}
       </AnimatePresence>

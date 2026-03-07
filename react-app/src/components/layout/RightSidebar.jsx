@@ -6,7 +6,7 @@ import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
-import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion } from '../../api/quizAPI'
+import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, listAvailableModels } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { logout } from '../../store/slices/authSlice'
 import LeaderboardPanel from './LeaderboardPanel'
@@ -278,10 +278,24 @@ const SettingsPanel = () => {
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
   const [testMessage, setTestMessage] = useState('')
   const [backendVersions, setBackendVersions] = useState({ api: null, multiplayer: null })
+  const [availableModels, setAvailableModels] = useState([])
+  const [modelsLoading, setModelsLoading] = useState(false)
   
   useEffect(() => {
     getBackendVersion().then(v => setBackendVersions(v)).catch(() => {})
   }, [])
+
+  // Fetch available models when API key changes
+  useEffect(() => {
+    if (!customApiKey && !ALLOW_GUEST_LOGIN) return
+    setModelsLoading(true)
+    listAvailableModels()
+      .then(res => {
+        if (res.models) setAvailableModels(res.models)
+      })
+      .catch(() => {})
+      .finally(() => setModelsLoading(false))
+  }, [customApiKey])
   
   // Collapsible sections state — accordion behavior on hover
   const [expandedSections, setExpandedSections] = useState({
@@ -291,31 +305,12 @@ const SettingsPanel = () => {
     account: false,
     community: false
   })
-  const hoverTimerRef = useRef(null)
   
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }))
-  }
-
-  const handleSectionMouseEnter = (section) => {
-    clearTimeout(hoverTimerRef.current)
-    hoverTimerRef.current = setTimeout(() => {
-      setExpandedSections({
-        display: false,
-        ai: false,
-        rateLimit: false,
-        account: false,
-        community: false,
-        [section]: true
-      })
-    }, 150)
-  }
-
-  const handleSectionMouseLeave = () => {
-    clearTimeout(hoverTimerRef.current)
   }
 
   const handleLogout = () => {
@@ -377,7 +372,7 @@ const SettingsPanel = () => {
       )}
 
       {/* Display Settings Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('display')} onMouseLeave={handleSectionMouseLeave}>
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
         <button
           onClick={() => toggleSection('display')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -423,7 +418,7 @@ const SettingsPanel = () => {
       </div>
 
       {/* AI Configuration Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('ai')} onMouseLeave={handleSectionMouseLeave}>
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
         <button
           onClick={() => toggleSection('ai')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -484,6 +479,14 @@ const SettingsPanel = () => {
                       </button>
                     )}
                   </div>
+                  {!customApiKey && (
+                    <div className="flex items-start gap-2 p-2 rounded-lg bg-accent-secondary/10 border border-accent-secondary/20">
+                      <Shield className="w-3.5 h-3.5 text-accent-secondary flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-accent-secondary/80">
+                        Your API key is stored locally in your browser and is never sent to QuizLabs servers.
+                      </p>
+                    </div>
+                  )}
                   <RetroInput
                     type="password"
                     value={customApiKey}
@@ -503,13 +506,25 @@ const SettingsPanel = () => {
                   <div className="flex items-center gap-2">
                     <Bot className="w-4 h-4 text-accent-primary" />
                     <span className="font-orbitron text-xs">AI Model</span>
+                    {modelsLoading && (
+                      <Loader2 className="w-3 h-3 text-accent-secondary animate-spin" />
+                    )}
                   </div>
-                  <RetroInput
-                    type="text"
-                    value={selectedModel}
-                    onChange={(value) => dispatch(setSelectedModel(value))}
-                    placeholder="gpt-4o-mini"
-                  />
+                  {availableModels.length > 0 ? (
+                    <RetroSelect
+                      value={selectedModel}
+                      onChange={(value) => dispatch(setSelectedModel(value))}
+                      options={availableModels.map(m => ({ value: m, label: m }))}
+                      placeholder="Select model..."
+                    />
+                  ) : (
+                    <RetroInput
+                      type="text"
+                      value={selectedModel}
+                      onChange={(value) => dispatch(setSelectedModel(value))}
+                      placeholder="gpt-4o-mini"
+                    />
+                  )}
                   <a 
                     href="https://platform.openai.com/docs/models" 
                     target="_blank" 
@@ -579,7 +594,7 @@ const SettingsPanel = () => {
 
       {/* Rate Limiting Section - Only show in local mode */}
       {ALLOW_GUEST_LOGIN && (
-        <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('rateLimit')} onMouseLeave={handleSectionMouseLeave}>
+        <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
           <button
             onClick={() => toggleSection('rateLimit')}
             className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -664,7 +679,7 @@ const SettingsPanel = () => {
       )}
 
       {/* Account Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('account')} onMouseLeave={handleSectionMouseLeave}>
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
         <button
           onClick={() => toggleSection('account')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -699,7 +714,7 @@ const SettingsPanel = () => {
       </div>
 
       {/* Community Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden" onMouseEnter={() => handleSectionMouseEnter('community')} onMouseLeave={handleSectionMouseLeave}>
+      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
         <button
           onClick={() => toggleSection('community')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"

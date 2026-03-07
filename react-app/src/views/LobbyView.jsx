@@ -497,9 +497,17 @@ const LobbyView = () => {
     }
   }
 
+  const MAX_TOTAL_QUESTIONS = 50
+
   const handleAddQuestions = async () => {
     if (!selectedCategory) {
       return // Silently prevent adding without showing alert
+    }
+
+    const currentTotal = quizContents.reduce((sum, set) => sum + set.count, 0)
+    if (currentTotal + questionCount > MAX_TOTAL_QUESTIONS) {
+      setError(`Maximum ${MAX_TOTAL_QUESTIONS} total questions allowed (currently ${currentTotal})`)
+      return
     }
 
     // Create a new question set entry (no subject — backend picks a random one)
@@ -833,7 +841,7 @@ const LobbyView = () => {
                 {isHost && !countdown && (
                   <button
                     onClick={handleAddQuestions}
-                    disabled={!selectedCategory}
+                    disabled={!selectedCategory || getTotalQuestions() >= MAX_TOTAL_QUESTIONS}
                     className="w-full py-3 bg-gradient-to-r from-accent-primary to-accent-secondary rounded-lg font-arcade text-white text-sm hover:shadow-[0_0_20px_rgba(217,70,239,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ADD QUESTIONS

@@ -1,8 +1,8 @@
 import React, { memo, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Send } from 'lucide-react'
+import { Send, Flame } from 'lucide-react'
 
-const AnswerInput = memo(function AnswerInput({ value, onChange, onSubmit, disabled, isSubmitting }) {
+const AnswerInput = memo(function AnswerInput({ value, onChange, onSubmit, onCooked, disabled, isSubmitting, isCooked }) {
   const textareaRef = useRef(null)
 
   const resizeTextarea = () => {
@@ -44,7 +44,28 @@ const AnswerInput = memo(function AnswerInput({ value, onChange, onSubmit, disab
         </div>
       </div>
 
-      <div className="flex justify-end mt-3 sm:mt-4">
+      <div className="flex justify-end gap-3 mt-3 sm:mt-4">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onCooked}
+          disabled={disabled || isSubmitting || isCooked}
+          className={`
+            px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-arcade text-xs sm:text-sm flex items-center gap-2 transition-all
+            ${disabled || isCooked
+              ? 'bg-white/5 text-text-muted cursor-not-allowed' 
+              : 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 hover:border-red-500/50'
+            }
+          `}
+        >
+          {isCooked ? (
+            <span className="animate-pulse">COOKED...</span>
+          ) : (
+            <>
+              I'M COOKED <Flame className="w-4 h-4" />
+            </>
+          )}
+        </motion.button>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

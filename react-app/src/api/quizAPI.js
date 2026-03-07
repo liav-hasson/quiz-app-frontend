@@ -176,6 +176,17 @@ export async function testAIConfiguration(apiKey, model) {
   })
 }
 
+export async function listAvailableModels() {
+  const { apiKey } = getCustomAISettings()
+  const headers = {}
+  if (apiKey) headers['X-OpenAI-API-Key'] = apiKey
+
+  return await fetchAPI('/api/ai/models', {
+    headers,
+    skipAuthRedirect: true,
+  })
+}
+
 export async function saveAnswerHistory(payload) {
   return await fetchAPI('/api/user/answers', {
     method: 'POST',

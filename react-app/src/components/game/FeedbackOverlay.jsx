@@ -1,12 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Star, RefreshCw, ArrowRight, Zap, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
 
-const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, question }) => {
+const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, question, autoShowPerfectAnswer = false }) => {
   const [perfectAnswer, setPerfectAnswer] = useState(null)
   const [isLoadingPerfect, setIsLoadingPerfect] = useState(false)
   const [perfectAnswerError, setPerfectAnswerError] = useState(null)
   const [showPerfectAnswer, setShowPerfectAnswer] = useState(false)
+  const [autoTriggered, setAutoTriggered] = useState(false)
   // Determine color based on score (0-10)
   const isHigh = score >= 8
   const isMedium = score >= 5 && score < 8
@@ -18,6 +19,47 @@ const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, q
   const numericScore = typeof score === 'string' && score.includes('/') ? parseFloat(score.split('/')[0]) : parseFloat(score)
   const difficultyMultiplier = difficulty === 1 ? 1 : difficulty === 2 ? 1.5 : 2
   const xpGained = Math.round(numericScore * difficultyMultiplier)
+
+  // Auto-trigger perfect answer generation for "I'm Cooked"
+  useEffect(() => {
+    if (autoShowPerfectAnswer && !autoTriggered && !perfectAnswer && !isLoadingPerfect) {
+      setAutoTriggered(true)
+      // Trigger the fetch directly to avoid stale closure issues
+      ;(async () => {
+        setIsLoadingPerfect(true)
+        setPerfectAnswerError(null)
+        try {
+          const getAIHeaders = () => {
+            try {
+              const settingsStr = localStorage.getItem('quiz_ai_settings')
+              if (!settingsStr) return {}
+              const s = JSON.parse(settingsStr)
+              const headers = {}
+              if (s.customApiKey) headers['X-OpenAI-API-Key'] = s.customApiKey
+              if (s.selectedModel) headers['X-OpenAI-Model'] = s.selectedModel
+              return headers
+            } catch { return {} }
+          }
+          const response = await fetch('/api/quiz/perfect-answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAIHeaders() },
+            body: JSON.stringify({ question }),
+          })
+          if (!response.ok) {
+            const err = await response.json()
+            throw new Error(err.error || 'Failed to generate perfect answer')
+          }
+          const data = await response.json()
+          setPerfectAnswer(data.perfect_answer)
+          setShowPerfectAnswer(true)
+        } catch (err) {
+          setPerfectAnswerError(err.message)
+        } finally {
+          setIsLoadingPerfect(false)
+        }
+      })()
+    }
+  }, [autoShowPerfectAnswer])
 
   const handleGeneratePerfectAnswer = async () => {
     if (perfectAnswer && showPerfectAnswer) {
