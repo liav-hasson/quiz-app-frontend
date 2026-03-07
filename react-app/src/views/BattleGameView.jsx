@@ -62,6 +62,7 @@ const BattleGameView = () => {
   const [standings, setStandings] = useState([])
   const [finalResults, setFinalResults] = useState(null)
   const [staleGame, setStaleGame] = useState(false)
+  const [staleGameMessage, setStaleGameMessage] = useState(null)
   
   // Timer ref
   const timerRef = useRef(null)
@@ -85,6 +86,14 @@ const BattleGameView = () => {
     if (lobbyId) setLobbyId(lobbyId)
   }, [lobbyId, setLobbyId])
 
+  // Clear location state on mount so refresh/back-nav don't re-use stale gameData
+  useEffect(() => {
+    if (initialGameData) {
+      dispatch(setGameInProgress(true))
+      window.history.replaceState({}, document.title)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Guard: if stuck in LOADING for too long, check if the game still exists
   useEffect(() => {
     if (gameState !== GAME_STATE.LOADING) return
@@ -96,24 +105,28 @@ const BattleGameView = () => {
         const result = await socketService.rejoinGame(lobbyId)
         if (cancelled) return
 
-        if (result.status === 'active' && result.question) {
-          // Game is live — hydrate all state
-          setCurrentQuestion(result.question)
-          setQuestionNumber(result.question.question_number)
-          setTotalQuestions(result.total_questions || result.question.total_questions || 10)
-          setTimeLeft(result.time_remaining)
-          setQuestionStartTime(Date.now() - ((result.question.time_limit - result.time_remaining) * 1000))
-          setStandings(result.standings || [])
-          setHasAnswered(result.has_answered || false)
-          if (result.has_answered) {
-            setUserAnswer('_rejoined')
+        if (result.status === 'active') {
+          if (result.question) {
+            // Game is live — hydrate all state
+            setCurrentQuestion(result.question)
+            setQuestionNumber(result.question.question_number)
+            setTotalQuestions(result.total_questions || result.question.total_questions || 10)
+            setTimeLeft(result.time_remaining)
+            setQuestionStartTime(Date.now() - ((result.question.time_limit - result.time_remaining) * 1000))
+            setStandings(result.standings || [])
+            setHasAnswered(result.has_answered || false)
+            if (result.has_answered) {
+              setUserAnswer('_rejoined')
+            }
           }
+          // Enter game view (even if between questions — events will deliver next question)
           setGameState(GAME_STATE.QUESTION)
           dispatch(setGameInProgress(true))
           return
         }
         // Game ended or not found
         setStaleGame(true)
+        if (result.message) setStaleGameMessage(result.message)
         dispatch(setGameInProgress(false))
         dispatch(clearLobbyState())
       } catch {
@@ -398,7 +411,7 @@ const BattleGameView = () => {
       return (
         <div className="flex flex-col items-center justify-center h-[60vh] text-center">
           <h2 className="font-arcade text-xl text-white mb-2">GAME NOT FOUND</h2>
-          <p className="text-text-secondary mb-6">This game has ended or could not be found.</p>
+          <p className="text-text-secondary mb-6">{staleGameMessage || 'This game has ended or could not be found.'}</p>
           <button 
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-accent-primary hover:bg-accent-primary/80 rounded-xl text-white font-orbitron"
@@ -864,6 +877,14 @@ const BattleGameView = () => {
           </div>
 
           {/* Question Card - only show during QUESTION state */}
+          {/* Waiting for question fallback (rejoin between questions) */}
+          {!currentQuestion && gameState === GAME_STATE.QUESTION && (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="w-12 h-12 text-accent-primary animate-spin mb-4" />
+              <p className="font-orbitron text-text-secondary animate-pulse">WAITING FOR NEXT QUESTION...</p>
+            </div>
+          )}
+
           <AnimatePresence mode="wait">
             {currentQuestion && gameState === GAME_STATE.QUESTION && (
               <motion.div
