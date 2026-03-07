@@ -174,8 +174,7 @@ const LobbyView = () => {
           setQuizContents(data.lobby.question_list)
         }
         
-        // Find current player's ready status
-        const myPlayer = data.lobby.players?.find(p => p.user_id === currentUser?.id)
+        // Find current player's ready status (myPlayer already resolved above)
         setIsReady(myPlayer?.ready || false)
         
         // Store lobby membership in Redux for persistence
