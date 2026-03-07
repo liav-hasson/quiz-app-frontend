@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { selectUser } from '../store/slices/authSlice'
 import { fetchUserProfile, selectUserProfile } from '../store/slices/quizSlice'
-import { leaveLobby as leaveLobbyAction, clearLobbyState, setGameInProgress } from '../store/slices/lobbySlice'
+import { joinLobby as joinLobbyAction, leaveLobby as leaveLobbyAction, clearLobbyState, setGameInProgress } from '../store/slices/lobbySlice'
 import socketService from '../api/socketService'
 import { resetLobby, leaveLobby } from '../api/quizAPI'
 import { useLobbyChatContext } from '../contexts/LobbyChatContext'
@@ -116,12 +116,30 @@ const BattleGameView = () => {
             setStandings(result.standings || [])
             setHasAnswered(result.has_answered || false)
             if (result.has_answered) {
-              setUserAnswer('_rejoined')
+              // Hydrate answer feedback so the user sees their selection + correct answer
+              const details = result.answer_details
+              const correctLetter = result.question?.correct_answer
+              if (details) {
+                setUserAnswer(details.answer)
+                setCalculatedScore(details.points)
+                const correctIndex = correctLetter ? ['A', 'B', 'C', 'D'].indexOf(correctLetter) : -1
+                const correctText = correctIndex >= 0 && result.question?.options ? result.question.options[correctIndex] : null
+                setAnswerFeedback({
+                  correct: details.is_correct,
+                  score: details.points,
+                  feedback: details.is_correct ? '' : (correctText ? `The correct answer was ${correctLetter}: ${correctText}` : 'Incorrect'),
+                  correctAnswer: correctLetter,
+                  userAnswer: details.answer,
+                })
+              } else {
+                setUserAnswer('_rejoined')
+              }
             }
           }
           // Enter game view (even if between questions — events will deliver next question)
           setGameState(GAME_STATE.QUESTION)
           dispatch(setGameInProgress(true))
+          dispatch(joinLobbyAction({ lobbyCode: lobbyId }))
           return
         }
         // Game ended or not found

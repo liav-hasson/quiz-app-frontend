@@ -134,6 +134,15 @@ const LobbyView = () => {
           return
         }
 
+        // Check if current user is a player in this lobby
+        const myPlayer = (data.lobby.players || []).find(p => p.user_id === currentUser?.id)
+        if (!myPlayer) {
+          setError('You are not a member of this lobby.')
+          dispatch(clearLobbyState())
+          setLoading(false)
+          return
+        }
+
         setLobby(data.lobby)
         setPlayers(data.lobby.players || [])
         
