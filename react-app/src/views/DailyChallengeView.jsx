@@ -58,6 +58,9 @@ const DailyChallengeView = () => {
       setResult({ score: res.score, feedback: res.feedback, xp_reward: res.xp_reward })
       if (res.streak) setStreak({ current_streak: res.streak, active: true })
 
+      // Notify sidebar to refresh streak
+      window.dispatchEvent(new Event('daily-streak-updated'))
+
       // Refresh leaderboard
       const lb = await getDailyLeaderboard()
       if (lb.ok && lb.leaderboard) setLeaderboard(lb.leaderboard)

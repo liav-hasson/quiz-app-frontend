@@ -50,10 +50,20 @@ const StreakBadge = ({ streak, active }) => {
   return (
     <div className={`ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-arcade transition-all ${
       active
-        ? 'bg-amber-500/20 text-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.4)] animate-pulse'
+        ? 'bg-amber-500/20 text-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.4)]'
         : 'bg-white/5 text-gray-500'
     }`}>
-      <Flame className={`w-3 h-3 ${active ? 'text-amber-400 drop-shadow-[0_0_4px_rgba(245,158,11,0.8)]' : 'text-gray-500'}`} />
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className={`w-3.5 h-3.5 ${
+          active
+            ? 'text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.9)] animate-[flicker_1.5s_ease-in-out_infinite]'
+            : 'text-gray-500'
+        }`}
+      >
+        <path d="M12 23c-4.97 0-9-3.58-9-8 0-3.07 2.13-5.93 4-7.5.69-.58 1.65-.04 1.53.82C8.28 10.2 9.4 12 12 12c1.5 0 2.5-.84 3-2 .36-.84.64-2.05.5-3.5-.11-1.12 1.2-1.72 1.87-.87C19.57 8.73 21 11.47 21 15c0 4.42-4.03 8-9 8z" />
+      </svg>
       {streak}
     </div>
   )
@@ -65,12 +75,23 @@ const LeftSidebar = ({ className = '' }) => {
   const activeTab = useSelector(selectActiveTab)
   const [streak, setStreak] = useState({ current_streak: 0, active: false })
 
-  useEffect(() => {
+  const fetchStreak = () => {
     getDailyStreak()
       .then(data => {
-        if (data && !data.error) setStreak(data)
+        if (data?.ok !== false && data?.current_streak !== undefined) {
+          setStreak(data)
+        }
       })
       .catch(() => {})
+  }
+
+  useEffect(() => {
+    fetchStreak()
+  }, [activeTab])
+
+  useEffect(() => {
+    window.addEventListener('daily-streak-updated', fetchStreak)
+    return () => window.removeEventListener('daily-streak-updated', fetchStreak)
   }, [])
 
   const handleNavigation = (tab) => {

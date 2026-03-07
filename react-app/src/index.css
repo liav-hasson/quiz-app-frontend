@@ -74,6 +74,14 @@ body {
   }
 }
 
+/* Fire flicker for streak badge */
+@keyframes flicker {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(251,146,60,0.8)); }
+  25% { transform: scale(1.15) rotate(-3deg); filter: drop-shadow(0 0 8px rgba(245,158,11,0.9)); }
+  50% { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 6px rgba(251,146,60,0.7)); }
+  75% { transform: scale(1.2) rotate(-1deg); filter: drop-shadow(0 0 10px rgba(245,158,11,1)); }
+}
+
 .hover-flicker:hover {
   animation: neon-flicker 1.5s infinite alternate;
 }
