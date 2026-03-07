@@ -497,7 +497,7 @@ const LobbyView = () => {
     }
   }
 
-  const MAX_TOTAL_QUESTIONS = 50
+  const MAX_TOTAL_QUESTIONS = 25
 
   const handleAddQuestions = async () => {
     if (!selectedCategory) {

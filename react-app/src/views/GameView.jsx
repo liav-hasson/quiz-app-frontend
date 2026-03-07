@@ -123,7 +123,7 @@ const GameView = () => {
     setGameState('cooked')
     setEvaluation({
       score: '0/10',
-      feedback: "User is cooked. No evaluation needed — better luck next time! 🍳",
+      feedback: "User is cooked. No evaluation needed - better luck next time!",
     })
     setGameState('feedback')
   }

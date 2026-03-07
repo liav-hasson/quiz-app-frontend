@@ -316,16 +316,15 @@ const BattleGameView = () => {
               message: `${data.username || 'A player'} left the game`,
               timestamp: Date.now()
             }])
+          },
+          onError: (data) => {
+            console.error('Game error:', data)
+            setStaleGame(true)
+            setStaleGameMessage(data.message || 'An error occurred during the game.')
           }
         })
 
-        // Also listen for errors on the socket directly
-        const socket = socketService.getSocket()
-        if (socket) {
-          socket.on('error', (data) => {
-            console.error('Socket error:', data)
-          })
-        }
+        // Error handling is now done via subscribeLobbyEvents onError handler
       } catch (err) {
         console.error('Failed to setup socket:', err)
       }

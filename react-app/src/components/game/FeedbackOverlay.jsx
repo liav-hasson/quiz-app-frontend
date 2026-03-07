@@ -161,32 +161,41 @@ const FeedbackOverlay = ({ score, feedback, onNext, isLoading, difficulty = 2, q
           {/* Perfect Answer Button */}
           {question && (
             <div className="mt-4">
-              <button
-                onClick={handleGeneratePerfectAnswer}
-                disabled={isLoadingPerfect}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-primary/20 hover:bg-accent-primary/30 
-                  border border-accent-primary/50 hover:border-accent-primary transition-all
-                  disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                {isLoadingPerfect ? (
-                  <>
+              {autoShowPerfectAnswer ? (
+                isLoadingPerfect && (
+                  <div className="flex items-center gap-2 px-4 py-2">
                     <div className="w-4 h-4 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
-                    <span className="font-arcade text-sm text-accent-primary">Generating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 text-accent-primary group-hover:scale-110 transition-transform" />
-                    <span className="font-arcade text-sm text-accent-primary">
-                      {perfectAnswer ? (showPerfectAnswer ? 'Hide' : 'Show') : 'Show'} 10/10 Answer
-                    </span>
-                    {perfectAnswer && (
-                      showPerfectAnswer ? 
-                        <ChevronUp className="w-4 h-4 text-accent-primary" /> : 
-                        <ChevronDown className="w-4 h-4 text-accent-primary" />
-                    )}
-                  </>
-                )}
-              </button>
+                    <span className="font-arcade text-sm text-accent-primary">Generating 10/10 answer...</span>
+                  </div>
+                )
+              ) : (
+                <button
+                  onClick={handleGeneratePerfectAnswer}
+                  disabled={isLoadingPerfect}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-primary/20 hover:bg-accent-primary/30 
+                    border border-accent-primary/50 hover:border-accent-primary transition-all
+                    disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  {isLoadingPerfect ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
+                      <span className="font-arcade text-sm text-accent-primary">Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-accent-primary group-hover:scale-110 transition-transform" />
+                      <span className="font-arcade text-sm text-accent-primary">
+                        {perfectAnswer ? (showPerfectAnswer ? 'Hide' : 'Show') : 'Show'} 10/10 Answer
+                      </span>
+                      {perfectAnswer && (
+                        showPerfectAnswer ? 
+                          <ChevronUp className="w-4 h-4 text-accent-primary" /> : 
+                          <ChevronDown className="w-4 h-4 text-accent-primary" />
+                      )}
+                    </>
+                  )}
+                </button>
+              )}
 
               {/* Perfect Answer Display */}
               <AnimatePresence>

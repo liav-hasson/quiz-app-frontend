@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield } from 'lucide-react'
+import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield, Info } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
@@ -273,6 +273,13 @@ const SettingsPanel = () => {
   
   // Check if user was redirected here to set API key
   const showApiKeyPrompt = location.state?.showApiKeyPrompt
+
+  // Auto-expand AI config section when redirected to set API key
+  useEffect(() => {
+    if (showApiKeyPrompt && !customApiKey && REQUIRES_USER_API_KEY) {
+      setExpandedSections(prev => ({ ...prev, ai: true }))
+    }
+  }, [showApiKeyPrompt, customApiKey])
   
   // AI configuration test state
   const [testStatus, setTestStatus] = useState(null) // null | 'loading' | 'success' | 'error'
@@ -418,7 +425,7 @@ const SettingsPanel = () => {
       </div>
 
       {/* AI Configuration Section */}
-      <div className="border border-white/10 rounded-xl bg-white/5 overflow-hidden">
+      <div className={`border rounded-xl bg-white/5 overflow-hidden transition-colors ${showApiKeyPrompt && !customApiKey ? 'border-amber-500/50' : 'border-white/10'}`}>
         <button
           onClick={() => toggleSection('ai')}
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
@@ -469,6 +476,13 @@ const SettingsPanel = () => {
                     <div className="flex items-center gap-2">
                       <Key className="w-4 h-4 text-accent-secondary" />
                       <span className="font-orbitron text-xs">OpenAI API Key</span>
+                      <div className="relative group/info">
+                        <Info className="w-3.5 h-3.5 text-text-muted hover:text-accent-secondary cursor-help transition-colors" />
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2 rounded-lg bg-bg-card border border-accent-secondary/30 text-xs text-accent-secondary/80 opacity-0 pointer-events-none group-hover/info:opacity-100 group-hover/info:pointer-events-auto transition-opacity z-50 shadow-lg">
+                          <Shield className="w-3 h-3 text-accent-secondary inline mr-1" />
+                          Your API key is stored locally in your browser and is never sent to QuizLabs servers.
+                        </div>
+                      </div>
                     </div>
                     {customApiKey && (
                       <button
@@ -479,14 +493,6 @@ const SettingsPanel = () => {
                       </button>
                     )}
                   </div>
-                  {!customApiKey && (
-                    <div className="flex items-start gap-2 p-2 rounded-lg bg-accent-secondary/10 border border-accent-secondary/20">
-                      <Shield className="w-3.5 h-3.5 text-accent-secondary flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-accent-secondary/80">
-                        Your API key is stored locally in your browser and is never sent to QuizLabs servers.
-                      </p>
-                    </div>
-                  )}
                   <RetroInput
                     type="password"
                     value={customApiKey}

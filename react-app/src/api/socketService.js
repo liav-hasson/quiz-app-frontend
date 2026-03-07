@@ -253,6 +253,7 @@ export function subscribeLobbyEvents(handlers) {
     'game_ended': handlers.onGameEnded,
     'new_message': handlers.onNewMessage,
     'scores_updated': handlers.onScoresUpdated,
+    'error': handlers.onError,
   }
 
   // Subscribe to all provided handlers
