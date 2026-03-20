@@ -822,7 +822,7 @@ const AccountSettings = ({ handleLogout }) => {
   const pwStrength = checkPasswordStrength(newPw)
 
   const authBadge = authType === 'credentials'
-    ? { label: 'Password', cls: 'bg-accent-primary/20 text-accent-primary border-accent-primary/40' }
+    ? { label: 'Local Account', cls: 'bg-accent-primary/20 text-accent-primary border-accent-primary/40' }
     : authType === 'guest'
     ? { label: 'Guest', cls: 'bg-amber-500/20 text-amber-400 border-amber-500/40' }
     : { label: 'Google', cls: 'bg-accent-secondary/20 text-accent-secondary border-accent-secondary/40' }
@@ -830,7 +830,7 @@ const AccountSettings = ({ handleLogout }) => {
   return (
     <div className="p-4 pt-2 space-y-3">
       {/* Profile info */}
-      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-3">
         <div className="flex items-center justify-between">
           <span className="font-orbitron text-xs text-white/60">Profile</span>
           <span className={`text-[10px] font-orbitron px-2 py-0.5 rounded-full border ${authBadge.cls}`}>{authBadge.label}</span>
@@ -845,7 +845,7 @@ const AccountSettings = ({ handleLogout }) => {
       </div>
 
       {/* Change Username */}
-      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-3">
         <span className="font-orbitron text-xs text-white/60">Change Username</span>
         <div className="flex gap-2">
           <input
@@ -874,7 +874,7 @@ const AccountSettings = ({ handleLogout }) => {
 
       {/* Change Password (credentials accounts only) */}
       {authType === 'credentials' && (
-        <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+        <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-3">
           <span className="font-orbitron text-xs text-white/60">Change Password</span>
           <div className="relative">
             <input type={showCurrentPw ? 'text' : 'password'} value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder="Current password" className="w-full bg-[#121212] border border-white/10 rounded-lg p-2 pr-9 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all" />
@@ -927,7 +927,7 @@ const AccountSettings = ({ handleLogout }) => {
       )}
 
       {/* Danger Zone */}
-      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 space-y-2">
+      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 space-y-3">
         <span className="font-orbitron text-xs text-red-400/80">Danger Zone</span>
 
         {!showDeleteConfirm ? (

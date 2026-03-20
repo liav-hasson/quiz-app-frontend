@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,6 +10,20 @@ import { Loader2, AlertCircle, Eye, EyeOff, Dices, Check, X, Copy, CheckCircle }
 import { selectAnimatedBackground } from '../store/slices/uiSlice'
 import PsychedelicSpiral from '../components/ui/PsychedelicSpiral'
 import { checkPasswordStrength, generateStrongPassword } from '../utils/passwordUtils'
+
+// Memoized background so it never re-renders when form state changes
+const LoginBackground = React.memo(({ animated }) => {
+  if (animated) {
+    return <PsychedelicSpiral className="absolute inset-0 pointer-events-none" spinRotation={-0.3} spinSpeed={1.5} color1="#050505" color2="#0f0f0f" color3="#1a1a1a" contrast={2.5} lighting={0.4} spinAmount={0.2} pixelFilter={500} isRotate={true} />
+  }
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-accent-primary/10 rounded-full blur-[150px] animate-float" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-accent-secondary/10 rounded-full blur-[150px] animate-float" style={{ animationDelay: '-8s' }} />
+      <div className="absolute inset-0 bg-[url('/assets/grid-pattern.svg')] opacity-[0.05]" />
+    </div>
+  )
+})
 
 // Reusable neon input component for the login page
 const NeonInput = ({ value, onChange, placeholder, type = 'text', disabled, maxLength, onKeyDown, autoComplete, showToggle }) => {
@@ -107,6 +121,10 @@ const LoginView = () => {
   // Clear error when switching tabs
   useEffect(() => { setError(null) }, [activeTab])
 
+  // Ref to re-render Google button when login tab reappears
+  const googleBtnRef = useRef(null)
+  const googleInitialized = useRef(false)
+
   // ----- Helpers -----
   const persistAndNavigate = useCallback((data) => {
     const storage = rememberMe ? localStorage : sessionStorage
@@ -132,40 +150,42 @@ const LoginView = () => {
     }
   }
 
+  // Initialize Google SDK once
   useEffect(() => {
     if (isLocalEnv) return undefined
+    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('your-google-client-id')) return undefined
 
-    const initializeGoogle = () => {
-      if (window.google?.accounts?.id) {
-        if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('your-google-client-id')) {
-          console.warn('Google Client ID not configured')
-          return true
-        }
-        try {
-          window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleResponse,
-            auto_select: false
-          })
-          const btn = document.getElementById('google-signin-btn')
-          if (btn) {
-            window.google.accounts.id.renderButton(btn, { theme: 'filled_black', size: 'large', width: 250, text: 'continue_with' })
-            setIsGoogleLoaded(true)
-            return true
-          }
-        } catch (err) {
-          console.error('Google Sign-In initialization failed:', err)
-          return true
-        }
+    const tryInit = () => {
+      if (!window.google?.accounts?.id) return false
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+          auto_select: false
+        })
+        googleInitialized.current = true
+        return true
+      } catch (err) {
+        console.error('Google Sign-In initialization failed:', err)
+        return true
       }
-      return false
     }
 
-    if (!initializeGoogle()) {
-      const interval = setInterval(() => { if (initializeGoogle()) clearInterval(interval) }, 100)
+    if (!tryInit()) {
+      const interval = setInterval(() => { if (tryInit()) clearInterval(interval) }, 100)
       return () => clearInterval(interval)
     }
   }, [isLocalEnv])
+
+  // Render Google button into the DOM element whenever the login tab is active
+  useEffect(() => {
+    if (isLocalEnv || activeTab !== 'login' || !googleInitialized.current) return
+    const btn = googleBtnRef.current
+    if (btn && window.google?.accounts?.id) {
+      window.google.accounts.id.renderButton(btn, { theme: 'filled_black', size: 'large', width: 250, text: 'continue_with' })
+      setIsGoogleLoaded(true)
+    }
+  }, [activeTab, isLocalEnv])
 
   // ----- Credential handlers -----
   const handleCredentialLogin = async () => {
@@ -235,16 +255,8 @@ const LoginView = () => {
 
   return (
     <div className="min-h-screen bg-bg-dark flex items-center justify-center relative overflow-hidden">
-      {/* Animated Background */}
-      {animatedBackground ? (
-        <PsychedelicSpiral className="absolute inset-0 pointer-events-none" spinRotation={-0.3} spinSpeed={1.5} color1="#050505" color2="#0f0f0f" color3="#1a1a1a" contrast={2.5} lighting={0.4} spinAmount={0.2} pixelFilter={500} isRotate={true} />
-      ) : (
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-accent-primary/10 rounded-full blur-[150px] animate-float" />
-          <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-accent-secondary/10 rounded-full blur-[150px] animate-float" style={{ animationDelay: '-8s' }} />
-          <div className="absolute inset-0 bg-[url('/assets/grid-pattern.svg')] opacity-[0.05]" />
-        </div>
-      )}
+      {/* Animated Background — memoized to prevent resets on keystroke */}
+      <LoginBackground animated={animatedBackground} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -312,7 +324,7 @@ const LoginView = () => {
                     {isLoading ? (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg"><Loader2 className="w-5 h-5 animate-spin text-white" /></div>
                     ) : (
-                      <div id="google-signin-btn" className="w-full flex justify-center" />
+                      <div ref={googleBtnRef} className="w-full flex justify-center" />
                     )}
                   </div>
                 </div>
