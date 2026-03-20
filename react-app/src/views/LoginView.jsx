@@ -122,8 +122,16 @@ const LoginView = () => {
   useEffect(() => { setError(null) }, [activeTab])
 
   // Ref to re-render Google button when login tab reappears
-  const googleBtnRef = useRef(null)
   const googleInitialized = useRef(false)
+
+  // Callback ref: fires every time the Google button div mounts into the DOM
+  const googleBtnRef = useCallback((node) => {
+    if (!node || isLocalEnv || !googleInitialized.current) return
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.renderButton(node, { theme: 'filled_black', size: 'large', width: 250, text: 'continue_with' })
+      setIsGoogleLoaded(true)
+    }
+  }, [isLocalEnv])
 
   // ----- Helpers -----
   const persistAndNavigate = useCallback((data) => {
@@ -176,16 +184,6 @@ const LoginView = () => {
       return () => clearInterval(interval)
     }
   }, [isLocalEnv])
-
-  // Render Google button into the DOM element whenever the login tab is active
-  useEffect(() => {
-    if (isLocalEnv || activeTab !== 'login' || !googleInitialized.current) return
-    const btn = googleBtnRef.current
-    if (btn && window.google?.accounts?.id) {
-      window.google.accounts.id.renderButton(btn, { theme: 'filled_black', size: 'large', width: 250, text: 'continue_with' })
-      setIsGoogleLoaded(true)
-    }
-  }, [activeTab, isLocalEnv])
 
   // ----- Credential handlers -----
   const handleCredentialLogin = async () => {
@@ -254,7 +252,7 @@ const LoginView = () => {
     }`
 
   return (
-    <div className="min-h-screen bg-bg-dark flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-bg-dark flex items-center justify-center relative overflow-hidden px-4">
       {/* Animated Background — memoized to prevent resets on keystroke */}
       <LoginBackground animated={animatedBackground} />
 
