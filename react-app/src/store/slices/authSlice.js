@@ -7,20 +7,23 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const loadUserFromStorage = () => {
   try {
-    const stored = localStorage.getItem('quiz_user')
+    // Check localStorage first, then sessionStorage (for "don't remember me" sessions)
+    const stored = localStorage.getItem('quiz_user') || sessionStorage.getItem('quiz_user')
     if (!stored) return null
     
     const user = JSON.parse(stored)
     
-    // Validate that user has at least an email
-    if (!user || !user.email) {
+    // Validate that user has required fields
+    if (!user || (!user.email && !user.username)) {
       localStorage.removeItem('quiz_user')
+      sessionStorage.removeItem('quiz_user')
       return null
     }
     
     return user
   } catch (error) {
     localStorage.removeItem('quiz_user')
+    sessionStorage.removeItem('quiz_user')
     return null
   }
 }
@@ -52,8 +55,9 @@ const authSlice = createSlice({
       state.user = null
       state.isAuthenticated = false
       
-      // Clear localStorage
+      // Clear all storage
       localStorage.removeItem('quiz_user')
+      sessionStorage.removeItem('quiz_user')
       // Clear lobby state on logout
       localStorage.removeItem('lobby_state')
     },
@@ -65,5 +69,6 @@ export const { loginSuccess, logout } = authSlice.actions
 // Selectors - Easy access to auth state
 export const selectUser = (state) => state.auth.user
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated
+export const selectAuthType = (state) => state.auth.user?.auth_type || 'google'
 
 export default authSlice.reducer

@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield, Info } from 'lucide-react'
+import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield, Info, UserCog, Trash2, Eye, EyeOff, Dices, Check, X } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
+import { selectUser, selectAuthType, logout, loginSuccess } from '../../store/slices/authSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
-import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion } from '../../api/quizAPI'
+import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, changeUsername, changePassword, deleteAccount } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
-import { logout } from '../../store/slices/authSlice'
+import { checkPasswordStrength, generateStrongPassword } from '../../utils/passwordUtils'
 import LeaderboardPanel from './LeaderboardPanel'
 import RetroSelect from '../ui/RetroSelect'
 import RetroInput from '../ui/RetroInput'
@@ -661,7 +662,7 @@ const SettingsPanel = () => {
           className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-slate-400" />
+            <UserCog className="w-4 h-4 text-slate-400" />
             <h3 className="text-slate-400 font-orbitron text-sm tracking-wider uppercase">Account</h3>
           </div>
           {expandedSections.account ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -675,15 +676,7 @@ const SettingsPanel = () => {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-4 pt-2">
-                <button 
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-all group"
-                >
-                  <span className="font-orbitron text-sm">Logout</span>
-                  <LogOut className="w-4 h-4 opacity-50 group-hover:opacity-100" />
-                </button>
-              </div>
+              <AccountSettings handleLogout={handleLogout} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -734,6 +727,260 @@ const SettingsPanel = () => {
         Frontend {APP_VERSION}<br />
         {backendVersions.api ? `API ${backendVersions.api}` : ''}{backendVersions.multiplayer ? ` · MP ${backendVersions.multiplayer}` : ''}
       </div>
+    </div>
+  )
+}
+
+// ---- Account Settings Sub-component ----
+const AccountSettings = ({ handleLogout }) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const user = useSelector(selectUser)
+  const authType = useSelector(selectAuthType)
+
+  // Username change
+  const [newUsername, setNewUsername] = useState('')
+  const [usernameStatus, setUsernameStatus] = useState(null) // null | 'loading' | 'success' | 'error'
+  const [usernameMsg, setUsernameMsg] = useState('')
+
+  // Password change (credentials only)
+  const [currentPw, setCurrentPw] = useState('')
+  const [newPw, setNewPw] = useState('')
+  const [confirmPw, setConfirmPw] = useState('')
+  const [pwStatus, setPwStatus] = useState(null)
+  const [pwMsg, setPwMsg] = useState('')
+  const [showCurrentPw, setShowCurrentPw] = useState(false)
+  const [showNewPw, setShowNewPw] = useState(false)
+  const [copiedPw, setCopiedPw] = useState(false)
+
+  // Delete account
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteInput, setDeleteInput] = useState('')
+  const [deletePw, setDeletePw] = useState('')
+  const [deleteStatus, setDeleteStatus] = useState(null)
+  const [deleteMsg, setDeleteMsg] = useState('')
+
+  const handleChangeUsername = async () => {
+    if (!newUsername.trim()) return
+    setUsernameStatus('loading')
+    try {
+      await changeUsername(newUsername.trim())
+      setUsernameStatus('success')
+      setUsernameMsg('Username updated!')
+      // Update localStorage user object
+      const stored = JSON.parse(localStorage.getItem('quiz_user') || '{}')
+      stored.username = newUsername.trim()
+      stored.name = newUsername.trim()
+      localStorage.setItem('quiz_user', JSON.stringify(stored))
+      dispatch(loginSuccess(stored))
+      setNewUsername('')
+    } catch (err) {
+      setUsernameStatus('error')
+      setUsernameMsg(err.message)
+    }
+    setTimeout(() => { setUsernameStatus(null); setUsernameMsg('') }, 3000)
+  }
+
+  const handleChangePw = async () => {
+    if (!currentPw || !newPw) return
+    if (newPw !== confirmPw) { setPwStatus('error'); setPwMsg('Passwords do not match'); setTimeout(() => { setPwStatus(null); setPwMsg('') }, 3000); return }
+    setPwStatus('loading')
+    try {
+      await changePassword(currentPw, newPw)
+      setPwStatus('success')
+      setPwMsg('Password updated!')
+      setCurrentPw(''); setNewPw(''); setConfirmPw('')
+    } catch (err) {
+      setPwStatus('error')
+      setPwMsg(err.message)
+    }
+    setTimeout(() => { setPwStatus(null); setPwMsg('') }, 3000)
+  }
+
+  const handleGeneratePw = () => {
+    const pw = generateStrongPassword(16)
+    setNewPw(pw)
+    setConfirmPw(pw)
+    navigator.clipboard.writeText(pw).then(() => { setCopiedPw(true); setTimeout(() => setCopiedPw(false), 2000) }).catch(() => {})
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteInput !== 'DELETE') return
+    setDeleteStatus('loading')
+    try {
+      await deleteAccount(authType === 'credentials' ? deletePw : undefined)
+      setDeleteStatus('success')
+      setDeleteMsg('Account deleted')
+      setTimeout(() => { dispatch(logout()); navigate('/login') }, 500)
+    } catch (err) {
+      setDeleteStatus('error')
+      setDeleteMsg(err.message)
+      setTimeout(() => { setDeleteStatus(null); setDeleteMsg('') }, 3000)
+    }
+  }
+
+  const pwStrength = checkPasswordStrength(newPw)
+
+  const authBadge = authType === 'credentials'
+    ? { label: 'Password', cls: 'bg-accent-primary/20 text-accent-primary border-accent-primary/40' }
+    : authType === 'guest'
+    ? { label: 'Guest', cls: 'bg-amber-500/20 text-amber-400 border-amber-500/40' }
+    : { label: 'Google', cls: 'bg-accent-secondary/20 text-accent-secondary border-accent-secondary/40' }
+
+  return (
+    <div className="p-4 pt-2 space-y-3">
+      {/* Profile info */}
+      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="font-orbitron text-xs text-white/60">Profile</span>
+          <span className={`text-[10px] font-orbitron px-2 py-0.5 rounded-full border ${authBadge.cls}`}>{authBadge.label}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          {user?.picture && <img src={user.picture} alt="" className="w-8 h-8 rounded-full border border-white/10" />}
+          <div className="min-w-0">
+            <p className="text-sm font-orbitron text-white truncate">{user?.username || user?.name}</p>
+            <p className="text-[10px] text-white/30 truncate">Joined {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'recently'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Change Username */}
+      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+        <span className="font-orbitron text-xs text-white/60">Change Username</span>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleChangeUsername()}
+            placeholder={user?.username || 'New username'}
+            maxLength={30}
+            className="flex-1 bg-[#121212] border border-white/10 rounded-lg p-2 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all"
+          />
+          <button
+            onClick={handleChangeUsername}
+            disabled={!newUsername.trim() || usernameStatus === 'loading'}
+            className="px-3 py-2 rounded-lg bg-accent-primary/20 border border-accent-primary/40 text-accent-primary text-xs font-orbitron hover:bg-accent-primary/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {usernameStatus === 'loading' ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Save'}
+          </button>
+        </div>
+        <AnimatePresence>
+          {usernameMsg && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`text-[10px] ${usernameStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>{usernameMsg}</motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Change Password (credentials accounts only) */}
+      {authType === 'credentials' && (
+        <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+          <span className="font-orbitron text-xs text-white/60">Change Password</span>
+          <div className="relative">
+            <input type={showCurrentPw ? 'text' : 'password'} value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder="Current password" className="w-full bg-[#121212] border border-white/10 rounded-lg p-2 pr-9 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all" />
+            <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60" tabIndex={-1}>{showCurrentPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button>
+          </div>
+          <div className="relative">
+            <input type={showNewPw ? 'text' : 'password'} value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="New password" className="w-full bg-[#121212] border border-white/10 rounded-lg p-2 pr-9 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all" />
+            <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60" tabIndex={-1}>{showNewPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button>
+          </div>
+
+          {/* Strength bar */}
+          {newPw && (
+            <div className="space-y-1">
+              <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-300 ${pwStrength.color} ${pwStrength.glow}`} style={{ width: `${(pwStrength.score / 5) * 100}%` }} />
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[9px] font-orbitron text-white/40">{pwStrength.label}</span>
+                <div className="flex gap-1">
+                  {[{ key: 'length', tip: '8+' }, { key: 'uppercase', tip: 'A-Z' }, { key: 'lowercase', tip: 'a-z' }, { key: 'digit', tip: '0-9' }, { key: 'special', tip: '!@#' }].map(({ key, tip }) => (
+                    <span key={key} title={tip} className={`w-3 h-3 rounded-full flex items-center justify-center text-[7px] border ${pwStrength.checks[key] ? 'border-emerald-400/60 bg-emerald-400/20 text-emerald-400' : 'border-white/10 bg-white/5 text-white/20'}`}>
+                      {pwStrength.checks[key] ? <Check className="w-2 h-2" /> : <X className="w-2 h-2" />}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Generate password button */}
+          <button type="button" onClick={handleGeneratePw} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-accent-secondary/30 bg-accent-secondary/10 text-accent-secondary text-[10px] font-orbitron hover:bg-accent-secondary/20 transition-all">
+            {copiedPw ? <><CheckCircle className="w-3 h-3" /> Copied!</> : <><Dices className="w-3 h-3" /> Generate Strong Password</>}
+          </button>
+
+          <input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} placeholder="Confirm new password" className="w-full bg-[#121212] border border-white/10 rounded-lg p-2 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all" />
+
+          {confirmPw && newPw !== confirmPw && (
+            <p className="text-[10px] text-red-400 flex items-center gap-1"><X className="w-2.5 h-2.5" /> Passwords don't match</p>
+          )}
+
+          <button onClick={handleChangePw} disabled={!currentPw || !newPw || newPw !== confirmPw || pwStatus === 'loading'} className="w-full py-2 rounded-lg bg-accent-primary/20 border border-accent-primary/40 text-accent-primary text-xs font-orbitron hover:bg-accent-primary/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+            {pwStatus === 'loading' ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Update Password'}
+          </button>
+          <AnimatePresence>
+            {pwMsg && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`text-[10px] ${pwStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>{pwMsg}</motion.p>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Danger Zone */}
+      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 space-y-2">
+        <span className="font-orbitron text-xs text-red-400/80">Danger Zone</span>
+
+        {!showDeleteConfirm ? (
+          <button onClick={() => setShowDeleteConfirm(true)} className="w-full flex items-center justify-between p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-all group">
+            <span className="font-orbitron text-xs">Delete Account</span>
+            <Trash2 className="w-4 h-4 opacity-50 group-hover:opacity-100" />
+          </button>
+        ) : (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-2">
+            <p className="text-[10px] text-red-400/70">This will permanently delete your account and all quiz data. Type <strong className="text-red-400">DELETE</strong> to confirm.</p>
+            <input
+              type="text"
+              value={deleteInput}
+              onChange={(e) => setDeleteInput(e.target.value)}
+              placeholder='Type "DELETE"'
+              className="w-full bg-[#121212] border border-red-500/30 rounded-lg p-2 text-red-400 text-xs font-orbitron placeholder:text-red-400/20 outline-none focus:border-red-500 transition-all"
+            />
+            {authType === 'credentials' && (
+              <input
+                type="password"
+                value={deletePw}
+                onChange={(e) => setDeletePw(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full bg-[#121212] border border-red-500/30 rounded-lg p-2 text-red-400 text-xs font-orbitron placeholder:text-red-400/20 outline-none focus:border-red-500 transition-all"
+              />
+            )}
+            <div className="flex gap-2">
+              <button onClick={() => { setShowDeleteConfirm(false); setDeleteInput(''); setDeletePw('') }} className="flex-1 py-2 rounded-lg border border-white/10 text-white/50 text-xs font-orbitron hover:bg-white/5 transition-all">Cancel</button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteInput !== 'DELETE' || (authType === 'credentials' && !deletePw) || deleteStatus === 'loading'}
+                className="flex-1 py-2 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-xs font-orbitron hover:bg-red-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleteStatus === 'loading' ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Confirm Delete'}
+              </button>
+            </div>
+            <AnimatePresence>
+              {deleteMsg && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`text-[10px] ${deleteStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>{deleteMsg}</motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Logout */}
+      <button 
+        onClick={handleLogout}
+        className="w-full flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400 transition-all group"
+      >
+        <span className="font-orbitron text-sm">Logout</span>
+        <LogOut className="w-4 h-4 opacity-50 group-hover:opacity-100" />
+      </button>
     </div>
   )
 }

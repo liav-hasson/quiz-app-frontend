@@ -348,6 +348,65 @@ export async function getDailyLeaderboard() {
   return await fetchAPI('/api/daily-challenge/leaderboard')
 }
 
+// --- Credential Auth ---
+
+export async function credentialRegister({ username, password }) {
+  const response = await fetchAPI('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+    skipAuthRedirect: true,
+  })
+  if (!response.ok) {
+    throw new Error(response.error || 'Registration failed')
+  }
+  return response
+}
+
+export async function credentialLogin({ username, password }) {
+  const response = await fetchAPI('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+    skipAuthRedirect: true,
+  })
+  if (!response.ok) {
+    throw new Error(response.error || 'Login failed')
+  }
+  return response
+}
+
+// --- Account Management ---
+
+export async function getAccountInfo() {
+  return await fetchAPI('/api/account/info')
+}
+
+export async function changeUsername(username) {
+  const response = await fetchAPI('/api/account/username', {
+    method: 'PATCH',
+    body: JSON.stringify({ username }),
+  })
+  if (!response.ok) throw new Error(response.error || 'Failed to change username')
+  return response
+}
+
+export async function changePassword(currentPassword, newPassword) {
+  const response = await fetchAPI('/api/account/password', {
+    method: 'PATCH',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+  if (!response.ok) throw new Error(response.error || 'Failed to change password')
+  return response
+}
+
+export async function deleteAccount(password) {
+  const response = await fetchAPI('/api/account', {
+    method: 'DELETE',
+    body: JSON.stringify({ password: password || undefined }),
+  })
+  if (!response.ok) throw new Error(response.error || 'Failed to delete account')
+  return response
+}
+
 export async function getDailyStreak() {
   return await fetchAPI('/api/daily-challenge/streak')
 }
