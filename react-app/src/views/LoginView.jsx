@@ -121,17 +121,23 @@ const LoginView = () => {
   // Clear error when switching tabs
   useEffect(() => { setError(null) }, [activeTab])
 
-  // Ref to re-render Google button when login tab reappears
+  // Hold a reference to the Google button DOM node so the SDK init effect can render into it
+  const googleNodeRef = useRef(null)
   const googleInitialized = useRef(false)
 
-  // Callback ref: fires every time the Google button div mounts into the DOM
-  const googleBtnRef = useCallback((node) => {
-    if (!node || isLocalEnv || !googleInitialized.current) return
-    if (window.google?.accounts?.id) {
+  const renderGoogleButton = useCallback((node) => {
+    if (!node || isLocalEnv) return
+    if (googleInitialized.current && window.google?.accounts?.id) {
       window.google.accounts.id.renderButton(node, { theme: 'filled_black', size: 'large', width: 250, text: 'continue_with' })
       setIsGoogleLoaded(true)
     }
   }, [isLocalEnv])
+
+  // Callback ref: fires every time the Google button div mounts into the DOM
+  const googleBtnRef = useCallback((node) => {
+    googleNodeRef.current = node
+    renderGoogleButton(node)
+  }, [renderGoogleButton])
 
   // ----- Helpers -----
   const persistAndNavigate = useCallback((data) => {
@@ -172,6 +178,8 @@ const LoginView = () => {
           auto_select: false
         })
         googleInitialized.current = true
+        // If the DOM node already mounted before SDK was ready, render now
+        renderGoogleButton(googleNodeRef.current)
         return true
       } catch (err) {
         console.error('Google Sign-In initialization failed:', err)

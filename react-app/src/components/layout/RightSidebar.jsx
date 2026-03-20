@@ -828,9 +828,9 @@ const AccountSettings = ({ handleLogout }) => {
     : { label: 'Google', cls: 'bg-accent-secondary/20 text-accent-secondary border-accent-secondary/40' }
 
   return (
-    <div className="p-4 pt-2 space-y-4">
+    <div className="p-4 pt-2 space-y-5">
       {/* Profile info */}
-      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="font-orbitron text-xs text-white/60">Profile</span>
           <span className={`text-[10px] font-orbitron px-2 py-0.5 rounded-full border ${authBadge.cls}`}>{authBadge.label}</span>
@@ -845,7 +845,7 @@ const AccountSettings = ({ handleLogout }) => {
       </div>
 
       {/* Change Username */}
-      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+      <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-1.5">
         <span className="font-orbitron text-xs text-white/60">Change Username</span>
         <div className="flex gap-2">
           <input
@@ -855,12 +855,12 @@ const AccountSettings = ({ handleLogout }) => {
             onKeyDown={(e) => e.key === 'Enter' && handleChangeUsername()}
             placeholder={user?.username || 'New username'}
             maxLength={30}
-            className="flex-1 bg-[#121212] border border-white/10 rounded-lg p-2 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all"
+            className="flex-1 min-w-0 bg-[#121212] border border-white/10 rounded-lg p-2 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all"
           />
           <button
             onClick={handleChangeUsername}
             disabled={!newUsername.trim() || usernameStatus === 'loading'}
-            className="px-3 py-2 rounded-lg bg-accent-primary/20 border border-accent-primary/40 text-accent-primary text-xs font-orbitron hover:bg-accent-primary/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="shrink-0 px-2.5 py-2 rounded-lg bg-accent-primary/20 border border-accent-primary/40 text-accent-primary text-xs font-orbitron hover:bg-accent-primary/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {usernameStatus === 'loading' ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Save'}
           </button>
@@ -874,7 +874,7 @@ const AccountSettings = ({ handleLogout }) => {
 
       {/* Change Password (credentials accounts only) */}
       {authType === 'credentials' && (
-        <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-2">
+        <div className="p-3 rounded-lg bg-white/5 border border-white/10 space-y-1.5">
           <span className="font-orbitron text-xs text-white/60">Change Password</span>
           <div className="relative">
             <input type={showCurrentPw ? 'text' : 'password'} value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} placeholder="Current password" className="w-full bg-[#121212] border border-white/10 rounded-lg p-2 pr-9 text-white text-xs font-orbitron placeholder:text-white/20 outline-none focus:border-accent-primary transition-all" />
@@ -927,7 +927,7 @@ const AccountSettings = ({ handleLogout }) => {
       )}
 
       {/* Danger Zone */}
-      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 space-y-2">
+      <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 space-y-1.5">
         <span className="font-orbitron text-xs text-red-400/80">Danger Zone</span>
 
         {!showDeleteConfirm ? (
