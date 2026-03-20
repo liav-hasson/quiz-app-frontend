@@ -102,7 +102,6 @@ const LoginView = () => {
   // Login fields
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(true)
 
   // Signup fields
   const [signupUsername, setSignupUsername] = useState('')
@@ -141,13 +140,10 @@ const LoginView = () => {
 
   // ----- Helpers -----
   const persistAndNavigate = useCallback((data) => {
-    const storage = rememberMe ? localStorage : sessionStorage
-    storage.setItem('quiz_user', JSON.stringify(data))
-    // Always keep in localStorage for the Redux hydrator
     localStorage.setItem('quiz_user', JSON.stringify(data))
     dispatch(loginSuccess(data))
     navigate('/')
-  }, [dispatch, navigate, rememberMe])
+  }, [dispatch, navigate])
 
   // ----- Google handler -----
   const handleGoogleResponse = async (response) => {
@@ -300,14 +296,6 @@ const LoginView = () => {
             <motion.div key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }} className="space-y-4">
               <NeonInput value={loginUsername} onChange={setLoginUsername} placeholder="Username" disabled={isLoading} autoComplete="username" onKeyDown={(e) => e.key === 'Enter' && handleCredentialLogin()} />
               <NeonInput value={loginPassword} onChange={setLoginPassword} placeholder="Password" type="password" showToggle disabled={isLoading} autoComplete="current-password" onKeyDown={(e) => e.key === 'Enter' && handleCredentialLogin()} />
-
-              {/* Remember me */}
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <button type="button" onClick={() => setRememberMe(!rememberMe)} className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${rememberMe ? 'bg-accent-primary border-accent-primary' : 'border-white/20 bg-transparent'}`}>
-                  {rememberMe && <Check className="w-3 h-3 text-white" />}
-                </button>
-                <span className="text-xs text-white/50 font-orbitron">Remember me</span>
-              </label>
 
               <button
                 onClick={handleCredentialLogin}
