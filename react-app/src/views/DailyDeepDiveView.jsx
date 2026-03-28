@@ -111,15 +111,10 @@ const DailyDeepDiveView = () => {
   if (generating) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
-        >
-          <BookOpen className="w-16 h-16 text-rose-400 mb-4" />
-        </motion.div>
+        <Loader2 className="w-16 h-16 text-rose-400 animate-spin mb-6" />
         <h2 className="font-arcade text-lg text-rose-400 mb-3">GENERATING ARTICLE</h2>
         <p className="text-text-secondary font-orbitron text-xs max-w-sm animate-pulse">
-          The AI is writing today's deep dive. This usually takes 10-20 seconds...
+          This may take 10-20 seconds...
         </p>
       </div>
     )

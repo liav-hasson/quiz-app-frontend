@@ -97,6 +97,19 @@ const MarkdownRenderer = memo(function MarkdownRenderer({ content, className = '
         em({ children }) {
           return <em className="italic text-gray-300">{children}</em>
         },
+        // Style headings
+        h1({ children }) {
+          return <h1 className="text-2xl font-bold text-white mt-6 mb-3">{children}</h1>
+        },
+        h2({ children }) {
+          return <h2 className="text-xl font-bold text-white mt-6 mb-3">{children}</h2>
+        },
+        h3({ children }) {
+          return <h3 className="text-lg font-semibold text-white mt-4 mb-2">{children}</h3>
+        },
+        h4({ children }) {
+          return <h4 className="text-base font-semibold text-gray-200 mt-3 mb-2">{children}</h4>
+        },
       }}
     >
       {content}
