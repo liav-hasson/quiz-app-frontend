@@ -410,3 +410,21 @@ export async function deleteAccount(password) {
 export async function getDailyStreak() {
   return await fetchAPI('/api/daily-challenge/streak')
 }
+
+// --- Daily Deep Dive ---
+
+export async function getDailyDeepDive() {
+  return await fetchAPI('/api/daily-deep-dive', {
+    headers: getAIHeaders(),
+  })
+}
+
+export async function claimDeepDiveXP() {
+  return await fetchAPI('/api/daily-deep-dive/claim-xp', {
+    method: 'POST',
+  })
+}
+
+export async function getDeepDiveArchive(page = 1, limit = 10) {
+  return await fetchAPI(`/api/daily-deep-dive/archive?page=${page}&limit=${limit}`)
+}

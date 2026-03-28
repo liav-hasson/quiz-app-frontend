@@ -10,7 +10,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  Flame
+  Flame,
+  BookOpen
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { logout } from '../../store/slices/authSlice'
@@ -53,6 +54,7 @@ const LeftSidebar = ({ className = '' }) => {
     if (tab === 'home') navigate('/')
     if (tab === 'play') navigate('/') // Stay on home, RightSidebar handles setup
     if (tab === 'daily') navigate('/daily')
+    if (tab === 'deep-dive') navigate('/deep-dive')
     if (tab === 'multiplayer') navigate('/') // Stay on home, RightSidebar handles lobby
     if (tab === 'stats') navigate('/stats')
     if (tab === 'history') navigate('/')
@@ -69,6 +71,7 @@ const LeftSidebar = ({ className = '' }) => {
     { id: 'home', label: 'Home', icon: Home, colorClass: 'text-cyan-400', bgClass: 'bg-cyan-400', hoverClass: 'hover:text-cyan-400', shadowClass: 'shadow-[0_0_15px_rgba(6,182,212,0.3)]' },
     { id: 'play', label: 'Play', icon: Play, colorClass: 'text-emerald-400', bgClass: 'bg-emerald-400', hoverClass: 'hover:text-emerald-400', shadowClass: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]' },
     { id: 'daily', label: 'Daily', icon: Flame, colorClass: 'text-amber-400', bgClass: 'bg-amber-400', hoverClass: 'hover:text-amber-400', shadowClass: 'shadow-[0_0_15px_rgba(245,158,11,0.3)]' },
+    { id: 'deep-dive', label: 'Deep Dive', icon: BookOpen, colorClass: 'text-rose-400', bgClass: 'bg-rose-400', hoverClass: 'hover:text-rose-400', shadowClass: 'shadow-[0_0_15px_rgba(251,113,133,0.3)]' },
     { id: 'multiplayer', label: 'Multiplayer', icon: Users, colorClass: 'text-fuchsia-400', bgClass: 'bg-fuchsia-400', hoverClass: 'hover:text-fuchsia-400', shadowClass: 'shadow-[0_0_15px_rgba(217,70,239,0.3)]' },
     { id: 'stats', label: 'Stats', icon: BarChart2, colorClass: 'text-sky-400', bgClass: 'bg-sky-400', hoverClass: 'hover:text-sky-400', shadowClass: 'shadow-[0_0_15px_rgba(56,189,248,0.3)]' },
     { id: 'history', label: 'History', icon: History, colorClass: 'text-orange-400', bgClass: 'bg-orange-400', hoverClass: 'hover:text-orange-400', shadowClass: 'shadow-[0_0_15px_rgba(251,146,60,0.3)]' },

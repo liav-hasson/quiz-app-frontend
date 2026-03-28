@@ -10,6 +10,7 @@ import StatsView from './views/StatsView'
 import LobbyView from './views/LobbyView'
 import BattleGameView from './views/BattleGameView'
 import DailyChallengeView from './views/DailyChallengeView'
+import DailyDeepDiveView from './views/DailyDeepDiveView'
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -78,6 +79,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <DailyChallengeView />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/deep-dive"
+        element={
+          <ProtectedRoute>
+            <DailyDeepDiveView />
           </ProtectedRoute>
         }
       />

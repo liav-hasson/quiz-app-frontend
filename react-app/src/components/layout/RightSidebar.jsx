@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield, Info, UserCog, Trash2, Eye, EyeOff, Dices, Check, X, Edit3 } from 'lucide-react'
-import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem } from '../../store/slices/uiSlice'
+import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem, setSelectedDeepDiveArticle } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { selectUser, selectAuthType, logout, loginSuccess } from '../../store/slices/authSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
-import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, changeUsername, changePassword, deleteAccount } from '../../api/quizAPI'
+import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, changeUsername, changePassword, deleteAccount, getDeepDiveArchive } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { checkPasswordStrength, generateStrongPassword } from '../../utils/passwordUtils'
 import LeaderboardPanel from './LeaderboardPanel'
@@ -1225,6 +1225,85 @@ const LobbyChatPanel = () => {
   )
 }
 
+const DeepDiveArchivePanel = () => {
+  const dispatch = useDispatch()
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  const loadArticles = async (p = 1) => {
+    const setLoadingState = p === 1 ? setLoading : setLoadingMore
+    setLoadingState(true)
+    try {
+      const data = await getDeepDiveArchive(p, 10)
+      if (data.ok !== false) {
+        if (p === 1) {
+          setArticles(data.articles || [])
+        } else {
+          setArticles(prev => [...prev, ...(data.articles || [])])
+        }
+        setPage(p)
+        setHasMore(data.has_more || false)
+      }
+    } catch (err) {
+      console.error('Failed to load archive:', err)
+    } finally {
+      setLoadingState(false)
+    }
+  }
+
+  useEffect(() => {
+    loadArticles(1)
+  }, [])
+
+  if (loading) {
+    return <div className="text-center text-text-muted font-orbitron text-xs animate-pulse">LOADING ARCHIVE...</div>
+  }
+
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <BookOpen className="w-8 h-8 text-text-muted mx-auto mb-3" />
+        <p className="text-text-muted font-orbitron text-xs">NO PAST ARTICLES YET</p>
+        <p className="text-text-muted text-[10px] mt-1.5">Check back tomorrow!</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {articles.map((a) => (
+        <div
+          key={a.date + a.keyword}
+          onClick={() => dispatch(setSelectedDeepDiveArticle(a))}
+          className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-rose-500/5 hover:border-rose-500/30 transition-all cursor-pointer"
+        >
+          <div className="flex justify-between items-start mb-1.5">
+            <span className="text-xs font-arcade text-rose-400 truncate flex-1">{a.keyword}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-text-muted font-orbitron">
+            <span>{a.category}</span>
+            <span className="text-white/20">•</span>
+            <span>{a.date}</span>
+          </div>
+        </div>
+      ))}
+
+      {hasMore && (
+        <button
+          onClick={() => loadArticles(page + 1)}
+          disabled={loadingMore}
+          className="w-full py-2 rounded-lg bg-white/5 border border-white/10 text-text-secondary hover:text-white hover:bg-white/10 font-orbitron text-[10px] transition-all flex items-center justify-center gap-2"
+        >
+          {loadingMore ? <Loader2 className="w-3 h-3 animate-spin" /> : 'LOAD MORE'}
+        </button>
+      )}
+    </div>
+  )
+}
+
 const RightSidebar = ({ className = '' }) => {
   const activeTab = useSelector(selectActiveTab)
   const location = useLocation()
@@ -1245,6 +1324,8 @@ const RightSidebar = ({ className = '' }) => {
         return <SettingsPanel />
       case 'history':
         return <HistoryPanel />
+      case 'deep-dive':
+        return <DeepDiveArchivePanel />
       case 'home':
       case 'stats':
       default:
@@ -1267,6 +1348,8 @@ const RightSidebar = ({ className = '' }) => {
         return { icon: Settings, text: 'SETTINGS' }
       case 'history':
         return { icon: History, text: 'HISTORY' }
+      case 'deep-dive':
+        return { icon: BookOpen, text: 'PAST ARTICLES' }
       default:
         return { icon: Trophy, text: 'LEADERBOARD' }
     }
@@ -1282,6 +1365,7 @@ const RightSidebar = ({ className = '' }) => {
       case 'multiplayer': return 'multiplayer'
       case 'settings': return 'settings'
       case 'history': return 'history'
+      case 'deep-dive': return 'deep-dive'
       default: return 'leaderboard'
     }
   }

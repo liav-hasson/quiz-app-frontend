@@ -7,6 +7,7 @@ const uiSlice = createSlice({
     activeTab: 'home', // home, play, multiplayer, stats, settings
     animatedBackground: true, // Enable/disable psychedelic spiral background
     selectedHistoryItem: null,
+    selectedDeepDiveArticle: null,
   },
   reducers: {
     toggleMobileMenu: (state) => {
@@ -24,9 +25,15 @@ const uiSlice = createSlice({
       if (action.payload !== 'history') {
         state.selectedHistoryItem = null
       }
+      if (action.payload !== 'deep-dive') {
+        state.selectedDeepDiveArticle = null
+      }
     },
     setSelectedHistoryItem: (state, action) => {
       state.selectedHistoryItem = action.payload
+    },
+    setSelectedDeepDiveArticle: (state, action) => {
+      state.selectedDeepDiveArticle = action.payload
     },
     toggleAnimatedBackground: (state) => {
       state.animatedBackground = !state.animatedBackground
@@ -37,11 +44,12 @@ const uiSlice = createSlice({
   },
 })
 
-export const { toggleMobileMenu, setMobileMenuOpen, closeMobileMenu, setActiveTab, setSelectedHistoryItem, toggleAnimatedBackground, setAnimatedBackground } = uiSlice.actions
+export const { toggleMobileMenu, setMobileMenuOpen, closeMobileMenu, setActiveTab, setSelectedHistoryItem, setSelectedDeepDiveArticle, toggleAnimatedBackground, setAnimatedBackground } = uiSlice.actions
 
 export const selectIsMobileMenuOpen = (state) => state.ui.isMobileMenuOpen
 export const selectActiveTab = (state) => state.ui.activeTab
 export const selectSelectedHistoryItem = (state) => state.ui.selectedHistoryItem
+export const selectSelectedDeepDiveArticle = (state) => state.ui.selectedDeepDiveArticle
 export const selectAnimatedBackground = (state) => state.ui.animatedBackground
 
 export default uiSlice.reducer
