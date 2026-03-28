@@ -12,6 +12,7 @@ const DailyDeepDiveView = () => {
 
   const [article, setArticle] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
   const [error, setError] = useState(null)
   const [xpClaimed, setXpClaimed] = useState(false)
   const [claiming, setClaiming] = useState(false)
@@ -21,7 +22,12 @@ const DailyDeepDiveView = () => {
       try {
         setLoading(true)
         const data = await getDailyDeepDive()
-        if (!data.ok) throw new Error(data.error || 'Failed to load daily deep dive')
+        if (data.status === 'generating') {
+          setGenerating(true)
+          setLoading(false)
+          return
+        }
+        if (!data.ok && data.status !== 'ready') throw new Error(data.error || 'Failed to load daily deep dive')
         setArticle(data)
         setXpClaimed(data.xp_claimed || false)
       } catch (err) {
@@ -32,6 +38,24 @@ const DailyDeepDiveView = () => {
     }
     load()
   }, [])
+
+  // Poll while article is being generated
+  useEffect(() => {
+    if (!generating) return
+    const interval = setInterval(async () => {
+      try {
+        const data = await getDailyDeepDive()
+        if (data.status === 'ready') {
+          setArticle(data)
+          setXpClaimed(data.xp_claimed || false)
+          setGenerating(false)
+        }
+      } catch {
+        // keep polling
+      }
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [generating])
 
   const handleClaimXP = async () => {
     if (claiming || xpClaimed) return
@@ -80,6 +104,23 @@ const DailyDeepDiveView = () => {
       <div className="flex flex-col items-center justify-center h-[60vh]">
         <Loader2 className="w-12 h-12 text-rose-400 animate-spin mb-4" />
         <p className="font-orbitron text-text-secondary animate-pulse">LOADING DEEP DIVE...</p>
+      </div>
+    )
+  }
+
+  if (generating) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
+        >
+          <BookOpen className="w-16 h-16 text-rose-400 mb-4" />
+        </motion.div>
+        <h2 className="font-arcade text-lg text-rose-400 mb-3">GENERATING ARTICLE</h2>
+        <p className="text-text-secondary font-orbitron text-xs max-w-sm animate-pulse">
+          The AI is writing today's deep dive. This usually takes 10-20 seconds...
+        </p>
       </div>
     )
   }
