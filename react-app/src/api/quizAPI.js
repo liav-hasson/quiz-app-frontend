@@ -428,9 +428,3 @@ export async function claimDeepDiveXP() {
 export async function getDeepDiveArchive(page = 1, limit = 10) {
   return await fetchAPI(`/api/daily-deep-dive/archive?page=${page}&limit=${limit}`)
 }
-
-export async function deleteDeepDiveToday() {
-  return await fetchAPI('/api/daily-deep-dive/today', {
-    method: 'DELETE',
-  })
-}

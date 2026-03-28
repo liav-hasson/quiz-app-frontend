@@ -62,12 +62,12 @@ const StatCard = memo(function StatCard({ icon: Icon, label, value, color }) {
   )
 })// Level calculation: 100 XP per level
 const calculateLevel = (xp) => {
-  if (!xp) return { level: 1, nextLevelXP: 100, progress: 0, xpIntoLevel: 0 }
+  if (!xp) return { level: 0, nextLevelXP: 100, progress: 0, xpIntoLevel: 0 }
   
-  const level = Math.floor(xp / 100) + 1
+  const level = Math.floor(xp / 100)
   const xpIntoLevel = xp % 100
   const progress = xpIntoLevel
-  const nextLevelXP = level * 100
+  const nextLevelXP = (level + 1) * 100
   
   return { level, nextLevelXP, progress, xpIntoLevel }
 }

@@ -74,11 +74,11 @@ const BattleGameView = () => {
 
   // Level calculation: 100 XP per level
   const calculateLevel = (xp) => {
-    if (!xp) return { level: 1, nextLevelXP: 100, progress: 0, xpIntoLevel: 0 }
-    const level = Math.floor(xp / 100) + 1
+    if (!xp) return { level: 0, nextLevelXP: 100, progress: 0, xpIntoLevel: 0 }
+    const level = Math.floor(xp / 100)
     const xpIntoLevel = xp % 100
     const progress = xpIntoLevel
-    return { level, nextLevelXP: level * 100, progress, xpIntoLevel }
+    return { level, nextLevelXP: (level + 1) * 100, progress, xpIntoLevel }
   }
 
   // Set lobby ID in context

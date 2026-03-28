@@ -77,7 +77,7 @@ const DailyDeepDiveView = () => {
   // Show selected archive article (clicked from RightSidebar)
   if (selectedArchiveArticle) {
     return (
-      <div className="max-w-3xl mx-auto w-full pb-20 space-y-6">
+      <div className="max-w-4xl mx-auto w-full pb-20 space-y-6">
         <button
           onClick={() => dispatch(setSelectedDeepDiveArticle(null))}
           className="flex items-center gap-2 text-text-secondary hover:text-white transition-colors font-orbitron text-sm"
@@ -131,7 +131,7 @@ const DailyDeepDiveView = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full pb-20 space-y-6">
+    <div className="max-w-4xl mx-auto w-full pb-20 space-y-6">
       {/* Header */}
       <div className="text-center">
         <motion.div
@@ -180,7 +180,7 @@ const DailyDeepDiveView = () => {
           disabled={xpClaimed || claiming}
           className={`px-8 py-3 rounded-xl font-arcade text-sm flex items-center gap-2 transition-all ${
             xpClaimed
-              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 cursor-default'
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
               : 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)]'
           }`}
         >
