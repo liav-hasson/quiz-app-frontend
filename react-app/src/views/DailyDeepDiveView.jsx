@@ -62,15 +62,6 @@ const DailyDeepDiveView = () => {
         </button>
 
         <div className="flex flex-wrap items-center gap-3 text-xs font-orbitron">
-          <span className="px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400">
-            {selectedArchiveArticle.keyword}
-          </span>
-          <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-text-secondary">
-            {selectedArchiveArticle.category}
-          </span>
-          <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-text-secondary">
-            {selectedArchiveArticle.subject}
-          </span>
           <span className="text-text-muted">{selectedArchiveArticle.date}</span>
         </div>
 
@@ -117,21 +108,12 @@ const DailyDeepDiveView = () => {
         </motion.div>
       </div>
 
-      {/* Metadata */}
+      {/* Date */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-wrap items-center justify-center gap-3 text-xs font-orbitron"
+        className="flex items-center justify-center text-xs font-orbitron"
       >
-        <span className="px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400">
-          {article?.keyword}
-        </span>
-        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-text-secondary">
-          {article?.category}
-        </span>
-        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-text-secondary">
-          {article?.subject}
-        </span>
         <span className="text-text-muted">{article?.date}</span>
       </motion.div>
 

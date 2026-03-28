@@ -1274,22 +1274,19 @@ const DeepDiveArchivePanel = () => {
 
   return (
     <div className="space-y-3">
-      {articles.map((a) => (
-        <div
-          key={a.date + a.keyword}
-          onClick={() => dispatch(setSelectedDeepDiveArticle(a))}
-          className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-rose-500/5 hover:border-rose-500/30 transition-all cursor-pointer"
-        >
-          <div className="flex justify-between items-start mb-1.5">
-            <span className="text-xs font-arcade text-rose-400 truncate flex-1">{a.keyword}</span>
+      {articles.map((a) => {
+        const title = a.content?.match(/^##\s+(.+)/m)?.[1] || a.date
+        return (
+          <div
+            key={a.date}
+            onClick={() => dispatch(setSelectedDeepDiveArticle(a))}
+            className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-rose-500/5 hover:border-rose-500/30 transition-all cursor-pointer"
+          >
+            <span className="text-xs font-arcade text-rose-400 line-clamp-2 leading-relaxed">{title}</span>
+            <span className="block text-[10px] text-text-muted font-orbitron mt-1.5">{a.date}</span>
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-text-muted font-orbitron">
-            <span>{a.category}</span>
-            <span className="text-white/20">•</span>
-            <span>{a.date}</span>
-          </div>
-        </div>
-      ))}
+        )
+      })}
 
       {hasMore && (
         <button
