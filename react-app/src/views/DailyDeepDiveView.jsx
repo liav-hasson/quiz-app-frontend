@@ -142,16 +142,8 @@ const DailyDeepDiveView = () => {
           <BookOpen className="w-5 h-5 text-rose-400" />
           <span className="font-arcade text-sm text-rose-400">DAILY DEEP DIVE</span>
         </motion.div>
+        <p className="text-text-muted text-sm font-orbitron">{article?.date}</p>
       </div>
-
-      {/* Date */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-center text-xs font-orbitron"
-      >
-        <span className="text-text-muted">{article?.date}</span>
-      </motion.div>
 
       {/* Article */}
       <motion.div
