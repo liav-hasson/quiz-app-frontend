@@ -375,8 +375,8 @@ const HomeView = () => {
               } : {}}
               transition={{ duration: 0.5 }}
               className={`px-2 py-1 rounded text-xs font-orbitron border ${(() => {
-                const colorCycle = Math.floor((level - 1) / 5) % 6
-                const brightnessStep = ((level - 1) % 5) + 1 // 1-5
+                const colorCycle = Math.floor(level / 5) % 6
+                const brightnessStep = (level % 5) + 1 // 1-5
                 const baseOpacity = 10 + brightnessStep * 6 // 16, 22, 28, 34, 40
                 const glowOpacity = 0.2 + brightnessStep * 0.15 // 0.35, 0.5, 0.65, 0.8, 0.95
                 
@@ -393,8 +393,8 @@ const HomeView = () => {
               })()}`}
               style={{
                 boxShadow: (() => {
-                  const colorCycle = Math.floor((level - 1) / 5) % 6
-                  const brightnessStep = ((level - 1) % 5) + 1
+                  const colorCycle = Math.floor(level / 5) % 6
+                  const brightnessStep = (level % 5) + 1
                   const glowOpacity = 0.2 + brightnessStep * 0.15
                   const colorRgb = {
                     0: '6,182,212',
