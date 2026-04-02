@@ -331,16 +331,13 @@ export async function getPerfectAnswer(question) {
 // --- Daily Challenge ---
 
 export async function getDailyChallenge() {
-  return await fetchAPI('/api/daily-challenge', {
-    headers: getAIHeaders(),
-  })
+  return await fetchAPI('/api/daily-challenge')
 }
 
 export async function submitDailyAnswer(answer) {
   return await fetchAPI('/api/daily-challenge/answer', {
     method: 'POST',
     body: JSON.stringify({ answer }),
-    headers: getAIHeaders(),
   })
 }
 
@@ -411,12 +408,14 @@ export async function getDailyStreak() {
   return await fetchAPI('/api/daily-challenge/streak')
 }
 
+export async function getDailyChallengeHistory(limit = 10) {
+  return await fetchAPI(`/api/daily-challenge/history?limit=${limit}`)
+}
+
 // --- Daily Deep Dive ---
 
 export async function getDailyDeepDive() {
-  return await fetchAPI('/api/daily-deep-dive', {
-    headers: getAIHeaders(),
-  })
+  return await fetchAPI('/api/daily-deep-dive')
 }
 
 export async function claimDeepDiveXP() {

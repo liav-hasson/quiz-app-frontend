@@ -61,7 +61,8 @@ export const CATEGORY_SECTIONS = [
     icon: Rocket,
     color: 'accent-quinary', // Emerald
     categories: [
-      'CI/CD Foundations',
+      'DevOps Methodology',
+      'CI/CD Methodology',
       'CI/CD Platforms',
       'Helm & Kustomize',
       'ArgoCD & Flux',
@@ -76,10 +77,10 @@ export const CATEGORY_SECTIONS = [
     categories: [
       'Networking Fundamentals',
       'Network Tools & Troubleshooting',
-      'Network Infrastructure',
       'Security Foundations',
       'Secrets & Policy',
-      'AppSec & Supply Chain',
+      'Security Testing',
+      'SSO & OIDC',
     ],
   },
   {
@@ -91,7 +92,7 @@ export const CATEGORY_SECTIONS = [
       'Metrics & Visualization',
       'Logging',
       'Tracing & Telemetry',
-      'Reliability & On-Call',
+      'Reliability & Alerting',
     ],
   },
   {
@@ -100,6 +101,7 @@ export const CATEGORY_SECTIONS = [
     icon: Database,
     color: 'accent-primary', // Fuchsia
     categories: [
+      'Databases Basics',
       'Messaging & Streaming',
       "Relational DB's and Scaling",
       'NoSQL & Caching',

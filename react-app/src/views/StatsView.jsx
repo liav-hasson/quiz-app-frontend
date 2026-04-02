@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts'
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Trophy } from 'lucide-react'
 import { 
   fetchUserProfile, 
   fetchUserHistory,
@@ -12,6 +12,7 @@ import {
   selectHistoryLoading
 } from '../store/slices/quizSlice'
 import { CATEGORY_SECTIONS } from '../constants/categoryGroups'
+import LeaderboardPanel from '../components/layout/LeaderboardPanel'
 
 const StatsView = () => {
   const dispatch = useDispatch()
@@ -140,6 +141,21 @@ const StatsView = () => {
               />
             </RadarChart>
           </ResponsiveContainer>
+        </motion.div>
+      </div>
+
+      {/* Leaderboard — mobile only (on desktop it's in the right sidebar) */}
+      <div className="lg:hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-bg-card/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6"
+        >
+          <h2 className="font-arcade text-xs text-text-secondary mb-4 flex items-center gap-2">
+            <Trophy className="w-4 h-4" />
+            LEADERBOARD
+          </h2>
+          <LeaderboardPanel />
         </motion.div>
       </div>
     </div>
