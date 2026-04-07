@@ -42,6 +42,7 @@ export const CATEGORY_SECTIONS = [
       'Kubernetes Storage',
       'Kubernetes Scheduling & Scaling',
       'Kubernetes Security',
+      "CRD's (Custom Resource Definitions)",
       'Service Mesh',
     ],
   },
