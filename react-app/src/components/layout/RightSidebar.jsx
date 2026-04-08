@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield, Info, UserCog, Trash2, Eye, EyeOff, Dices, Check, X, Edit3 } from 'lucide-react'
+import { Zap, Clock, Target, Hash, Plus, Users, Trophy, BookOpen, LogOut, Github, History, Settings, CircleAlert, MessageCircle, Send, ExternalLink, Key, Bot, CheckCircle, Loader2, AlertCircle, Shuffle, ChevronDown, ChevronUp, Shield, Info, UserCog, Trash2, Eye, EyeOff, Dices, Check, X, Edit3, Flame } from 'lucide-react'
 import { selectActiveTab, setActiveTab, selectAnimatedBackground, toggleAnimatedBackground, setSelectedHistoryItem, setSelectedDeepDiveArticle } from '../../store/slices/uiSlice'
 import { selectCustomApiKey, selectSelectedModel, setCustomApiKey, setSelectedModel, clearCustomApiKey } from '../../store/slices/settingsSlice'
 import { selectUser, selectAuthType, logout, loginSuccess } from '../../store/slices/authSlice'
 import { REQUIRES_USER_API_KEY, ALLOW_GUEST_LOGIN, APP_VERSION } from '../../config.js'
-import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, changeUsername, changePassword, deleteAccount, getDeepDiveArchive } from '../../api/quizAPI'
+import { getCategoriesWithSubjects, createLobby, joinLobby, getUserHistory, testAIConfiguration, getBackendVersion, changeUsername, changePassword, deleteAccount, getDeepDiveArchive, getDailyChallengeHistory } from '../../api/quizAPI'
 import { setGameSettings, selectRateLimitInfo, clearRateLimitInfo } from '../../store/slices/quizSlice'
 import { checkPasswordStrength, generateStrongPassword } from '../../utils/passwordUtils'
 import LeaderboardPanel from './LeaderboardPanel'
@@ -511,6 +511,9 @@ const SettingsPanel = () => {
                     <ExternalLink className="w-3 h-3" />
                     View available models
                   </a>
+                  <p className="text-xs text-text-muted italic">
+                    The better the model, the better the content will be.
+                  </p>
                 </div>
                 
                 {/* Test Configuration Button */}
@@ -1225,6 +1228,67 @@ const LobbyChatPanel = () => {
   )
 }
 
+const DailyHistoryPanel = () => {
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const data = await getDailyChallengeHistory(10)
+        setHistory(data.history || [])
+      } catch (err) {
+        console.error('Failed to fetch daily history:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetch()
+  }, [])
+
+  if (loading) {
+    return <div className="text-center text-text-muted font-orbitron text-xs animate-pulse">LOADING DAILY HISTORY...</div>
+  }
+
+  if (history.length === 0) {
+    return (
+      <div className="text-center py-4">
+        <Flame className="w-8 h-8 text-text-muted mx-auto mb-3" />
+        <p className="text-text-muted font-orbitron text-xs">NO DAILY CHALLENGES YET</p>
+        <p className="text-text-muted text-[10px] mt-1.5">Complete your first daily to see history here.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {history.map((entry, i) => (
+        <div
+          key={entry.date + '-' + i}
+          className="p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-amber-500/5 hover:border-amber-500/30 transition-all"
+        >
+          <div className="flex justify-between items-start mb-1.5">
+            <span className="text-xs font-orbitron text-amber-400">{entry.date}</span>
+            <span className={`text-xs font-arcade ${
+              entry.score >= 8 ? 'text-green-400' :
+              entry.score >= 5 ? 'text-amber-400' :
+              'text-red-400'
+            }`}>
+              {typeof entry.score === 'number'
+                ? `${entry.score}/10`
+                : String(entry.score).includes('/') ? entry.score : `${entry.score}/10`
+              }
+            </span>
+          </div>
+          {entry.question && (
+            <p className="text-[10px] text-text-muted line-clamp-2 leading-relaxed">{entry.question}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const DeepDiveArchivePanel = () => {
   const dispatch = useDispatch()
   const [articles, setArticles] = useState([])
@@ -1321,6 +1385,8 @@ const RightSidebar = ({ className = '' }) => {
         return <SettingsPanel />
       case 'history':
         return <HistoryPanel />
+      case 'daily':
+        return <DailyHistoryPanel />
       case 'deep-dive':
         return <DeepDiveArchivePanel />
       case 'home':
@@ -1345,6 +1411,8 @@ const RightSidebar = ({ className = '' }) => {
         return { icon: Settings, text: 'SETTINGS' }
       case 'history':
         return { icon: History, text: 'HISTORY' }
+      case 'daily':
+        return { icon: Flame, text: 'DAILY HISTORY' }
       case 'deep-dive':
         return { icon: BookOpen, text: 'PAST ARTICLES' }
       default:
@@ -1362,6 +1430,7 @@ const RightSidebar = ({ className = '' }) => {
       case 'multiplayer': return 'multiplayer'
       case 'settings': return 'settings'
       case 'history': return 'history'
+      case 'daily': return 'daily'
       case 'deep-dive': return 'deep-dive'
       default: return 'leaderboard'
     }

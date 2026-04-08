@@ -411,6 +411,10 @@ export async function getDailyStreak() {
   return await fetchAPI('/api/daily-challenge/streak')
 }
 
+export async function getDailyChallengeHistory(limit = 10) {
+  return await fetchAPI(`/api/daily-challenge/history?limit=${limit}`)
+}
+
 // --- Daily Deep Dive ---
 
 export async function getDailyDeepDive() {
